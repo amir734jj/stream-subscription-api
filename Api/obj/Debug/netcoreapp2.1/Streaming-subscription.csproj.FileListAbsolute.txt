@@ -1,0 +1,14 @@
+C:\workspace\Streaming-subscription\Streaming-subscription\bin\Debug\netcoreapp2.1\StreamingSubscription.deps.json
+C:\workspace\Streaming-subscription\Streaming-subscription\bin\Debug\netcoreapp2.1\StreamingSubscription.runtimeconfig.json
+C:\workspace\Streaming-subscription\Streaming-subscription\bin\Debug\netcoreapp2.1\StreamingSubscription.runtimeconfig.dev.json
+C:\workspace\Streaming-subscription\Streaming-subscription\bin\Debug\netcoreapp2.1\StreamingSubscription.dll
+C:\workspace\Streaming-subscription\Streaming-subscription\bin\Debug\netcoreapp2.1\StreamingSubscription.pdb
+C:\workspace\Streaming-subscription\Streaming-subscription\obj\Debug\netcoreapp2.1\Streaming-subscription.csprojAssemblyReference.cache
+C:\workspace\Streaming-subscription\Streaming-subscription\obj\Debug\netcoreapp2.1\Streaming-subscription.csproj.CoreCompileInputs.cache
+C:\workspace\Streaming-subscription\Streaming-subscription\obj\Debug\netcoreapp2.1\Streaming-subscription.RazorAssemblyInfo.cache
+C:\workspace\Streaming-subscription\Streaming-subscription\obj\Debug\netcoreapp2.1\Streaming-subscription.RazorAssemblyInfo.cs
+C:\workspace\Streaming-subscription\Streaming-subscription\obj\Debug\netcoreapp2.1\Streaming-subscription.AssemblyInfoInputs.cache
+C:\workspace\Streaming-subscription\Streaming-subscription\obj\Debug\netcoreapp2.1\Streaming-subscription.AssemblyInfo.cs
+C:\workspace\Streaming-subscription\Streaming-subscription\obj\Debug\netcoreapp2.1\Streaming-subscription.RazorTargetAssemblyInfo.cache
+C:\workspace\Streaming-subscription\Streaming-subscription\obj\Debug\netcoreapp2.1\StreamingSubscription.dll
+C:\workspace\Streaming-subscription\Streaming-subscription\obj\Debug\netcoreapp2.1\StreamingSubscription.pdb

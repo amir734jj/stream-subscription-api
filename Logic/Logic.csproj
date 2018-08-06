@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Dal\Dal.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Dropbox.Api" Version="4.9.0" />
+    <PackageReference Include="HashLib" Version="2.0.1" />
+    <PackageReference Include="StreamRipper" Version="2.0.0" />
+  </ItemGroup>
+</Project>
