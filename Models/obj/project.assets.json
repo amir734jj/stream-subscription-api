@@ -767,29 +767,30 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Amir-Acer\\.nuget\\packages\\": {},
-    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+    "/Users/HES8493/.nuget/packages/": {},
+    "/usr/local/share/dotnet/sdk/NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\workspace\\Streaming-subscription\\Models\\Models.csproj",
+      "projectUniqueName": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Models/Models.csproj",
       "projectName": "Models",
-      "projectPath": "C:\\workspace\\Streaming-subscription\\Models\\Models.csproj",
-      "packagesPath": "C:\\Users\\Amir-Acer\\.nuget\\packages\\",
-      "outputPath": "C:\\workspace\\Streaming-subscription\\Models\\obj\\",
+      "projectPath": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Models/Models.csproj",
+      "packagesPath": "/Users/HES8493/.nuget/packages/",
+      "outputPath": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Models/obj/",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\Amir-Acer\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/Users/HES8493/.config/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp2.1"
       ],
       "sources": {
-        "https://api.nuget.org/v3/index.json": {}
+        "https://api.nuget.org/v3/index.json": {},
+        "https://nexus.nml.com/repository/nuget-hosted/": {}
       },
       "frameworks": {
         "netcoreapp2.1": {

@@ -1,13 +1,13 @@
 ﻿{
   "version": "1.0.0",
   "restore": {
-    "projectUniqueName": "C:\\workspace\\Streaming-subscription\\Dal\\Dal.csproj",
+    "projectUniqueName": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Dal/Dal.csproj",
     "projectName": "Dal",
-    "projectPath": "C:\\workspace\\Streaming-subscription\\Dal\\Dal.csproj",
-    "outputPath": "C:\\workspace\\Streaming-subscription\\Dal\\obj\\",
+    "projectPath": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Dal/Dal.csproj",
+    "outputPath": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Dal/obj/",
     "projectStyle": "PackageReference",
     "fallbackFolders": [
-      "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
     ],
     "originalTargetFrameworks": [
       "netcoreapp2.1"
@@ -15,8 +15,8 @@
     "frameworks": {
       "netcoreapp2.1": {
         "projectReferences": {
-          "C:\\workspace\\Streaming-subscription\\Models\\Models.csproj": {
-            "projectPath": "C:\\workspace\\Streaming-subscription\\Models\\Models.csproj"
+          "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Models/Models.csproj": {
+            "projectPath": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Models/Models.csproj"
           }
         }
       }
