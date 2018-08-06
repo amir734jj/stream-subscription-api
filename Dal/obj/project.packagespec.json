@@ -1,0 +1,67 @@
+﻿{
+  "version": "1.0.0",
+  "restore": {
+    "projectUniqueName": "C:\\workspace\\Streaming-subscription\\Dal\\Dal.csproj",
+    "projectName": "Dal",
+    "projectPath": "C:\\workspace\\Streaming-subscription\\Dal\\Dal.csproj",
+    "outputPath": "C:\\workspace\\Streaming-subscription\\Dal\\obj\\",
+    "projectStyle": "PackageReference",
+    "fallbackFolders": [
+      "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+    ],
+    "originalTargetFrameworks": [
+      "netcoreapp2.1"
+    ],
+    "frameworks": {
+      "netcoreapp2.1": {
+        "projectReferences": {
+          "C:\\workspace\\Streaming-subscription\\Models\\Models.csproj": {
+            "projectPath": "C:\\workspace\\Streaming-subscription\\Models\\Models.csproj"
+          }
+        }
+      }
+    },
+    "warningProperties": {
+      "warnAsError": [
+        "NU1605"
+      ]
+    }
+  },
+  "frameworks": {
+    "netcoreapp2.1": {
+      "dependencies": {
+        "Microsoft.EntityFrameworkCore.Sqlite": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.NETCore.App": {
+          "suppressParent": "All",
+          "target": "Package",
+          "version": "[2.1.0, )",
+          "autoReferenced": true
+        },
+        "Npgsql.EntityFrameworkCore.PostgreSQL": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "System.Configuration.ConfigurationManager": {
+          "target": "Package",
+          "version": "[4.5.0, )"
+        },
+        "System.Data.Common": {
+          "target": "Package",
+          "version": "[4.3.0, )"
+        },
+        "System.Data.SQLite": {
+          "target": "Package",
+          "version": "[1.0.108, )"
+        }
+      },
+      "imports": [
+        "net461"
+      ],
+      "assetTargetFallback": true,
+      "warn": true
+    }
+  }
+}
