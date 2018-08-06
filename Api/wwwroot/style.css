@@ -5,3 +5,10 @@
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
     display: none !important;
 }
+
+span.pre {
+    display: inline;
+    white-space: pre;
+    unicode-bidi: embed;
+    font-family: monospace;
+}
