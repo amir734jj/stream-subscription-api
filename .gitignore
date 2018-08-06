@@ -1,2 +1,10 @@
 
 \.idea/
+
+Api/obj/
+
+Dal/obj/
+
+Logic/obj/
+
+Models/obj/
