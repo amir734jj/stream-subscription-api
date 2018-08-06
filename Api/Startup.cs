@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
+using System.Text;
 using API.Attributes;
 using API.Extensions;
 using AutoMapper;
@@ -7,6 +9,7 @@ using Dal;
 using Logic;
 using Logic.DataStructures;
 using Logic.Interfaces;
+using Logic.UploadServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -166,6 +169,8 @@ namespace Api
             _container.GetInstance<EntityDbContext>();
             
             Console.WriteLine("Application Started!");
+
+            new DropBoxUploadService("84l_qosu9mAAAAAAAAADi-WRIv_Fn3i59ycVs0z9q4BNSlmRQUSZoH5-dnna1ujp").UploadStream(new MemoryStream(Encoding.UTF8.GetBytes("Fuck")), "Asheghaneh-Farzad Farzin");
         }
     }
 }

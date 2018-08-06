@@ -2,6 +2,6 @@
 {
     public static class StreamConstants
     {
-        public const string UploadFolder = "RippedMusic";
+        public const string UploadFolder = "/RippedMusic";
     }
 }
