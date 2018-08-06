@@ -1,13 +1,13 @@
 ﻿{
   "version": "1.0.0",
   "restore": {
-    "projectUniqueName": "C:\\workspace\\Streaming-subscription\\Api\\Api.csproj",
+    "projectUniqueName": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Api/Api.csproj",
     "projectName": "Api",
-    "projectPath": "C:\\workspace\\Streaming-subscription\\Api\\Api.csproj",
-    "outputPath": "C:\\workspace\\Streaming-subscription\\Api\\obj\\",
+    "projectPath": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Api/Api.csproj",
+    "outputPath": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Api/obj/",
     "projectStyle": "PackageReference",
     "fallbackFolders": [
-      "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
     ],
     "originalTargetFrameworks": [
       "netcoreapp2.1"
@@ -15,8 +15,8 @@
     "frameworks": {
       "netcoreapp2.1": {
         "projectReferences": {
-          "C:\\workspace\\Streaming-subscription\\Logic\\Logic.csproj": {
-            "projectPath": "C:\\workspace\\Streaming-subscription\\Logic\\Logic.csproj"
+          "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Logic/Logic.csproj": {
+            "projectPath": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Logic/Logic.csproj"
           }
         }
       }

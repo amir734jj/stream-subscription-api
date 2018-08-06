@@ -2179,7 +2179,7 @@
       ]
     },
     "System.Data.Common/4.3.0": {
-      "sha512": "lm6E3T5u7BOuEH0u18JpbJHxBfOJPuCyl4Kg1RH10ktYLp5uEEE1xKrHW56/We4SnZpGAuCc9N0MJpSDhTHZGQ==",
+      "sha512": "LuOg7OJeEBxJvWDMYOXJBrl8JkQMeVoAji0gVC+xrdVQeowZQGyrXMT6W+nBmZBRG0abpZH49ac4dir5pcXQvg==",
       "type": "package",
       "path": "system.data.common/4.3.0",
       "files": [
@@ -3901,35 +3901,36 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Amir-Acer\\.nuget\\packages\\": {},
-    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+    "/Users/HES8493/.nuget/packages/": {},
+    "/usr/local/share/dotnet/sdk/NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\workspace\\Streaming-subscription\\Dal\\Dal.csproj",
+      "projectUniqueName": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Dal/Dal.csproj",
       "projectName": "Dal",
-      "projectPath": "C:\\workspace\\Streaming-subscription\\Dal\\Dal.csproj",
-      "packagesPath": "C:\\Users\\Amir-Acer\\.nuget\\packages\\",
-      "outputPath": "C:\\workspace\\Streaming-subscription\\Dal\\obj\\",
+      "projectPath": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Dal/Dal.csproj",
+      "packagesPath": "/Users/HES8493/.nuget/packages/",
+      "outputPath": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Dal/obj/",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\Amir-Acer\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/Users/HES8493/.config/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp2.1"
       ],
       "sources": {
-        "https://api.nuget.org/v3/index.json": {}
+        "https://api.nuget.org/v3/index.json": {},
+        "https://nexus.nml.com/repository/nuget-hosted/": {}
       },
       "frameworks": {
         "netcoreapp2.1": {
           "projectReferences": {
-            "C:\\workspace\\Streaming-subscription\\Models\\Models.csproj": {
-              "projectPath": "C:\\workspace\\Streaming-subscription\\Models\\Models.csproj"
+            "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Models/Models.csproj": {
+              "projectPath": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Models/Models.csproj"
             }
           }
         }
