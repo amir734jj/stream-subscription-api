@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Logic.Interfaces;
 using Logic.UploadServices;
@@ -54,12 +55,16 @@ namespace Logic
 
             var uploadService = GetUploadService(streamRipper);
             
-            streamRipperInstance.SongChangedEventHandlers += (_, arg) =>
+            streamRipperInstance.SongChangedEventHandlers += async (_, arg) =>
             {
+                // Needed
+                arg.SongInfo.Stream.Seek(0, SeekOrigin.Begin);
+                
+                // Create filename
                 var filename = $"{arg.SongInfo.SongMetadata.Artist}-{arg.SongInfo.SongMetadata.Title}";
 
                 // Upload the stream
-                uploadService.UploadStream(arg.SongInfo.Stream, $"{filename}.mp3");
+                await uploadService.UploadStream(arg.SongInfo.Stream, $"{filename}.mp3");
             };
             
             // Start the ripper
