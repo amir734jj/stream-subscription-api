@@ -18,6 +18,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using StructureMap;
 using Swashbuckle.AspNetCore.Swagger;
+using static  API.Utilities.ConnectionStringUtility;
 
 namespace Api
 {
@@ -113,6 +114,11 @@ namespace Api
                     if (_env.IsLocalhost())
                     {
                         builder.UseSqlite(_configuration.GetValue<string>("ConnectionStrings:Sqlite"));    
+                    }
+                    else
+                    {
+                        builder.UseNpgsql(ConnectionStringUrlToResource(Environment.GetEnvironmentVariable("DATABASE_URL"))
+                                          ?? throw new Exception("DATABASE_URL is null"));
                     }
                 })).Singleton();
 
