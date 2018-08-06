@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using Dropbox.Api;
 using Dropbox.Api.Files;
 using Logic.Interfaces;
@@ -25,9 +26,9 @@ namespace Logic.UploadServices
         /// </summary>
         /// <param name="stream"></param>
         /// <param name="filename"></param>
-        public async void UploadStream(MemoryStream stream, string filename)
+        public Task UploadStream(MemoryStream stream, string filename)
         {
-            await _dropboxClient.Files.UploadAsync(
+            return _dropboxClient.Files.UploadAsync(
                 StreamConstants.UploadFolder + "/" + filename,
                 WriteMode.Overwrite.Instance,
                 body: stream);
