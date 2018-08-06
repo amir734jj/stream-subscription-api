@@ -1,13 +1,13 @@
 ﻿{
   "version": "1.0.0",
   "restore": {
-    "projectUniqueName": "C:\\workspace\\Streaming-subscription\\Models\\Models.csproj",
+    "projectUniqueName": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Models/Models.csproj",
     "projectName": "Models",
-    "projectPath": "C:\\workspace\\Streaming-subscription\\Models\\Models.csproj",
-    "outputPath": "C:\\workspace\\Streaming-subscription\\Models\\obj\\",
+    "projectPath": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Models/Models.csproj",
+    "outputPath": "/Users/HES8493/Desktop/Repos/Streaming-subscription-website/Models/obj/",
     "projectStyle": "PackageReference",
     "fallbackFolders": [
-      "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
     ],
     "originalTargetFrameworks": [
       "netcoreapp2.1"
