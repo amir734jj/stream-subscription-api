@@ -1,0 +1,59 @@
+﻿{
+  "version": "1.0.0",
+  "restore": {
+    "projectUniqueName": "C:\\workspace\\Streaming-subscription\\Logic\\Logic.csproj",
+    "projectName": "Logic",
+    "projectPath": "C:\\workspace\\Streaming-subscription\\Logic\\Logic.csproj",
+    "outputPath": "C:\\workspace\\Streaming-subscription\\Logic\\obj\\",
+    "projectStyle": "PackageReference",
+    "fallbackFolders": [
+      "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+    ],
+    "originalTargetFrameworks": [
+      "netcoreapp2.1"
+    ],
+    "frameworks": {
+      "netcoreapp2.1": {
+        "projectReferences": {
+          "C:\\workspace\\Streaming-subscription\\Dal\\Dal.csproj": {
+            "projectPath": "C:\\workspace\\Streaming-subscription\\Dal\\Dal.csproj"
+          }
+        }
+      }
+    },
+    "warningProperties": {
+      "warnAsError": [
+        "NU1605"
+      ]
+    }
+  },
+  "frameworks": {
+    "netcoreapp2.1": {
+      "dependencies": {
+        "Dropbox.Api": {
+          "target": "Package",
+          "version": "[4.9.0, )"
+        },
+        "HashLib": {
+          "target": "Package",
+          "version": "[2.0.1, )"
+        },
+        "Microsoft.NETCore.App": {
+          "suppressParent": "All",
+          "target": "Package",
+          "version": "[2.1.0, )",
+          "autoReferenced": true
+        },
+        "StreamRipper": {
+          "target": "Package",
+          "version": "[2.0.0, )"
+        }
+      },
+      "imports": [
+        "net461"
+      ],
+      "assetTargetFallback": true,
+      "warn": true
+    }
+  }
+}
