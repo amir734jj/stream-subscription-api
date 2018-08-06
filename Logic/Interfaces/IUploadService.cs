@@ -1,9 +1,10 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 
 namespace Logic.Interfaces
 {
     public interface IUploadService
     {
-        void UploadStream(MemoryStream stream, string filename);
+        Task UploadStream(MemoryStream stream, string filename);
     }
 }
