@@ -1,0 +1,131 @@
+﻿{
+  "version": "1.0.0",
+  "restore": {
+    "projectUniqueName": "C:\\workspace\\Streaming-subscription\\Api\\Api.csproj",
+    "projectName": "Api",
+    "projectPath": "C:\\workspace\\Streaming-subscription\\Api\\Api.csproj",
+    "outputPath": "C:\\workspace\\Streaming-subscription\\Api\\obj\\",
+    "projectStyle": "PackageReference",
+    "fallbackFolders": [
+      "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+    ],
+    "originalTargetFrameworks": [
+      "netcoreapp2.1"
+    ],
+    "frameworks": {
+      "netcoreapp2.1": {
+        "projectReferences": {
+          "C:\\workspace\\Streaming-subscription\\Logic\\Logic.csproj": {
+            "projectPath": "C:\\workspace\\Streaming-subscription\\Logic\\Logic.csproj"
+          }
+        }
+      }
+    },
+    "warningProperties": {
+      "warnAsError": [
+        "NU1605"
+      ]
+    }
+  },
+  "frameworks": {
+    "netcoreapp2.1": {
+      "dependencies": {
+        "AutoMapper.Extensions.Microsoft.DependencyInjection": {
+          "target": "Package",
+          "version": "[4.0.1, )"
+        },
+        "Microsoft.AspNetCore": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.AspNetCore.All": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.AspNetCore.Authentication.Cookies": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.AspNetCore.Hosting": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.AspNetCore.Http": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.AspNetCore.Mvc.Core": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.AspNetCore.Mvc.Cors": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.AspNetCore.Mvc.Formatters.Json": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.AspNetCore.Server.Kestrel": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.AspNetCore.Session": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.AspNetCore.StaticFiles": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.Extensions.Caching.Memory": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.Extensions.Caching.Redis": {
+          "target": "Package",
+          "version": "[2.1.1, )"
+        },
+        "Microsoft.Extensions.Configuration": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.Extensions.Logging": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Microsoft.NETCore.App": {
+          "suppressParent": "All",
+          "target": "Package",
+          "version": "[2.1.0, )",
+          "autoReferenced": true
+        },
+        "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+          "target": "Package",
+          "version": "[2.1.0, )"
+        },
+        "Newtonsoft.Json": {
+          "target": "Package",
+          "version": "[11.0.2, )"
+        },
+        "StructureMap": {
+          "target": "Package",
+          "version": "[4.7.0, )"
+        },
+        "StructureMap.Microsoft.DependencyInjection": {
+          "target": "Package",
+          "version": "[1.4.0, )"
+        },
+        "Swashbuckle.AspNetCore": {
+          "target": "Package",
+          "version": "[1.2.0, )"
+        }
+      },
+      "imports": [
+        "net461"
+      ],
+      "assetTargetFallback": true,
+      "warn": true
+    }
+  }
+}

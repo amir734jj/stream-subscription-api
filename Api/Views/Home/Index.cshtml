@@ -1,0 +1,77 @@
+﻿@using Models.Enums
+@model Models.Models.StreamingSubscription
+
+@{
+    ViewBag.Title = "title";
+    Layout = "_Layout";
+}
+
+<div ng-controller="streamSubscriptionCtrl">
+
+    <div class="alert alert-info" ng-show="alert.show">
+        {{ alert.message }}
+    </div>
+    
+    <div class="rows">
+
+        <div class="col-sm-3">
+            <h4>Add new Stream Subsciption</h4>
+            
+            @using (Html.BeginForm("", "", FormMethod.Post, new {ng_submit = "addStreamSubscription($event)"}))
+            {
+                @Html.TextBoxFor(x => x.Id, new {@class = "hidden"})
+
+                <div class="form-group">
+                    @Html.LabelFor(x => x.Url)
+                    @Html.TextBoxFor(x => x.Url, new {@class = "form-control", type = "url", placeholder = "Enter url", ng_model = "streamSubscription.url"})
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(x => x.ServiceType)
+                    @Html.DropDownListFor(x => x.ServiceType, Enum.GetNames(typeof(ServiceTypeEnum)).Select(x => new SelectListItem {Text = x, Value = x}), new {@class = "form-control", ng_model = "streamSubscription.serviceType"})
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(x => x.Token)
+                    @Html.TextBoxFor(x => x.Token, new {@class = "form-control", type = "tel", placeholder = "Enter token", ng_model = "streamSubscription.token"})
+                </div>
+
+                <input class="btn btn-primary" type="submit" value="Add Stream Subscription"/>
+            }
+        </div>
+        
+        <div class="col-sm-9">
+            <h4>Stream Subsciptions</h4>
+
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Url</th>
+                            <th>Service</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr ng-repeat="subscription in subscriptions">
+                            <td>{{ subscription.id }}</td>
+                            <td>
+                                <a href="{{ subscription.url }}">{{ subscription.url }}</a>
+                            </td>
+                            <td>{{ subscription.serviceType }}</td>
+                            <td>{{ streamRippers[subscription.id] }}</td>
+                            <td>
+                                <button class="btn btn-success" ng-if="streamRippers[subscription.id] === 'Stopped'" ng-click="startStreamRipper(subscription.id)">Start</button>
+                                <button class="btn btn-warning" ng-if="streamRippers[subscription.id] === 'Started'" ng-click="stopStreamRipper(subscription.id)">Stop</button>
+                                <button class="btn btn-danger" ng-if="streamRippers[subscription.id] === 'Stopped'" ng-click="deleteSubscription(subscription.id)">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

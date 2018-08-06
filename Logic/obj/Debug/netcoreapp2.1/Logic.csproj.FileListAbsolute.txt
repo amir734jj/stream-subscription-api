@@ -1,0 +1,14 @@
+C:\workspace\Streaming-subscription\Logic\bin\Debug\netcoreapp2.1\Logic.deps.json
+C:\workspace\Streaming-subscription\Logic\bin\Debug\netcoreapp2.1\Logic.dll
+C:\workspace\Streaming-subscription\Logic\bin\Debug\netcoreapp2.1\Logic.pdb
+C:\workspace\Streaming-subscription\Logic\bin\Debug\netcoreapp2.1\Dal.dll
+C:\workspace\Streaming-subscription\Logic\bin\Debug\netcoreapp2.1\Models.dll
+C:\workspace\Streaming-subscription\Logic\bin\Debug\netcoreapp2.1\Dal.pdb
+C:\workspace\Streaming-subscription\Logic\bin\Debug\netcoreapp2.1\Models.pdb
+C:\workspace\Streaming-subscription\Logic\obj\Debug\netcoreapp2.1\Logic.csprojAssemblyReference.cache
+C:\workspace\Streaming-subscription\Logic\obj\Debug\netcoreapp2.1\Logic.csproj.CoreCompileInputs.cache
+C:\workspace\Streaming-subscription\Logic\obj\Debug\netcoreapp2.1\Logic.AssemblyInfoInputs.cache
+C:\workspace\Streaming-subscription\Logic\obj\Debug\netcoreapp2.1\Logic.AssemblyInfo.cs
+C:\workspace\Streaming-subscription\Logic\obj\Debug\netcoreapp2.1\Logic.csproj.CopyComplete
+C:\workspace\Streaming-subscription\Logic\obj\Debug\netcoreapp2.1\Logic.dll
+C:\workspace\Streaming-subscription\Logic\obj\Debug\netcoreapp2.1\Logic.pdb
