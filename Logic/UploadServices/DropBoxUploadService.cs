@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 using Dropbox.Api;
 using Dropbox.Api.Files;
@@ -29,9 +28,10 @@ namespace Logic.UploadServices
         public Task UploadStream(MemoryStream stream, string filename)
         {
             return _dropboxClient.Files.UploadAsync(
-                StreamConstants.UploadFolder + "/" + filename,
+                $@"{StreamConstants.UploadFolder}/{filename}",
                 WriteMode.Overwrite.Instance,
-                body: stream);
+                body: stream,
+                autorename: true);
         }
     }
 }
