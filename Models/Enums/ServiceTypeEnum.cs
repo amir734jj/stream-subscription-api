@@ -5,6 +5,7 @@
     /// </summary>
     public enum ServiceTypeEnum
     {
-        DropBox
+        DropBox,
+        // BoxDotCom
     }
 }
