@@ -111,6 +111,9 @@ namespace Logic
             {
                 case ServiceTypeEnum.DropBox:
                     return new DropBoxUploadService(streamingSubscription.Token);
+                // case ServiceTypeEnum.BoxDotCom:
+                //    return new BoxDotComUploadService();
+                //    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
