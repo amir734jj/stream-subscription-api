@@ -142,9 +142,10 @@ namespace Api
 
             services.AddSingleton<DbContext>(dbContext);
 
+            services.AddDataProtection();
+
             services.AddDefaultIdentity<IdentityUser>()
                 .AddEntityFrameworkStores<DbContext>();
-
 
             return _container.GetInstance<IServiceProvider>();
         }
