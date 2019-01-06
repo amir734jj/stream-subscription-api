@@ -1,18 +1,16 @@
 ﻿using System;
-using System.IO;
 using System.Reflection;
-using System.Text;
-using API.Attributes;
 using API.Extensions;
 using AutoMapper;
 using Dal;
 using Logic;
-using Logic.DataStructures;
 using Logic.Interfaces;
-using Logic.UploadServices;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,16 +19,16 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using StructureMap;
 using Swashbuckle.AspNetCore.Swagger;
-using static  API.Utilities.ConnectionStringUtility;
+using static API.Utilities.ConnectionStringUtility;
 
 namespace Api
 {
     public class Startup
     {
         private Container _container;
-        
+
         private readonly IHostingEnvironment _env;
-        
+
         private readonly IConfigurationRoot _configuration;
 
         /// <summary>
@@ -49,7 +47,7 @@ namespace Api
 
             _configuration = builder.Build();
         }
-        
+
         /// <summary>
         /// This method gets called by the runtime. Use this method to add services to the container.
         /// For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
@@ -59,13 +57,8 @@ namespace Api
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddCors();
-            
-            services.AddRouting(options =>
-            {
-                options.LowercaseUrls = true; 
-            });
 
-            services.AddDistributedMemoryCache();
+            services.AddRouting(options => { options.LowercaseUrls = true; });
 
             services.AddSession(options =>
             {
@@ -75,16 +68,36 @@ namespace Api
                 options.Cookie.Name = ApiConstants.AuthenticationSessionCookieName;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             });
-            
+
             // All the other service configuration.
             services.AddAutoMapper(x => { x.AddProfiles(Assembly.Load("Models")); });
 
-            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new Info { Title = "Streaming-Subscription", Version = "v1", Description = "Music Streaming Subscription" }); });
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1",
+                    new Info
+                    {
+                        Title = "Streaming-Subscription", Version = "v1",
+                        Description = "Music Streaming Subscription"
+                    });
+            });
+
+            var dbContext = new EntityDbContext(builder =>
+            {
+                if (_env.IsLocalhost())
+                {
+                    builder.UseSqlite(_configuration.GetValue<string>("ConnectionStrings:Sqlite"));
+                }
+                else
+                {
+                    builder.UseNpgsql(
+                        ConnectionStringUrlToResource(Environment.GetEnvironmentVariable("DATABASE_URL"))
+                        ?? throw new Exception("DATABASE_URL is null"));
+                }
+            });
 
             services.AddMvc(x =>
-            {   
-                x.Filters.Add<AuthorizeActionFilter>();
-
+            {
                 x.ModelValidatorProviders.Clear();
 
                 // Not need to have https
@@ -94,11 +107,21 @@ namespace Api
                 x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                 x.SerializerSettings.Converters.Add(new StringEnumConverter());
             });
-            
-            // Dependency injection
-            _container = new Container();
 
-            _container.Configure(config =>
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = GoogleDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+            }).AddGoogle(googleOptions =>
+            {
+                var section = _configuration.GetSection("Authentication:Google");
+
+                googleOptions.ClientId = section.GetValue<string>("ClientId");
+                googleOptions.ClientSecret = section.GetValue<string>("ClientSecret");
+            });
+
+            // Dependency injection
+            _container = new Container(config =>
             {
                 // Register stuff in container, using the StructureMap APIs...
                 config.Scan(_ =>
@@ -109,27 +132,20 @@ namespace Api
                     _.WithDefaultConventions();
                 });
 
+                config.For<EntityDbContext>().Use(dbContext).Singleton();
+
+                config.For<IStreamRipperManagement>().Use<StreamRipperManagement>().Singleton();
+
                 // Populate the container using the service collection
                 config.Populate(services);
-
-                config.For<EntityDbContext>().Use(new EntityDbContext(builder =>
-                {
-                    if (_env.IsLocalhost())
-                    {
-                        builder.UseSqlite(_configuration.GetValue<string>("ConnectionStrings:Sqlite"));    
-                    }
-                    else
-                    {
-                        builder.UseNpgsql(ConnectionStringUrlToResource(Environment.GetEnvironmentVariable("DATABASE_URL"))
-                                          ?? throw new Exception("DATABASE_URL is null"));
-                    }
-                })).Singleton();
-
-                config.For<IIdentityDictionary>().Use<IdentityDictionary>().Singleton();
-                
-                config.For<IStreamRipperManagement>().Use<StreamRipperManagement>().Singleton();
             });
-            
+
+            services.AddSingleton<DbContext>(dbContext);
+
+            services.AddDefaultIdentity<IdentityUser>()
+                .AddEntityFrameworkStores<DbContext>();
+
+
             return _container.GetInstance<IServiceProvider>();
         }
 
@@ -151,26 +167,23 @@ namespace Api
             }
 
             app.UseCors();
-            
+
             app.UseDeveloperExceptionPage();
 
             app.UseCookiePolicy();
 
             app.UseSession();
 
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute("default", "{controller=Home}/{action=Index}");
-            });
+            app.UseAuthentication();
+
+            app.UseMvc(routes => { routes.MapRoute("default", "{controller=Home}/{action=Index}"); });
 
             app.UseStaticFiles();
 
             // Just to make sure everything is running fine
             _container.GetInstance<EntityDbContext>();
-            
-            Console.WriteLine("Application Started!");
 
-            new DropBoxUploadService("84l_qosu9mAAAAAAAAADi-WRIv_Fn3i59ycVs0z9q4BNSlmRQUSZoH5-dnna1ujp").UploadStream(new MemoryStream(Encoding.UTF8.GetBytes("Fuck")), "Asheghaneh-Farzad Farzin");
+            Console.WriteLine("Application Started!");
         }
     }
 }

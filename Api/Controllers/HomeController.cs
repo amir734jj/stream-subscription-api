@@ -1,10 +1,11 @@
 ﻿using System.Threading.Tasks;
-using API.Attributes;
 using API.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
+    [Authorize]
     [ApiExplorerSettings(IgnoreApi = true)]
     public class HomeController : Controller
     {
