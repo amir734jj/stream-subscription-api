@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -96,30 +98,6 @@ namespace Api
                 }
             });
 
-            services.AddMvc(x =>
-            {
-                x.ModelValidatorProviders.Clear();
-
-                // Not need to have https
-                x.RequireHttpsPermanent = false;
-            }).AddJsonOptions(x =>
-            {
-                x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                x.SerializerSettings.Converters.Add(new StringEnumConverter());
-            });
-
-            services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = GoogleDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-            }).AddGoogle(googleOptions =>
-            {
-                var section = _configuration.GetSection("Authentication:Google");
-
-                googleOptions.ClientId = section.GetValue<string>("ClientId");
-                googleOptions.ClientSecret = section.GetValue<string>("ClientSecret");
-            });
-
             // Dependency injection
             _container = new Container(config =>
             {
@@ -145,7 +123,33 @@ namespace Api
             services.AddDataProtection();
 
             services.AddDefaultIdentity<IdentityUser>()
+                .AddDefaultUI(UIFramework.Bootstrap4)
                 .AddEntityFrameworkStores<DbContext>();
+
+            services.AddMvc(x =>
+                {
+                    x.ModelValidatorProviders.Clear();
+
+                    // Not need to have https
+                    x.RequireHttpsPermanent = false;
+                }).AddJsonOptions(x =>
+                {
+                    x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                    x.SerializerSettings.Converters.Add(new StringEnumConverter());
+                })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = GoogleDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+            }).AddGoogle(googleOptions =>
+            {
+                var section = _configuration.GetSection("Authentication:Google");
+
+                googleOptions.ClientId = section.GetValue<string>("ClientId");
+                googleOptions.ClientSecret = section.GetValue<string>("ClientSecret");
+            });
 
             return _container.GetInstance<IServiceProvider>();
         }
