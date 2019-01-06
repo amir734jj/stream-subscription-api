@@ -1,14 +1,14 @@
 ﻿using System.Threading.Tasks;
 using API.Abstracts;
-using API.Attributes;
 using API.Extensions;
 using Logic.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Models;
 
 namespace API.Controllers.Api
 {
-    [AuthorizeMiddleware]
+    [Authorize]
     [Route("api/[controller]")]
     public class StreamingSubscriptionController : BasicController<StreamingSubscription>
     {

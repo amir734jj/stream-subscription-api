@@ -10,17 +10,16 @@ namespace Logic.ModelsLogic
     public class StreamingSubscriptionLogic : BasicLogicAbstract<StreamingSubscription>, IStreamingSubscriptionLogic
     {
         private readonly IStreamingSubscriptionDal _streamingSubscriptionDal;
-        private readonly IUserDal _userDal;
 
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
         /// <param name="streamingSubscriptionDal"></param>
         /// <param name="userDal"></param>
-        public StreamingSubscriptionLogic(IStreamingSubscriptionDal streamingSubscriptionDal, IUserDal userDal)
+        public StreamingSubscriptionLogic(IStreamingSubscriptionDal streamingSubscriptionDal)
         {
             _streamingSubscriptionDal = streamingSubscriptionDal;
-            _userDal = userDal;
+            // _userDal = userDal;
         }
 
         /// <summary>
@@ -48,7 +47,7 @@ namespace Logic.ModelsLogic
         /// <returns></returns>
         public StreamingSubscription Save(StreamingSubscription instance, string username)
         {
-            instance.User = _userDal.GetAll().FirstOrDefault(x => x.Username == username);
+            // instance.User = _userDal.GetAll().FirstOrDefault(x => x.Username == username);
 
             // Call base
             return base.Save(instance);
