@@ -3,15 +3,20 @@ using Microsoft.EntityFrameworkCore;
 using Models;
 using Models.Models;
 using DbContext = Microsoft.EntityFrameworkCore.DbContext;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
 namespace Dal
 {
-    public sealed class EntityDbContext: DbContext
+    public sealed class EntityDbContext: DbContext, IDataProtectionKeyContext
     {
         /// <summary>
         /// Streaming subscription table
         /// </summary>
         public DbSet<StreamingSubscription> StreamingSubscriptions { get; set; }
+        
+        // This maps to the table that stores keys.
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
         
         /// <summary>
         /// Users table
