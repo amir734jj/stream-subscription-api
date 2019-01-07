@@ -1,0 +1,56 @@
+﻿@using Models.Constants
+@model Models.Models.User
+
+@{
+    ViewBag.Title = "Register user";
+    Layout = "_Layout";
+}
+
+<div class="container">
+    <div class="page-header">
+        <h3>Please register</h3>
+    </div>
+    
+    @using (Html.BeginForm("RegisterAction", "Identity", FormMethod.Post, new { @class = "form-horizontal", ng_submit="validateInvitationCode($event)" }))
+    {        
+        @Html.TextBoxFor(x => x.Id, new { @class = "hidden" })
+        
+        <div class="form-group">
+            @Html.LabelFor(x => x.Email, new { @class = "control-label col-sm-2" })
+        
+            <div class="col-sm-10">
+                @Html.TextBoxFor(x => x.Email, new { type = "email", placeholder = "Enter email", @class = "form-control", required = "required" })
+            </div>
+        </div>
+        
+        <div class="form-group">
+            @Html.LabelFor(x => x.Fullname, new { @class = "control-label col-sm-2" })
+        
+            <div class="col-sm-10">
+                @Html.TextBoxFor(x => x.Fullname, new { type = "text", placeholder = "Enter fullname", @class = "form-control", required = "required" })
+            </div>
+        </div>
+        
+        <div class="form-group">
+            @Html.LabelFor(x => x.Username, new { @class = "control-label col-sm-2" })
+        
+            <div class="col-sm-10">
+                @Html.TextBoxFor(x => x.Username, new { type = "text", placeholder = "Enter username", @class = "form-control", required = "required" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(x => x.Password, new { @class = "control-label col-sm-2" })
+
+            <div class="col-sm-10">
+                @Html.TextBoxFor(x => x.Password, new { type = "password", placeholder = "Enter password", @class = "form-control", required = "required" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary">Register</button>
+            </div>
+        </div>
+    }
+</div>
