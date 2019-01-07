@@ -98,25 +98,6 @@ namespace Api
                 }
             });
 
-            // Dependency injection
-            _container = new Container(config =>
-            {
-                // Register stuff in container, using the StructureMap APIs...
-                config.Scan(_ =>
-                {
-                    _.AssemblyContainingType(typeof(Startup));
-                    _.Assembly("Logic");
-                    _.Assembly("Dal");
-                    _.WithDefaultConventions();
-                });
-
-                config.For<EntityDbContext>().Use(dbContext).Singleton();
-
-                config.For<IStreamRipperManagement>().Use<StreamRipperManagement>().Singleton();
-
-                // Populate the container using the service collection
-                config.Populate(services);
-            });
 
             services.AddSingleton<DbContext>(dbContext);
 
@@ -151,7 +132,26 @@ namespace Api
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+            // Dependency injection
+            _container = new Container(config =>
+            {
+                // Register stuff in container, using the StructureMap APIs...
+                config.Scan(_ =>
+                {
+                    _.AssemblyContainingType(typeof(Startup));
+                    _.Assembly("Logic");
+                    _.Assembly("Dal");
+                    _.WithDefaultConventions();
+                });
 
+                config.For<EntityDbContext>().Use(dbContext).Singleton();
+
+                config.For<IStreamRipperManagement>().Use<StreamRipperManagement>().Singleton();
+
+                // Populate the container using the service collection
+                config.Populate(services);
+            });
+            
             return _container.GetInstance<IServiceProvider>();
         }
 
