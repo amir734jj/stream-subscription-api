@@ -6,6 +6,7 @@ using Logic.Interfaces;
 using Logic.UploadServices;
 using Models.Enums;
 using Models.Models;
+using StreamRipper.Builders;
 using StreamRipper.Interfaces;
 
 namespace Logic
@@ -51,7 +52,10 @@ namespace Logic
             // Get the model from database
             var streamRipper = _streamingSubscriptionLogic.Get(id);
 
-            var streamRipperInstance = StreamRipper.StreamRipper.New(new Uri(streamRipper.Url));
+            var streamRipperInstance = StreamRipperBuilder.New()
+                .WithUrl(new Uri(streamRipper.Url))
+                .FinalizeFilters()
+                .Build();
 
             var uploadService = GetUploadService(streamRipper);
             
