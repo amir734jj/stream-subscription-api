@@ -126,6 +126,18 @@ namespace Api
                 .AddDefaultUI(UIFramework.Bootstrap4)
                 .AddEntityFrameworkStores<DbContext>();
 
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = GoogleDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+            }).AddGoogle(googleOptions =>
+            {
+                var section = _configuration.GetSection("Authentication:Google");
+
+                googleOptions.ClientId = section.GetValue<string>("ClientId");
+                googleOptions.ClientSecret = section.GetValue<string>("ClientSecret");
+            });
+
             services.AddMvc(x =>
                 {
                     x.ModelValidatorProviders.Clear();
@@ -139,17 +151,6 @@ namespace Api
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            services.AddAuthentication(x =>
-            {
-                x.DefaultAuthenticateScheme = GoogleDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-            }).AddGoogle(googleOptions =>
-            {
-                var section = _configuration.GetSection("Authentication:Google");
-
-                googleOptions.ClientId = section.GetValue<string>("ClientId");
-                googleOptions.ClientSecret = section.GetValue<string>("ClientSecret");
-            });
 
             return _container.GetInstance<IServiceProvider>();
         }
