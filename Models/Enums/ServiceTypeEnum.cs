@@ -5,7 +5,7 @@
     /// </summary>
     public enum ServiceTypeEnum
     {
-        DropBox,
-        // BoxDotCom
+        DropBox = 0,
+        Ftp = 1
     }
 }

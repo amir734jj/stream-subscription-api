@@ -2,14 +2,15 @@
 using System.Threading.Tasks;
 using Logic.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using Models.Interfaces;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace API.Abstracts
 {
-    public abstract class BasicController<T> : Controller
+    public abstract class BasicController<T> : Controller where T : IEntityUpdatable<T>, IEntity
     {
         [NonAction]
-        public abstract IBasicLogic<T> BasicLogic();
+        protected abstract IBasicLogic<T> BasicLogic();
 
         [HttpGet]
         [Route("")]
