@@ -1,27 +1,29 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
+using Models.Enums;
 using Models.Interfaces;
+using  Models.Extensions;
 
 namespace Models.Models
 {
     /// <summary>
     /// Website user model
     /// </summary>
-    public class User : IBasicModel
+    public class User : IdentityUser<int>, IEntity, IEntityUpdatable<User>
     {
-        [Key]
-        public int Id { get; set; }
-        
-        public string Username { get; set; }
-        
-        public string Password { get; set; }
-        
-        public string Active { get; set; }
-        
         public string Fullname { get; set; }
-        
-        public string Email { get; set; }
-        
+
         public List<StreamingSubscription> Streaming { get; set; }
+        
+        public UserRoleEnum Role { get; set; }
+
+        public User Update(User dto)
+        {
+            Fullname = Fullname;
+            Streaming = Streaming.IdAwareUpdate(dto.Streaming, x => x.Id);
+            Role = dto.Role;
+            
+            return this;
+        }
     }
 }

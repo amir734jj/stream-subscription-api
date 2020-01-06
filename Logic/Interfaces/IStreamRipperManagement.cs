@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Models.Enums;
 
 namespace Logic.Interfaces
 {
     public interface IStreamRipperManagement
     {
-        Dictionary<int, StreamStatus> Status();
+        Task<Dictionary<int, StreamStatus>> Status();
         
-        bool Start(int id);
+        Task<bool> Start(int id);
 
-        bool Stop(int id);
+        Task<bool> Stop(int id);
     }
 }

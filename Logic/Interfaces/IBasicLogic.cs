@@ -1,17 +1,19 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Models.Interfaces;
 
 namespace Logic.Interfaces
 {
-    public interface IBasicLogic<T>
+    public interface IBasicLogic<T> where T: IEntityUpdatable<T>, IEntity
     {
-        IEnumerable<T> GetAll();
+        Task<IEnumerable<T>> GetAll();
 
-        T Get(int id);
+        Task<T> Get(int id);
 
-        T Save(T instance);
+        Task<T> Save(T instance);
         
-        T Delete(int id);
+        Task<T> Delete(int id);
 
-        T Update(int id, T updatedInstance);
+        Task<T> Update(int id, T dto);
     }
 }

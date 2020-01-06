@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Models;
+using System.Threading.Tasks;
 using Models.Models;
 
 namespace Logic.Interfaces
@@ -11,7 +11,7 @@ namespace Logic.Interfaces
         /// </summary>
         /// <param name="username"></param>
         /// <returns></returns>
-        IEnumerable<StreamingSubscription> GetAll(string username);
+        Task<IEnumerable<StreamingSubscription>> GetAll(string username);
 
         /// <summary>
         /// Saves the StreamingSubscription with filled-in user field
@@ -19,6 +19,6 @@ namespace Logic.Interfaces
         /// <param name="instance"></param>
         /// <param name="username"></param>
         /// <returns></returns>
-        StreamingSubscription Save(StreamingSubscription instance, string username);
+        Task<StreamingSubscription> Save(StreamingSubscription instance, string username);
     }
 }
