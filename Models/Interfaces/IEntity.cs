@@ -1,6 +1,6 @@
 ﻿namespace Models.Interfaces
 {
-    public interface IBasicModel
+    public interface IEntity
     {
         int Id { get; set; }
     }

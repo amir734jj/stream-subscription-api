@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Dal.Interfaces;
 using Logic.Abstracts;
 using Logic.Interfaces;
@@ -27,17 +29,15 @@ namespace Logic.ModelsLogic
         /// Returns DAL
         /// </summary>
         /// <returns></returns>
-        public override IBasicDal<StreamingSubscription> GetBasicCrudDal() => _streamingSubscriptionDal;
+        protected override IBasicDal<StreamingSubscription> GetBasicCrudDal() => _streamingSubscriptionDal;
 
         /// <summary>
         /// Pass username to GetAll
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<StreamingSubscription> GetAll(string username)
+        public async Task<IEnumerable<StreamingSubscription>> GetAll(string username)
         {
-            // Call base with extra filter
-            return base.GetAll()
-                .Where(x => x.User != null && x.User.Username == username);
+            return await _streamingSubscriptionDal.Get(x => x.User.UserName == username);
         }
 
         /// <summary>
@@ -46,12 +46,12 @@ namespace Logic.ModelsLogic
         /// <param name="instance"></param>
         /// <param name="username"></param>
         /// <returns></returns>
-        public StreamingSubscription Save(StreamingSubscription instance, string username)
+        public async Task<StreamingSubscription> Save(StreamingSubscription instance, string username)
         {
-            instance.User = _userDal.GetAll().FirstOrDefault(x => x.Username == username);
+            instance.User = (await _userDal.Get(x => x.UserName == username)).FirstOrDefault() ?? throw new Exception("Invalid username");
 
             // Call base
-            return base.Save(instance);
+            return await base.Save(instance);
         }
     }
 }

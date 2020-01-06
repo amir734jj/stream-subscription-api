@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Logic.Interfaces;
-using Logic.UploadServices;
 using Models.Enums;
 using Models.Models;
 using StreamRipper.Builders;
@@ -18,8 +18,9 @@ namespace Logic
         /// <summary>
         /// Hold on to the instances
         /// </summary>
-        private readonly Dictionary<int, KeyValuePair<IUploadService, IStreamRipper>> _streamRippers = new Dictionary<int, KeyValuePair<IUploadService, IStreamRipper>>();
-        
+        private readonly Dictionary<int, KeyValuePair<IUploadService, IStreamRipper>> _streamRippers =
+            new Dictionary<int, KeyValuePair<IUploadService, IStreamRipper>>();
+
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
@@ -33,24 +34,28 @@ namespace Logic
         /// Returns the stream status
         /// </summary>
         /// <returns></returns>
-        public Dictionary<int, StreamStatus> Status() =>
-            _streamingSubscriptionLogic.GetAll().Select(x => x).ToDictionary(x => x.Id, x => _streamRippers.ContainsKey(x.Id) ? StreamStatus.Started : StreamStatus.Stopped);
-        
+        public async Task<Dictionary<int, StreamStatus>> Status()
+        {
+            return (await _streamingSubscriptionLogic.GetAll())
+                .ToDictionary(x => x.Id,
+                    x => _streamRippers.ContainsKey(x.Id) ? StreamStatus.Started : StreamStatus.Stopped);
+        }
+
         /// <summary>
         /// Start the stream
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public bool Start(int id)
+        public async Task<bool> Start(int id)
         {
             // Already started
             if (_streamRippers.ContainsKey(id))
             {
                 return false;
             }
-            
+
             // Get the model from database
-            var streamRipper = _streamingSubscriptionLogic.Get(id);
+            var streamRipper = await _streamingSubscriptionLogic.Get(id);
 
             var streamRipperInstance = StreamRipperBuilder.New()
                 .WithUrl(new Uri(streamRipper.Url))
@@ -58,19 +63,19 @@ namespace Logic
                 .Build();
 
             var uploadService = GetUploadService(streamRipper);
-            
+
             streamRipperInstance.SongChangedEventHandlers += async (_, arg) =>
             {
                 // Needed
                 arg.SongInfo.Stream.Seek(0, SeekOrigin.Begin);
-                
+
                 // Create filename
                 var filename = $"{arg.SongInfo.SongMetadata.Artist}-{arg.SongInfo.SongMetadata.Title}";
 
                 // Upload the stream
                 await uploadService.UploadStream(arg.SongInfo.Stream, $"{filename}.mp3");
             };
-            
+
             // Start the ripper
             streamRipperInstance.Start();
 
@@ -85,7 +90,7 @@ namespace Logic
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public bool Stop(int id)
+        public async Task<bool> Stop(int id)
         {
             if (_streamRippers.ContainsKey(id))
             {
@@ -111,7 +116,7 @@ namespace Logic
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         private static IUploadService GetUploadService(StreamingSubscription streamingSubscription)
         {
-            switch (streamingSubscription.ServiceType)
+            /*switch (streamingSubscription.ServiceType)
             {
                 case ServiceTypeEnum.DropBox:
                     return new DropBoxUploadService(streamingSubscription.Token);
@@ -120,7 +125,8 @@ namespace Logic
                 //    break;
                 default:
                     throw new ArgumentOutOfRangeException();
-            }
+            }*/
+            throw new NotImplementedException();
         }
     }
 }
