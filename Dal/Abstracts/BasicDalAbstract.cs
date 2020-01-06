@@ -1,98 +1,107 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using AutoMapper;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Dal.Interfaces;
-using DAL.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Models.Interfaces;
 
-
 namespace DAL.Abstracts
 {
-    public abstract class BasicDalAbstract<T> : IBasicDal<T> where T : class, IBasicModel
+    public abstract class BasicDalAbstract<T> : IBasicDal<T> where T : class, IEntityUpdatable<T>, IEntity
     {
-        /// <summary>
-        /// Abstract to get IMapper
-        /// </summary>
-        /// <returns></returns>
-        public abstract IMapper GetMapper();
-        
         /// <summary>
         /// Abstract to get database context
         /// </summary>
         /// <returns></returns>
-        public abstract DbContext GetDbContext();
+        protected abstract DbContext GetDbContext();
         
         /// <summary>
         /// Abstract to get entity set
         /// </summary>
         /// <returns></returns>
-        public abstract DbSet<T> GetDbSet();
-        
+        protected abstract DbSet<T> GetDbSet();
+
+        public async Task<IEnumerable<T>> Get(Expression<Func<T, bool>> filter)
+        {
+            return await GetDbSet().Where(filter).ToListAsync();
+        }
+
         /// <summary>
-        /// Returns all enities
+        /// Returns all entities
         /// </summary>
         /// <returns></returns>
-        public virtual IEnumerable<T> GetAll() => GetDbSet().ToList();
+        public virtual async Task<IEnumerable<T>> GetAll()
+        {
+            return await GetDbSet().ToListAsync();
+        }
 
         /// <summary>
         /// Returns an entity given the id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public virtual T Get(int id) => GetDbSet().FirstOrDefaultCache(x => x.Id == id);
+        public virtual async Task<T> Get(int id)
+        {
+            return (await Get(x => x.Id == id)).FirstOrDefault();
+        }
 
         /// <summary>
         /// Saves an instance
         /// </summary>
         /// <param name="instance"></param>
         /// <returns></returns>
-        public virtual T Save(T instance)
+        public virtual async Task<T> Save(T instance)
         {
             GetDbSet().Add(instance);
-            GetDbContext().SaveChanges();
+            await GetDbContext().SaveChangesAsync();
             return instance;
         }
 
         /// <summary>
-        /// Deletes enitity given the id
+        /// Deletes entity given the id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public virtual T Delete(int id)
+        public virtual async Task<T> Delete(int id)
         {
-            var instance = GetDbSet().FirstOrDefaultCache(x => x.Id == id);
+            var entity = await Get(id);
 
-            if (instance != null)
+            if (entity != null)
             {
-                GetDbSet().Remove(instance);
-                GetDbContext().SaveChanges();
-                return instance;
+                GetDbSet().Remove(entity);
+                await GetDbContext().SaveChangesAsync();
+                return entity;
             }
 
             return null;
         }
 
         /// <summary>
-        /// Updates enity given the id and new instance
+        /// Updates entity given the id and new instance
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="updatedInstance"></param>
+        /// <param name="dto"></param>
         /// <returns></returns>
-        public virtual T Update(int id, T updatedInstance)
+        public virtual async Task<T> Update(int id, T dto)
         {
-            var instance = GetDbSet().FirstOrDefaultCache(x => x.Id == id);
+            return await Update(id, entity => entity.Update(dto));
+        }
 
-            if (instance != null)
+        public async Task<T> Update(int id, Action<T> updater)
+        {
+            var entity = await Get(id);
+
+            if (entity != null)
             {
                 // Copy the fields
-                instance = GetMapper().Map(updatedInstance, instance);
-                GetDbSet().Update(instance);
+                updater(entity);
                 GetDbContext().SaveChanges();
-                return updatedInstance;
+                return entity;
             }
 
             return null;
-        }        
+        }
     }
 }

@@ -1,120 +1,104 @@
-﻿using System.Threading.Tasks;
-using API.Extensions;
-using Logic.Interfaces;
-using Microsoft.AspNetCore.Http;
+﻿using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Models.Constants;
+using Models.Enums;
 using Models.Models;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using Models.ViewModels.Identities;
 
-namespace API.Controllers
+namespace Api.Controllers
 {
-    [Route("[controller]")]
-    public class IdentityController : Controller
+    public abstract class AbstractAccountController : Controller
     {
-        private readonly IIdentityLogic _identityLogic;
-        
-        private readonly IUserLogic _userLogic;
+        public abstract UserManager<User> ResolveUserManager();
 
-        public IdentityController(IIdentityLogic identityLogic, IUserLogic userLogic)
-        {
-            _identityLogic = identityLogic;
-            _userLogic = userLogic;
-        }
+        public abstract SignInManager<User> ResolveSignInManager();
 
-        /// <summary>
-        /// View page to login
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("Login")]
-        [SwaggerOperation("Login")]
-        public async Task<IActionResult> Login()
-        {
-            return View(new User());
-        }
-        
-        /// <summary>
-        /// View page to register
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("Register")]
-        [SwaggerOperation("Register")]
-        public async Task<IActionResult> Register()
-        {
-            return View(new User());
-        }
+        public abstract RoleManager<IdentityRole<int>> ResolveRoleManager();
 
-        /// <summary>
-        /// Login the user
-        /// </summary>
-        /// <returns></returns>
-        [HttpPost]
-        [Route("LoginAction")]
-        [SwaggerOperation("LoginAction")]
-        public async Task<IActionResult> LoginAction(User user)
+        public async Task<bool> Register(RegisterViewModel registerViewModel)
         {
-            _identityLogic.TryLogin(user.Username, user.Password, out var result);
+            var role = ResolveUserManager().Users.Any() ? UserRoleEnum.Basic : UserRoleEnum.Admin;
 
-            // Set session values
-            if (result)
+            var user = new User
             {
-                HttpContext.Session.SetString(ApiConstants.Username, user.Username);
-                HttpContext.Session.SetString(ApiConstants.Password, user.Password);
-                HttpContext.Session.SetString(ApiConstants.Authenticated.Key, ApiConstants.Authenticated.Value);
-            }
-            
-            return result ? (IActionResult) Redirect(Url.Content("~/")) : RedirectToAction("NotAuthenticated");
-        }
-        
-        /// <summary>
-        /// Register the user
-        /// </summary>
-        /// <returns></returns>
-        [HttpPost]
-        [Route("RegisterAction")]
-        [SwaggerOperation("RegisterAction")]
-        public async Task<IActionResult> RegisterAction(User user)
-        {
-            // Save the user
-            var result = _userLogic.Save(user);
+                Fullname = registerViewModel.Fullname,
+                UserName = registerViewModel.Username,
+                Email = registerViewModel.Email,
+                PhoneNumber = registerViewModel.PhoneNumber,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                Role = role
+            };
 
-            return result != null ? RedirectToAction("Login") : RedirectToAction("RegisterAction");
-        }
+            var result1 = (await ResolveUserManager().CreateAsync(user, registerViewModel.Password)).Succeeded;
 
-        /// <summary>
-        /// Login the user
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("LogoutAction")]
-        [SwaggerOperation("LogoutAction")]
-        public async Task<IActionResult> LogoutAction()
-        {
-            var (username, password) = HttpContext.Session.GetUseramePassword();
-            
-            _identityLogic.TryLogout(username, password, out var result);
-            
-            // Remove session values
-            if (result)
+            if (!result1)
             {
-                HttpContext.Session.Clear();
+                return false;
             }
 
-            return result ? (IActionResult) Redirect(Url.Content("~/")) : RedirectToAction("NotAuthenticated");
+            var result2 = true;
+            
+            foreach (var subRole in role.SubRoles())
+            {
+                if (!await ResolveRoleManager().RoleExistsAsync(subRole.ToString()))
+                {
+                    await ResolveRoleManager().CreateAsync(new IdentityRole<int>(subRole.ToString()));
+                    
+                    result2 &= (await ResolveUserManager().AddToRoleAsync(user, subRole.ToString())).Succeeded;
+                }
+            }
+
+            return result2;
         }
-        
-        /// <summary>
-        /// Not authenticated view
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("NotAuthenticated")]
-        [SwaggerOperation("NotAuthenticated")]
-        public async Task<IActionResult> NotAuthenticated()
+
+        public async Task<bool> Login(LoginViewModel loginViewModel)
         {
-            return View();
+            // Ensure the username and password is valid.
+            var result = await ResolveUserManager().FindByNameAsync(loginViewModel.Username);
+
+            if (result == null || !await ResolveUserManager().CheckPasswordAsync(result, loginViewModel.Password))
+            {
+                return false;
+            }
+
+            await ResolveSignInManager().SignInAsync(result, true);
+
+            // Generate and issue a JWT token
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Name, result.Email)
+            };
+
+            var identity = new ClaimsIdentity(
+                claims, CookieAuthenticationDefaults.AuthenticationScheme,
+                ClaimTypes.Name, ClaimTypes.Role);
+
+            var principal = new ClaimsPrincipal(identity);
+
+            var authProperties = new AuthenticationProperties
+            {
+                AllowRefresh = true,
+                ExpiresUtc = DateTimeOffset.Now.AddDays(1),
+                IsPersistent = true
+            };
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(principal), authProperties);
+
+            return true;
+        }
+
+        public async Task Logout()
+        {
+            await ResolveSignInManager().SignOutAsync();
+
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
     }
 }

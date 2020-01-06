@@ -1,14 +1,13 @@
 ﻿using System.Threading.Tasks;
 using API.Abstracts;
-using API.Attributes;
-using API.Extensions;
 using Logic.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Models;
 
 namespace API.Controllers.Api
 {
-    [AuthorizeMiddleware]
+    [Authorize]
     [Route("api/[controller]")]
     public class StreamingSubscriptionController : BasicController<StreamingSubscription>
     {
@@ -24,7 +23,7 @@ namespace API.Controllers.Api
         /// Returns instance of logic
         /// </summary>
         /// <returns></returns>
-        public override IBasicLogic<StreamingSubscription> BasicLogic() => _streamingSubscriptionLogic;
+        protected override IBasicLogic<StreamingSubscription> BasicLogic() => _streamingSubscriptionLogic;
 
         /// <summary>
         /// Override GetAll to pass username

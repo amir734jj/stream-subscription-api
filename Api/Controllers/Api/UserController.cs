@@ -1,12 +1,12 @@
 ﻿using API.Abstracts;
-using API.Attributes;
 using Logic.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Models;
 
 namespace API.Controllers.Api
 {
-    [AuthorizeMiddleware]
+    [Authorize]
     [Route("api/[controller]")]
     public class UserController : BasicController<User>
     {
@@ -22,6 +22,6 @@ namespace API.Controllers.Api
         /// Returns instance of logic
         /// </summary>
         /// <returns></returns>
-        public override IBasicLogic<User> BasicLogic() => _userLogic;
+        protected override IBasicLogic<User> BasicLogic() => _userLogic;
     }
 }
