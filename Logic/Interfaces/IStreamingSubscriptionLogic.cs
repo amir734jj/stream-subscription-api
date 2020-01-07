@@ -9,16 +9,16 @@ namespace Logic.Interfaces
         /// <summary>
         /// Returns all StreamingSubscription which matching username
         /// </summary>
-        /// <param name="username"></param>
+        /// <param name="user"></param>
         /// <returns></returns>
-        Task<IEnumerable<StreamingSubscription>> GetAll(string username);
+        Task<IEnumerable<StreamingSubscription>> GetAll(User user);
 
         /// <summary>
         /// Saves the StreamingSubscription with filled-in user field
         /// </summary>
         /// <param name="instance"></param>
-        /// <param name="username"></param>
+        /// <param name="user"></param>
         /// <returns></returns>
-        Task<StreamingSubscription> Save(StreamingSubscription instance, string username);
+        Task<StreamingSubscription> Save(StreamingSubscription instance, User user);
     }
 }

@@ -1,4 +1,7 @@
-﻿@model Models.ViewModels.Identities.LoginViewModel
+﻿@using Microsoft.Extensions.Options
+@using reCAPTCHA.AspNetCore
+@model Models.ViewModels.Identities.LoginViewModel
+@inject IOptions<RecaptchaSettings> RecaptchaSettings
 
 @{
     ViewBag.Title = "Login user";
@@ -27,6 +30,8 @@
                 @Html.TextBoxFor(x => x.Password, new { type = "password", placeholder = "Enter password", @class = "form-control", required = "required" })
             </div>
         </div>
+        
+        @Html.Recaptcha(RecaptchaSettings.Value)
 
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
