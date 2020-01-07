@@ -2,6 +2,7 @@
 using API.Abstracts;
 using Logic.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Models.Models;
 
@@ -12,18 +13,28 @@ namespace API.Controllers.Api
     public class StreamingSubscriptionController : BasicController<StreamingSubscription>
     {
         private readonly IStreamingSubscriptionLogic _streamingSubscriptionLogic;
+        
+        private readonly UserManager<User> _userManager;
 
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
         /// <param name="streamingSubscriptionLogic"></param>
-        public StreamingSubscriptionController(IStreamingSubscriptionLogic streamingSubscriptionLogic) => _streamingSubscriptionLogic = streamingSubscriptionLogic;
+        /// <param name="userManager"></param>
+        public StreamingSubscriptionController(IStreamingSubscriptionLogic streamingSubscriptionLogic,  UserManager<User> userManager)
+        {
+            _streamingSubscriptionLogic = streamingSubscriptionLogic;
+            _userManager = userManager;
+        }
 
         /// <summary>
         /// Returns instance of logic
         /// </summary>
         /// <returns></returns>
-        protected override IBasicLogic<StreamingSubscription> BasicLogic() => _streamingSubscriptionLogic;
+        protected override IBasicLogic<StreamingSubscription> BasicLogic()
+        {
+            return _streamingSubscriptionLogic;
+        }
 
         /// <summary>
         /// Override GetAll to pass username
@@ -31,7 +42,9 @@ namespace API.Controllers.Api
         /// <returns></returns>
         public override async Task<IActionResult> GetAll()
         {
-            return Ok(_streamingSubscriptionLogic.GetAll(HttpContext.Session.GetUseramePassword().username));
+            var user = await _userManager.GetUserAsync(User);
+            
+            return Ok(_streamingSubscriptionLogic.GetAll(user.UserName));
         }
 
         /// <summary>
@@ -41,7 +54,9 @@ namespace API.Controllers.Api
         /// <returns></returns>
         public override async Task<IActionResult> Save([FromBody] StreamingSubscription instance)
         {
-            return Ok(_streamingSubscriptionLogic.Save(instance, HttpContext.Session.GetUseramePassword().username));
+            var user = await _userManager.GetUserAsync(User);
+
+            return Ok(_streamingSubscriptionLogic.Save(instance, user.UserName));
         }
     }
 }

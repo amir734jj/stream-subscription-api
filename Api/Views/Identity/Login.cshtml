@@ -1,4 +1,4 @@
-﻿@model Models.Models.User
+﻿@model Models.ViewModels.Identities.LoginViewModel
 
 @{
     ViewBag.Title = "Login user";
@@ -10,10 +10,8 @@
         <h3>Please login</h3>
     </div>
     
-    @using (Html.BeginForm("LoginAction", "Identity", FormMethod.Post, new { @class = "form-horizontal" }))
+    @using (Html.BeginForm("LoginHandler", "Identity", FormMethod.Post, new { @class = "form-horizontal" }))
     {
-        @Html.TextBoxFor(x => x.Id, new { @class = "hidden" })
-        
         <div class="form-group">
             @Html.LabelFor(x => x.Username, new { @class = "control-label col-sm-2" })
         

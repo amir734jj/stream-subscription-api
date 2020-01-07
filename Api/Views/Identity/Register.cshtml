@@ -1,4 +1,4 @@
-﻿@model Models.Models.User
+﻿@model Models.ViewModels.Identities.RegisterViewModel
 
 @{
     ViewBag.Title = "Register user";
@@ -10,10 +10,8 @@
         <h3>Please register</h3>
     </div>
     
-    @using (Html.BeginForm("RegisterAction", "Identity", FormMethod.Post, new { @class = "form-horizontal", ng_submit="validateInvitationCode($event)" }))
-    {        
-        @Html.TextBoxFor(x => x.Id, new { @class = "hidden" })
-        
+    @using (Html.BeginForm("RegisterHandler", "Identity", FormMethod.Post, new { @class = "form-horizontal", ng_submit="validateInvitationCode($event)" }))
+    {
         <div class="form-group">
             @Html.LabelFor(x => x.Email, new { @class = "control-label col-sm-2" })
         
