@@ -16,8 +16,11 @@ namespace API.Controllers.Api
         /// Constructor dependency injection
         /// </summary>
         /// <param name="streamRipperManagement"></param>
-        public StreamRipperManagementController(IStreamRipperManagement streamRipperManagement) => _streamRipperManagement = streamRipperManagement;
-        
+        public StreamRipperManagementController(IStreamRipperManagement streamRipperManagement)
+        {
+            _streamRipperManagement = streamRipperManagement;
+        }
+
         [HttpGet]
         [Route("status")]
         [SwaggerOperation("Status")]

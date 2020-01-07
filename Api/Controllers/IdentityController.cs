@@ -1,104 +1,173 @@
-﻿using System;
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Api.Controllers.Abstracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Models.Enums;
 using Models.Models;
 using Models.ViewModels.Identities;
+using reCAPTCHA.AspNetCore;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Controllers
 {
-    public abstract class AbstractAccountController : Controller
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [Route("[controller]")]
+    public class IdentityController : AbstractAccountController
     {
-        public abstract UserManager<User> ResolveUserManager();
+        private readonly UserManager<User> _userManager;
 
-        public abstract SignInManager<User> ResolveSignInManager();
+        private readonly SignInManager<User> _signInManager;
 
-        public abstract RoleManager<IdentityRole<int>> ResolveRoleManager();
+        private readonly RoleManager<IdentityRole<int>> _roleManager;
 
-        public async Task<bool> Register(RegisterViewModel registerViewModel)
+        private readonly IRecaptchaService _recaptcha;
+
+        public IdentityController(UserManager<User> userManager, SignInManager<User> signInManager,
+            RoleManager<IdentityRole<int>> roleManager, IRecaptchaService recaptcha)
         {
-            var role = ResolveUserManager().Users.Any() ? UserRoleEnum.Basic : UserRoleEnum.Admin;
-
-            var user = new User
-            {
-                Fullname = registerViewModel.Fullname,
-                UserName = registerViewModel.Username,
-                Email = registerViewModel.Email,
-                PhoneNumber = registerViewModel.PhoneNumber,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                Role = role
-            };
-
-            var result1 = (await ResolveUserManager().CreateAsync(user, registerViewModel.Password)).Succeeded;
-
-            if (!result1)
-            {
-                return false;
-            }
-
-            var result2 = true;
-            
-            foreach (var subRole in role.SubRoles())
-            {
-                if (!await ResolveRoleManager().RoleExistsAsync(subRole.ToString()))
-                {
-                    await ResolveRoleManager().CreateAsync(new IdentityRole<int>(subRole.ToString()));
-                    
-                    result2 &= (await ResolveUserManager().AddToRoleAsync(user, subRole.ToString())).Succeeded;
-                }
-            }
-
-            return result2;
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _roleManager = roleManager;
+            _recaptcha = recaptcha;
         }
 
-        public async Task<bool> Login(LoginViewModel loginViewModel)
+        public override UserManager<User> ResolveUserManager()
         {
-            // Ensure the username and password is valid.
-            var result = await ResolveUserManager().FindByNameAsync(loginViewModel.Username);
-
-            if (result == null || !await ResolveUserManager().CheckPasswordAsync(result, loginViewModel.Password))
-            {
-                return false;
-            }
-
-            await ResolveSignInManager().SignInAsync(result, true);
-
-            // Generate and issue a JWT token
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.Name, result.Email)
-            };
-
-            var identity = new ClaimsIdentity(
-                claims, CookieAuthenticationDefaults.AuthenticationScheme,
-                ClaimTypes.Name, ClaimTypes.Role);
-
-            var principal = new ClaimsPrincipal(identity);
-
-            var authProperties = new AuthenticationProperties
-            {
-                AllowRefresh = true,
-                ExpiresUtc = DateTimeOffset.Now.AddDays(1),
-                IsPersistent = true
-            };
-
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(principal), authProperties);
-
-            return true;
+            return _userManager;
         }
 
-        public async Task Logout()
+        public override SignInManager<User> ResolveSignInManager()
         {
-            await ResolveSignInManager().SignOutAsync();
+            return _signInManager;
+        }
 
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        public override RoleManager<IdentityRole<int>> ResolveRoleManager()
+        {
+            return _roleManager;
+        }
+
+        /// <summary>
+        ///     View page to login
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Login")]
+        [SwaggerOperation("Login")]
+        public async Task<IActionResult> Login()
+        {
+            if (TempData.ContainsKey("Error"))
+            {
+                var prevError = (string) TempData["Error"];
+
+                ModelState.AddModelError("", prevError);
+
+                TempData.Clear();
+            }
+
+            return View();
+        }
+
+        /// <summary>
+        ///     Handles login the user
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("LoginHandler")]
+        [SwaggerOperation("LoginHandler")]
+        public async Task<IActionResult> LoginHandler(LoginViewModel loginViewModel)
+        {
+            var recaptcha = await _recaptcha.Validate(Request);
+
+            if (!recaptcha.success)
+            {
+                TempData["Error"] = "There was an error validating recatpcha. Please try again!";
+
+                return RedirectToAction("Login");
+            }
+
+            var result = await base.Login(loginViewModel);
+
+            if (result)
+            {
+                return Redirect(Url.Content("~/"));
+            }
+
+            return RedirectToAction("NotAuthenticated");
+        }
+
+        /// <summary>
+        ///     View page to register
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Register")]
+        [SwaggerOperation("Register")]
+        public async Task<IActionResult> Register()
+        {
+            if (TempData.ContainsKey("Error"))
+            {
+                var prevError = (string) TempData["Error"];
+
+                ModelState.AddModelError("", prevError);
+
+                TempData.Clear();
+            }
+
+            return View();
+        }
+
+        /// <summary>
+        ///     Register the user
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("RegisterHandler")]
+        [SwaggerOperation("RegisterHandler")]
+        public async Task<IActionResult> RegisterHandler(RegisterViewModel registerViewModel)
+        {
+            var recaptcha = await _recaptcha.Validate(Request);
+
+            if (!recaptcha.success)
+            {
+                TempData["Error"] = "There was an error validating recatpcha. Please try again!";
+
+                return RedirectToAction("Register");
+            }
+
+            // Save the user
+            var result = await Register(registerViewModel);
+
+            if (result)
+            {
+                return RedirectToAction("Login");
+            }
+
+            return RedirectToAction("Register");
+        }
+
+        /// <summary>
+        ///     Not authenticated view
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("NotAuthenticated")]
+        [SwaggerOperation("NotAuthenticated")]
+        public async Task<IActionResult> NotAuthenticated()
+        {
+            return View();
+        }
+
+        /// <summary>
+        ///     Not authorized view
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Logout")]
+        [SwaggerOperation("Logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await base.Logout();
+
+            return RedirectToAction("Login");
         }
     }
 }
