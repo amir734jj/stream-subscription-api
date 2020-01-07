@@ -22,6 +22,7 @@ using Newtonsoft.Json.Converters;
 using reCAPTCHA.AspNetCore;
 using StackExchange.Redis;
 using StructureMap;
+using WebMarkupMin.AspNetCore2;
 using static API.Utilities.ConnectionStringUtility;
 
 namespace Api
@@ -106,6 +107,14 @@ namespace Api
                 x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                 x.SerializerSettings.Converters.Add(new StringEnumConverter());
             }).AddRazorPagesOptions(x => { x.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute()); });
+
+            services.AddWebMarkupMin(opt =>
+                {
+                    opt.AllowMinificationInDevelopmentEnvironment = true;
+                    opt.AllowCompressionInDevelopmentEnvironment = true;
+                })
+                .AddHtmlMinification()
+                .AddHttpCompression();
 
             services.AddDbContext<EntityDbContext>(opt =>
             {
