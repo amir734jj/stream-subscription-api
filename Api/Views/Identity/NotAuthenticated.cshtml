@@ -1,4 +1,5 @@
-﻿@model object
+﻿@using Models.Constants
+@model object
 
 @{
     ViewBag.Title = "Not authenticated";
@@ -10,4 +11,13 @@
         <h2>You are not authenticated, please try login (again!)</h2>
     </div>
     <p>If this problem persist, please contact the site adminstrator</p>
+
+    <ul>
+        @foreach (var email in ApiConstants.AdminEmail)
+        {
+            <li>
+                <a href="mailto:@email">@email</a>
+            </li>
+        }
+    </ul>
 </div>
