@@ -44,7 +44,7 @@ namespace API.Controllers.Api
         {
             var user = await _userManager.GetUserAsync(User);
             
-            return Ok(_streamingSubscriptionLogic.GetAll(user.UserName));
+            return Ok(_streamingSubscriptionLogic.GetAll(user));
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace API.Controllers.Api
         {
             var user = await _userManager.GetUserAsync(User);
 
-            return Ok(_streamingSubscriptionLogic.Save(instance, user.UserName));
+            return Ok(_streamingSubscriptionLogic.Save(instance, user));
         }
     }
 }

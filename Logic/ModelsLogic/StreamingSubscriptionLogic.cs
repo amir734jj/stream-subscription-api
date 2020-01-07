@@ -38,20 +38,20 @@ namespace Logic.ModelsLogic
         /// Pass username to GetAll
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<StreamingSubscription>> GetAll(string username)
+        public async Task<IEnumerable<StreamingSubscription>> GetAll(User user)
         {
-            return await _streamingSubscriptionDal.Get(x => x.User.UserName == username);
+            return await _streamingSubscriptionDal.Get(x => x.User.UserName == user.UserName);
         }
 
         /// <summary>
         /// Pass username to Save
         /// </summary>
         /// <param name="instance"></param>
-        /// <param name="username"></param>
+        /// <param name="user"></param>
         /// <returns></returns>
-        public async Task<StreamingSubscription> Save(StreamingSubscription instance, string username)
+        public async Task<StreamingSubscription> Save(StreamingSubscription instance, User user)
         {
-            instance.User = (await _userDal.Get(x => x.UserName == username)).FirstOrDefault() ?? throw new Exception("Invalid username");
+            instance.User = (await _userDal.Get(x => x.UserName == user.UserName)).FirstOrDefault() ?? throw new Exception("Invalid username");
 
             // Call base
             return await base.Save(instance);
