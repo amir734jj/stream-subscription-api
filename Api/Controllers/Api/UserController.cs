@@ -16,12 +16,18 @@ namespace API.Controllers.Api
         /// Constructor dependency injection
         /// </summary>
         /// <param name="userLogic"></param>
-        public UserController(IUserLogic userLogic) => _userLogic = userLogic;
+        public UserController(IUserLogic userLogic)
+        {
+            _userLogic = userLogic;
+        }
 
         /// <summary>
         /// Returns instance of logic
         /// </summary>
         /// <returns></returns>
-        protected override IBasicLogic<User> BasicLogic() => _userLogic;
+        protected override IBasicLogic<User> BasicLogic()
+        {
+            return _userLogic;
+        }
     }
 }

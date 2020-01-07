@@ -12,7 +12,7 @@ namespace Api.Controllers
         /// <returns></returns>
         public async Task<IActionResult> Index()
         {
-            if (HttpContext.Session.IsAuthenticated())
+            if (User.Identity.IsAuthenticated)
             {
                 return View();
             }

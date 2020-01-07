@@ -13,12 +13,18 @@ namespace Logic.ModelsLogic
         /// Constructor dependency injection
         /// </summary>
         /// <param name="userDal"></param>
-        public UserLogic(IUserDal userDal) => _userDal = userDal;
+        public UserLogic(IUserDal userDal)
+        {
+            _userDal = userDal;
+        }
 
         /// <summary>
         /// Returns DAL
         /// </summary>
         /// <returns></returns>
-        protected override IBasicDal<User> GetBasicCrudDal() => _userDal;
+        protected override IBasicDal<User> GetBasicCrudDal()
+        {
+            return _userDal;
+        }
     }
 }
