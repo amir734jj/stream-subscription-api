@@ -1,4 +1,15 @@
 @using API.Extensions
+@using Api.Interfaces
+@using Microsoft.Extensions.Hosting
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+@inject IHttpRequestUtilityBuilder RequestUtilityBuilder;
+@{
+    var utility = RequestUtilityBuilder.For(Context);
+    var userInfo = await utility.GetUserInfo();
+    var dateTimeNow = DateTime.UtcNow;
+    var cacheBustingSuffix = dateTimeNow.Day;
+}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,8 +27,17 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     
-    <link rel="stylesheet" href="~/style.css">
-    <script src="~/script.js"></script>
+    @* customs *@
+    @if (Env.IsDevelopment())
+    {
+        <script src="~/scripts/script.js?@cacheBustingSuffix"></script>
+        <link rel="stylesheet" href="~/styles/style.css?@cacheBustingSuffix"> 
+    }
+    else
+    {
+        <script src="~/scripts/script.min.js?@cacheBustingSuffix"></script>
+        <link rel="stylesheet" href="~/styles/style.min.css?@cacheBustingSuffix">
+    }
 </head>
 <body>
   
@@ -38,7 +58,7 @@
                 </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                @if (!Context.Session.IsAuthenticated())
+                @if (!User.Identity.IsAuthenticated)
                 {
                     <li>
                         <a href="~/Identity/login"><span class="glyphicon glyphicon-log-in"></span> Login</a>

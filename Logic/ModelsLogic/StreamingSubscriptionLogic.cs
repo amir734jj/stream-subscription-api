@@ -29,7 +29,10 @@ namespace Logic.ModelsLogic
         /// Returns DAL
         /// </summary>
         /// <returns></returns>
-        protected override IBasicDal<StreamingSubscription> GetBasicCrudDal() => _streamingSubscriptionDal;
+        protected override IBasicDal<StreamingSubscription> GetBasicCrudDal()
+        {
+            return _streamingSubscriptionDal;
+        }
 
         /// <summary>
         /// Pass username to GetAll
