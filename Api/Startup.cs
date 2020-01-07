@@ -19,6 +19,7 @@ using Models.Constants;
 using Models.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using reCAPTCHA.AspNetCore;
 using StackExchange.Redis;
 using StructureMap;
 using static API.Utilities.ConnectionStringUtility;
@@ -148,6 +149,10 @@ namespace Api
             {
                 x.Cookie.MaxAge = TimeSpan.FromMinutes(60);
             });
+            
+            // Re-Captcha config
+            services.Configure<RecaptchaSettings>(_configuration.GetSection("RecaptchaSettings"));
+            services.AddTransient<IRecaptchaService, RecaptchaService>();
 
             _container = new Container(config =>
             {
