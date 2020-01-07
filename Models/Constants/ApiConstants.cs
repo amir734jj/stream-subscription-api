@@ -2,6 +2,6 @@ namespace Models.Constants
 {
     public static class ApiConstants
     {
-        public static readonly string AuthenticationSessionCookieName = "";
+        public const string AuthenticationSessionCookieName = "streaming-subscription";
     }
 }
