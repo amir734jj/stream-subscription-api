@@ -1,10 +1,10 @@
-﻿using API.Abstracts;
+﻿using Api.Abstracts;
 using Logic.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Models;
 
-namespace API.Controllers.Api
+namespace Api.Controllers.Api
 {
     [Authorize]
     [Route("api/[controller]")]

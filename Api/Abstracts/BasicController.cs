@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Models.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace API.Abstracts
+namespace Api.Abstracts
 {
     public abstract class BasicController<T> : Controller where T : IEntityUpdatable<T>, IEntity
     {

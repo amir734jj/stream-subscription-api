@@ -13,7 +13,7 @@ namespace Models.Models
     {
         public string Fullname { get; set; }
 
-        public List<StreamingSubscription> Streaming { get; set; }
+        public List<Stream> Streaming { get; set; }
         
         public UserRoleEnum Role { get; set; }
 

@@ -3,42 +3,80 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using Logic.DataStructures;
 using Logic.Interfaces;
 using Models.Enums;
 using Models.Models;
+using Models.ViewModels.Streams;
 using StreamRipper.Builders;
-using StreamRipper.Interfaces;
+using Stream = Models.Models.Stream;
 
 namespace Logic
 {
     public class StreamRipperManagement : IStreamRipperManagement
     {
-        private readonly IStreamingSubscriptionLogic _streamingSubscriptionLogic;
+        private readonly IStreamingLogic _streamingLogic;
 
-        /// <summary>
-        /// Hold on to the instances
-        /// </summary>
-        private readonly Dictionary<int, KeyValuePair<IUploadService, IStreamRipper>> _streamRippers =
-            new Dictionary<int, KeyValuePair<IUploadService, IStreamRipper>>();
+        private readonly IUserLogic _userLogic;
+        
+        private readonly IMapper _mapper;
+        
+        private readonly IStreamState _state;
 
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
-        /// <param name="streamingSubscriptionLogic"></param>
-        public StreamRipperManagement(IStreamingSubscriptionLogic streamingSubscriptionLogic)
+        /// <param name="state"></param>
+        /// <param name="streamingLogic"></param>
+        /// <param name="userLogic"></param>
+        /// <param name="mapper"></param>
+        public StreamRipperManagement(IStreamState state, IStreamingLogic streamingLogic, IUserLogic userLogic, IMapper mapper)
         {
-            _streamingSubscriptionLogic = streamingSubscriptionLogic;
+            _state = state;
+            _streamingLogic = streamingLogic;
+            _userLogic = userLogic;
+            _mapper = mapper;
         }
 
         /// <summary>
-        /// Returns the stream status
+        /// Pass username to GetAll
         /// </summary>
         /// <returns></returns>
-        public async Task<Dictionary<int, StreamStatus>> Status()
+        public async Task<StreamsStatusViewModel> Status(User user)
         {
-            return (await _streamingSubscriptionLogic.GetAll())
-                .ToDictionary(x => x.Id,
-                    x => _streamRippers.ContainsKey(x.Id) ? StreamStatus.Started : StreamStatus.Stopped);
+            var streams = await _streamingLogic.Get(x => x.User.UserName == user.UserName);
+
+            return new StreamsStatusViewModel
+            {
+                Status = streams.ToDictionary(x => x,
+                    x => _state.Resolve().FirstOrDefault()?.State ?? StreamStatusEnum.Stopped)
+            };
+        }
+
+        /// <summary>
+        /// Pass username to Save
+        /// </summary>
+        /// <param name="addStreamViewModel"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public async Task<Stream> Save(AddStreamViewModel addStreamViewModel, User user)
+        {
+            return await Save(_mapper.Map<Stream>(addStreamViewModel), user);
+        }
+
+        public async Task<IEnumerable<Stream>> Get(User user)
+        {
+            var streams = await _streamingLogic.Get(x => x.User.UserName == user.UserName);
+
+            return streams;
+        }
+
+        public Task<Stream> Save(Stream instance, User user)
+        {
+            instance.User = user;
+
+            return _streamingLogic.Save(instance);
         }
 
         /// <summary>
@@ -49,13 +87,16 @@ namespace Logic
         public async Task<bool> Start(int id)
         {
             // Already started
-            if (_streamRippers.ContainsKey(id))
+            if (_state.Resolve().Any(x => x.Stream.Id == id))
             {
                 return false;
             }
 
+            // Stream key
+            var key = Guid.NewGuid();
+
             // Get the model from database
-            var streamRipper = await _streamingSubscriptionLogic.Get(id);
+            var streamRipper = await _streamingLogic.Get(id);
 
             var streamRipperInstance = StreamRipperBuilder.New()
                 .WithUrl(new Uri(streamRipper.Url))
@@ -75,13 +116,42 @@ namespace Logic
                 // Upload the stream
                 await uploadService.UploadStream(arg.SongInfo.Stream, $"{filename}.mp3");
             };
+            
+            streamRipperInstance.StreamEndedEventHandlers += (sender, arg) =>
+            {
+                _state.UpdateState((state, _) =>
+                {
+                    var prev = state.Find(y => y.Key == key);
+                    var item = (StreamItem) prev.Clone();
+                    item.State = StreamStatusEnum.Stopped;
+                    return state.Replace(prev, item);
+                });
+            };
+
+            streamRipperInstance.StreamFailedHandlers += (sender, arg) =>
+            {
+                _state.UpdateState((state, _) =>
+                {
+                    var prev = state.Find(y => y.Key == key);
+                    var item = (StreamItem) prev.Clone();
+                    item.State = StreamStatusEnum.Fail;
+                    return state.Replace(prev, item);
+                });
+            };
 
             // Start the ripper
             streamRipperInstance.Start();
 
             // Add to the dictionary
-            _streamRippers[id] = new KeyValuePair<IUploadService, IStreamRipper>(uploadService, streamRipperInstance);
-
+            _state.UpdateState((state, _) => state.Add(new StreamItem
+            {
+                Key = key,
+                Stream = streamRipper,
+                State = StreamStatusEnum.Started,
+                UploadService = uploadService,
+                User = streamRipper.User
+            }));
+                
             return true;
         }
 
@@ -92,15 +162,9 @@ namespace Logic
         /// <returns></returns>
         public async Task<bool> Stop(int id)
         {
-            if (_streamRippers.ContainsKey(id))
+            if (_state.Resolve().Any(x => x.Stream.Id == id))
             {
-                var streamRipperInstance = _streamRippers[id].Value;
-
-                // Stop the ripper
-                streamRipperInstance.Dispose();
-
-                // Remove from dictionary
-                _streamRippers.Remove(id);
+                _state.UpdateState((state, find) => state.Remove(find(x => x.Stream.Id == id)));
 
                 return true;
             }
@@ -111,10 +175,10 @@ namespace Logic
         /// <summary>
         /// Returns new instance of upload service
         /// </summary>
-        /// <param name="streamingSubscription"></param>
+        /// <param name="stream"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        private static IUploadService GetUploadService(StreamingSubscription streamingSubscription)
+        private static IUploadService GetUploadService(Stream stream)
         {
             /*switch (streamingSubscription.ServiceType)
             {

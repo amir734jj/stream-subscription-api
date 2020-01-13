@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace API.Utilities
+namespace Api.Utilities
 {
     public static class ConnectionStringUtility
     {
