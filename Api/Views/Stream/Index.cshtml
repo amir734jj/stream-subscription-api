@@ -1,3 +1,4 @@
+@using Models.Enums
 @model Models.ViewModels.Streams.StreamsStatusViewModel
 
 @{
@@ -31,6 +32,12 @@
                         </td>
                         <td> @key.ServiceType </td>
                         <td> @value </td>
+                        <td>
+                            <button class="btn btn-danger"> Delete </button>
+                            <button class="btn btn-primary">
+                                Start / Stop
+                            </button>
+                        </td>
                     </tr>
                 }
                 </tbody>
@@ -38,6 +45,6 @@
         </div>
     </div>
     <div class="col-sm-2">
-        <a href="~/Stream/Add" class="btn btn-primary">Add new subscription</a>
+        <a href="~/Stream/Add" class="btn btn-default">Add new subscription</a>
     </div>
 </div>

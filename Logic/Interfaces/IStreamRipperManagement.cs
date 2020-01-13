@@ -34,6 +34,12 @@ namespace Logic.Interfaces
         /// <returns></returns>
         Task<IEnumerable<Stream>> Get(User user);
 
+        /// <summary>
+        /// Save a stream + it's user data
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
         Task<Stream> Save(Stream instance, User user);
     }
 }
