@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dal.Interfaces;
 using Logic.Interfaces;
@@ -13,6 +15,11 @@ namespace Logic.Abstracts
         /// </summary>
         /// <returns></returns>
         protected abstract IBasicDal<T> GetBasicCrudDal();
+
+        public Task<IEnumerable<T>> Get(Expression<Func<T, bool>> filter)
+        {
+            return GetBasicCrudDal().Get(filter);
+        }
 
         /// <summary>
         /// Call forwarding
@@ -62,6 +69,11 @@ namespace Logic.Abstracts
         public virtual Task<T> Update(int id, T dto)
         {
             return GetBasicCrudDal().Update(id, dto);
+        }
+
+        public Task<T> Update(int id, Action<T> updater)
+        {
+            return GetBasicCrudDal().Update(id, updater);
         }
     }
 }

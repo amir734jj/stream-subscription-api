@@ -1,11 +1,11 @@
-﻿using Dal.Interfaces;
-using DAL.Abstracts;
+﻿using Dal.Abstracts;
+using Dal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Models.Models;
 
 namespace Dal
 {
-    public class StreamingSubscriptionDal : BasicDalAbstract<StreamingSubscription>, IStreamingSubscriptionDal
+    public class StreamingDal : BasicDalAbstract<Stream>, IStreamingDal
     {
         private readonly EntityDbContext _dbContext;
 
@@ -13,7 +13,7 @@ namespace Dal
         /// Constructor dependency injection
         /// </summary>
         /// <param name="dbContext"></param>
-        public StreamingSubscriptionDal(EntityDbContext dbContext)
+        public StreamingDal(EntityDbContext dbContext)
         {
             _dbContext = dbContext;
         }
@@ -31,7 +31,7 @@ namespace Dal
         /// Returns DbSet
         /// </summary>
         /// <returns></returns>
-        protected override DbSet<StreamingSubscription> GetDbSet()
+        protected override DbSet<Stream> GetDbSet()
         {
             return _dbContext.StreamingSubscriptions;
         }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 
-namespace API.Extensions
+namespace Api.Extensions
 {
     public static class HostingEnvironmentExtension
     {

@@ -19,7 +19,7 @@ namespace Api.Controllers
         {
             if (User.Identity.IsAuthenticated)
             {
-                return View();
+                return RedirectToAction("Index", "Stream");
             }
 
             return RedirectToAction("About");
