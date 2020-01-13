@@ -27,7 +27,7 @@
             @Html.LabelFor(x => x.Password, new { @class = "control-label col-sm-2" })
 
             <div class="col-sm-10">
-                @Html.TextBoxFor(x => x.Password, new { type = "password", placeholder = "Enter password", @class = "form-control", required = "required" })
+                @Html.TextBoxFor(x => x.Password, new { type = "password", placeholder = "Enter password (at least 8 alphanumeric characters with special characters)", @class = "form-control", required = "required", pattern="^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$" })
             </div>
         </div>
         
