@@ -10,7 +10,7 @@
 <div class="col-sm-4">
     <h4>Add new Stream Subsciption</h4>
             
-    @using (Html.BeginForm("", "", FormMethod.Post, new { }))
+    @using (Html.BeginForm("AddStreamHandler", "Stream", FormMethod.Post, new { }))
     {
         <div class="form-group">
             @Html.LabelFor(x => x.Name)
