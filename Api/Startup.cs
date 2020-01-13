@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Reflection;
+using AutoMapper;
 using Dal;
 using EFCache;
 using EFCache.Redis;
@@ -23,7 +25,7 @@ using reCAPTCHA.AspNetCore;
 using StackExchange.Redis;
 using StructureMap;
 using WebMarkupMin.AspNetCore2;
-using static API.Utilities.ConnectionStringUtility;
+using static Api.Utilities.ConnectionStringUtility;
 
 namespace Api
 {
@@ -63,6 +65,8 @@ namespace Api
             services.AddOptions();
 
             services.AddLogging();
+
+            services.AddAutoMapper(Assembly.Load("Models"));
 
             services.AddRouting(options => { options.LowercaseUrls = true; });
 

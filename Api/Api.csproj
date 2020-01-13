@@ -26,4 +26,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Logic\Logic.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Controllers\Streams\Add.cshtml" />
+    <_ContentIncludedByDefault Remove="Controllers\Streams\Index.cshtml" />
+  </ItemGroup>
 </Project>

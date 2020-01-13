@@ -1,4 +1,4 @@
-using API.Utilities;
+using Api.Utilities;
 using Microsoft.AspNetCore.Http;
 
 namespace Api.Interfaces

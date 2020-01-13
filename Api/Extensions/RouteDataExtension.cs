@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Routing;
 
-namespace API.Extensions
+namespace Api.Extensions
 {
     public static class RouteDataExtension
     {

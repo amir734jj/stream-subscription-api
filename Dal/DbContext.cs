@@ -13,7 +13,7 @@ namespace Dal
         /// <summary>
         /// Streaming subscription table
         /// </summary>
-        public DbSet<StreamingSubscription> StreamingSubscriptions { get; set; }
+        public DbSet<Stream> StreamingSubscriptions { get; set; }
 
         public EntityDbContext() { }
 

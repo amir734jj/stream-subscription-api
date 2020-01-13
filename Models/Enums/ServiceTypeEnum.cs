@@ -1,11 +1,12 @@
-﻿namespace Models.Enums
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Models.Enums
 {
     /// <summary>
     /// Service type
     /// </summary>
     public enum ServiceTypeEnum
     {
-        DropBox = 0,
-        Ftp = 1
+        FTP = 0
     }
 }

@@ -3,7 +3,7 @@ using Logic.Abstracts;
 using Logic.Interfaces;
 using Models.Models;
 
-namespace Logic.ModelsLogic
+namespace Logic.Crud
 {
     public class UserLogic : BasicLogicAbstract<User>, IUserLogic
     {

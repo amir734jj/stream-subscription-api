@@ -1,29 +1,34 @@
 ﻿using System.Threading.Tasks;
-using API.Abstracts;
+using Api.Abstracts;
 using Logic.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Models.Models;
+using Models.ViewModels.Streams;
 
-namespace API.Controllers.Api
+namespace Api.Controllers.Api
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class StreamingSubscriptionController : BasicController<StreamingSubscription>
+    public class StreamingSubscriptionController : BasicController<Stream>
     {
-        private readonly IStreamingSubscriptionLogic _streamingSubscriptionLogic;
+        private readonly IStreamingLogic _streamingLogic;
         
         private readonly UserManager<User> _userManager;
+        
+        private readonly IStreamRipperManagement _streamRipperManagement;
 
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
-        /// <param name="streamingSubscriptionLogic"></param>
+        /// <param name="streamingLogic"></param>
+        /// <param name="streamRipperManagement"></param>
         /// <param name="userManager"></param>
-        public StreamingSubscriptionController(IStreamingSubscriptionLogic streamingSubscriptionLogic,  UserManager<User> userManager)
+        public StreamingSubscriptionController(IStreamingLogic streamingLogic, IStreamRipperManagement streamRipperManagement , UserManager<User> userManager)
         {
-            _streamingSubscriptionLogic = streamingSubscriptionLogic;
+            _streamingLogic = streamingLogic;
+            _streamRipperManagement = streamRipperManagement;
             _userManager = userManager;
         }
 
@@ -31,9 +36,9 @@ namespace API.Controllers.Api
         /// Returns instance of logic
         /// </summary>
         /// <returns></returns>
-        protected override IBasicLogic<StreamingSubscription> BasicLogic()
+        protected override IBasicLogic<Stream> BasicLogic()
         {
-            return _streamingSubscriptionLogic;
+            return _streamingLogic;
         }
 
         /// <summary>
@@ -44,7 +49,7 @@ namespace API.Controllers.Api
         {
             var user = await _userManager.GetUserAsync(User);
             
-            return Ok(_streamingSubscriptionLogic.GetAll(user));
+            return Ok(_streamRipperManagement.Get(user));
         }
 
         /// <summary>
@@ -52,11 +57,11 @@ namespace API.Controllers.Api
         /// </summary>
         /// <param name="instance"></param>
         /// <returns></returns>
-        public override async Task<IActionResult> Save([FromBody] StreamingSubscription instance)
+        public override async Task<IActionResult> Save([FromBody] Stream instance)
         {
             var user = await _userManager.GetUserAsync(User);
 
-            return Ok(_streamingSubscriptionLogic.Save(instance, user));
+            return Ok(_streamRipperManagement.Save(instance, user));
         }
     }
 }

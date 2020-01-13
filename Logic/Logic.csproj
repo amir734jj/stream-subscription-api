@@ -9,7 +9,7 @@
     <PackageReference Include="Box.V2.Core" Version="3.9.2" />
     <PackageReference Include="Dropbox.Api" Version="4.9.0" />
     <PackageReference Include="HashLib" Version="2.0.1" />
-    <PackageReference Include="StreamRipper" Version="2.0.1" />
+    <PackageReference Include="StreamRipper" Version="2.0.2" />
     <PackageReference Include="System.Reactive.Linq" Version="4.3.2" />
   </ItemGroup>
 </Project>
