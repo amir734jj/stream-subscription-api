@@ -8,14 +8,12 @@ namespace Models.Models
     /// <summary>
     /// Streaming Subscription
     /// </summary>
-    public class StreamingSubscription : IEntity, IEntityUpdatable<StreamingSubscription>
+    public class Stream : IEntity, IEntityUpdatable<Stream>
     {
         [Key]
         public int Id { get; set; }
         
         public string Url { get; set; }
-
-        public int UserRefId { get; set; }
 
         /// <summary>
         /// User reference
@@ -28,7 +26,7 @@ namespace Models.Models
         /// </summary>
         public ServiceTypeEnum ServiceType { get; set; }
 
-        public StreamingSubscription Update(StreamingSubscription dto)
+        public Stream Update(Stream dto)
         {
             Url = dto.Url;
             ServiceType = dto.ServiceType;

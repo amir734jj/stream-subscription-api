@@ -6,7 +6,7 @@ using Models.Enums;
 using Models.Models;
 using static Models.Enums.UserRoleEnumExtension;
 
-namespace API.Utilities
+namespace Api.Utilities
 {
  /// <summary>
     /// UserInfo Struct

@@ -1,5 +1,5 @@
-﻿using Dal.Interfaces;
-using DAL.Abstracts;
+﻿using Dal.Abstracts;
+using Dal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Models.Models;
 

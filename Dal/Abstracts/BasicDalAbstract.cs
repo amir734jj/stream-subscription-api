@@ -7,7 +7,7 @@ using Dal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Models.Interfaces;
 
-namespace DAL.Abstracts
+namespace Dal.Abstracts
 {
     public abstract class BasicDalAbstract<T> : IBasicDal<T> where T : class, IEntityUpdatable<T>, IEntity
     {
