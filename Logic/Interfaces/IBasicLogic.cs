@@ -6,7 +6,7 @@ using Models.Interfaces;
 
 namespace Logic.Interfaces
 {
-    public interface IBasicLogic<T> where T: IEntityUpdatable<T>, IEntity
+    public interface IBasicLogic<T> where T: IEntity
     {
         Task<IEnumerable<T>> Get(Expression<Func<T, bool>> filter);
         

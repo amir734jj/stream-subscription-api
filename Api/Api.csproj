@@ -5,7 +5,6 @@
     <RootNamespace>Api</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="BuildBundlerMinifier" Version="2.9.406" />
     <PackageReference Include="EFCache.Redis" Version="2019.3.11.1" />
     <PackageReference Include="Flurl" Version="2.8.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.0" />
@@ -27,7 +26,6 @@
     <ProjectReference Include="..\Logic\Logic.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <_ContentIncludedByDefault Remove="Controllers\Streams\Add.cshtml" />
-    <_ContentIncludedByDefault Remove="Controllers\Streams\Index.cshtml" />
+    <Folder Include="Interfaces" />
   </ItemGroup>
 </Project>
