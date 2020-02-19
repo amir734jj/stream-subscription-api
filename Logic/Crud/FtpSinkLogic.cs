@@ -23,50 +23,49 @@ namespace Logic.Crud
             _ftpSinkDal = ftpSinkDal;
         }
 
-        /// <summary>
-        /// Returns DAL
-        /// </summary>
-        /// <returns></returns>
+        public IBasicLogic<FtpSink> For(User user)
+        {
+            return new FtpSinkLogicImpl(_ftpSinkDal, user);
+        }
+
+        protected override IBasicDal<FtpSink> GetBasicCrudDal()
+        {
+            return _ftpSinkDal;
+        }
+    }
+
+    public class FtpSinkLogicImpl : BasicLogicAbstract<FtpSink>
+    {
+        private readonly IFtpSinkDal _ftpSinkDal;
+        
+        private readonly User _user;
+
+        public FtpSinkLogicImpl(IFtpSinkDal ftpSinkDal, User user)
+        {
+            _ftpSinkDal = ftpSinkDal;
+            _user = user;
+        }
+        
         protected override IBasicDal<FtpSink> GetBasicCrudDal()
         {
             return _ftpSinkDal;
         }
 
-        public async Task<IEnumerable<FtpSink>> Get(User user, Func<FtpSink, bool> filter)
+        public override Task<FtpSink> Save(FtpSink instance)
         {
-            return (await GetAll()).Where(x => x.User.Id == user.Id).Where(filter).ToList();
+            instance.User = _user;
+            
+            return base.Save(instance);
+        }
+        
+        public override async Task<IEnumerable<FtpSink>> GetAll()
+        {
+            return (await _ftpSinkDal.GetAll()).Where(x => x.User.Id == _user.Id).ToList();
         }
 
-        public async Task<IEnumerable<FtpSink>> GetAll(User user)
+        public override async Task<FtpSink> Get(int id)
         {
-            return (await GetAll()).Where(x => x.User.Id == user.Id).ToList();
-        }
-
-        public async Task<FtpSink> Get(User user, int id)
-        {
-            return (await GetAll()).Where(x => x.User.Id == user.Id).FirstOrDefault(x => x.Id == id);
-        }
-
-        public async Task<FtpSink> Save(User user, FtpSink instance)
-        {
-            instance.User = user;
-
-            return await Save(instance);
-        }
-
-        public async Task<FtpSink> Delete(User _, int id)
-        {
-            return await Delete(id);
-        }
-
-        public async Task<FtpSink> Update(User _, int id, FtpSink dto)
-        {
-            return await Update(id, dto);
-        }
-
-        public async Task<FtpSink> Update(User user, int id, Action<FtpSink> updater)
-        {
-            return await Update(id, updater);
+            return (await _ftpSinkDal.GetAll()).Where(x => x.User.Id == _user.Id).FirstOrDefault(x => x.Id == id);
         }
     }
 }
