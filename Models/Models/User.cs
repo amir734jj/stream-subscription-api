@@ -1,29 +1,19 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
-using Models.Enums;
 using Models.Interfaces;
-using  Models.Extensions;
+using Models.Models.Sinks;
 
 namespace Models.Models
 {
     /// <summary>
     /// Website user model
     /// </summary>
-    public class User : IdentityUser<int>, IEntity, IEntityUpdatable<User>
+    public class User : IdentityUser<int>, IEntity
     {
         public string Fullname { get; set; }
 
-        public List<Stream> Streaming { get; set; }
-        
-        public UserRoleEnum Role { get; set; }
+        public List<Stream> Streams { get; set; }
 
-        public User Update(User dto)
-        {
-            Fullname = Fullname;
-            Streaming = Streaming.IdAwareUpdate(dto.Streaming, x => x.Id);
-            Role = dto.Role;
-            
-            return this;
-        }
+        public List<FtpSink> FtpSinks { get; set; }
     }
 }
