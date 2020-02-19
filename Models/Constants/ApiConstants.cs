@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Models.Constants
 {
     public static class ApiConstants
