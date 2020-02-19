@@ -5,8 +5,6 @@ namespace Models.ViewModels.Identities
     /// </summary>
     public class RegisterViewModel
     {
-        public string PhoneNumber { get; set; }
-
         public string Fullname { get; set; }
 
         public string Username { get; set; }
