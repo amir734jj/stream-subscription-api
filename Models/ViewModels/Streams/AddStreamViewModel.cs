@@ -12,6 +12,6 @@ namespace Models.ViewModels.Streams
         public string Name { get; set; }
         
         [Display(Name = "Type of Service to export")]
-        public ServiceTypeEnum ServiceType { get; set; }
+        public SinkTypeEnum SinkType { get; set; }
     }
 }
