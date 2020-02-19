@@ -22,50 +22,49 @@ namespace Logic.Crud
             _streamDal = streamDal;
         }
 
-        /// <summary>
-        /// Returns DAL
-        /// </summary>
-        /// <returns></returns>
+        public IBasicLogic<Stream> For(User user)
+        {
+            return new StreamLogicImpl(_streamDal, user);
+        }
+
+        protected override IBasicDal<Stream> GetBasicCrudDal()
+        {
+            return _streamDal;
+        }
+    }
+
+    public class StreamLogicImpl : BasicLogicAbstract<Stream>
+    {
+        private readonly IStreamDal _streamDal;
+        
+        private readonly User _user;
+
+        public StreamLogicImpl(IStreamDal streamDal, User user)
+        {
+            _streamDal = streamDal;
+            _user = user;
+        }
+        
         protected override IBasicDal<Stream> GetBasicCrudDal()
         {
             return _streamDal;
         }
 
-        public async Task<IEnumerable<Stream>> Get(User user, Func<Stream, bool> filter)
+        public override Task<Stream> Save(Stream instance)
         {
-            return (await GetAll()).Where(x => x.User.Id == user.Id).Where(filter).ToList();
+            instance.User = _user;
+            
+            return base.Save(instance);
+        }
+        
+        public override async Task<IEnumerable<Stream>> GetAll()
+        {
+            return (await _streamDal.GetAll()).Where(x => x.User.Id == _user.Id).ToList();
         }
 
-        public async Task<IEnumerable<Stream>> GetAll(User user)
+        public override async Task<Stream> Get(int id)
         {
-            return (await GetAll()).Where(x => x.User.Id == user.Id).ToList();
-        }
-
-        public async Task<Stream> Get(User user, int id)
-        {
-            return (await GetAll()).Where(x => x.User.Id == user.Id).FirstOrDefault(x => x.Id == id);
-        }
-
-        public async Task<Stream> Save(User user, Stream instance)
-        {
-            instance.User = user;
-
-            return await Save(instance);
-        }
-
-        public async Task<Stream> Delete(User _, int id)
-        {
-            return await Delete(id);
-        }
-
-        public async Task<Stream> Update(User _, int id, Stream dto)
-        {
-            return await Update(id, dto);
-        }
-
-        public async Task<Stream> Update(User user, int id, Action<Stream> updater)
-        {
-            return await Update(id, updater);
+            return (await _streamDal.GetAll()).Where(x => x.User.Id == _user.Id).FirstOrDefault(x => x.Id == id);
         }
     }
 }

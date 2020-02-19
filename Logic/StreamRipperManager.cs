@@ -43,7 +43,7 @@ namespace Logic
         /// <returns></returns>
         public async Task<Dictionary<Stream, StreamStatusEnum>> Status(User user)
         {
-            var streams = await _streamLogic.GetAll(user);
+            var streams = await _streamLogic.For(user).GetAll();
 
             return streams
                 .ToDictionary(x => x,
@@ -66,7 +66,7 @@ namespace Logic
             }
 
             // Get the model from database
-            var stream = await _streamLogic.Get(user, id);
+            var stream = await _streamLogic.For(user).Get(id);
 
             var streamRipperInstance = StreamRipperBuilder.New()
                 .WithUrl(new Uri(stream.Url))
