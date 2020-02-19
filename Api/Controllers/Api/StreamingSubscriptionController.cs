@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Models.Models;
-using Models.ViewModels.Streams;
 
 namespace Api.Controllers.Api
 {
@@ -13,7 +12,7 @@ namespace Api.Controllers.Api
     [Route("api/[controller]")]
     public class StreamingSubscriptionController : BasicController<Stream>
     {
-        private readonly IStreamingLogic _streamingLogic;
+        private readonly IStreamLogic _streamLogic;
         
         private readonly UserManager<User> _userManager;
         
@@ -22,12 +21,12 @@ namespace Api.Controllers.Api
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
-        /// <param name="streamingLogic"></param>
+        /// <param name="streamLogic"></param>
         /// <param name="streamRipperManagement"></param>
         /// <param name="userManager"></param>
-        public StreamingSubscriptionController(IStreamingLogic streamingLogic, IStreamRipperManagement streamRipperManagement , UserManager<User> userManager)
+        public StreamingSubscriptionController(IStreamLogic streamLogic, IStreamRipperManagement streamRipperManagement , UserManager<User> userManager)
         {
-            _streamingLogic = streamingLogic;
+            _streamLogic = streamLogic;
             _streamRipperManagement = streamRipperManagement;
             _userManager = userManager;
         }
@@ -38,7 +37,7 @@ namespace Api.Controllers.Api
         /// <returns></returns>
         protected override IBasicLogic<Stream> BasicLogic()
         {
-            return _streamingLogic;
+            return _streamLogic;
         }
 
         /// <summary>

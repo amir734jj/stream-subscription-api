@@ -8,7 +8,7 @@ using Models.Interfaces;
 
 namespace Logic.Abstracts
 {
-    public abstract class BasicLogicAbstract<T> : IBasicLogic<T> where T: IEntityUpdatable<T>, IEntity
+    public abstract class BasicLogicAbstract<T> : IBasicLogic<T> where T: IEntity
     {
         /// <summary>
         /// Returns instance of basic DAL
