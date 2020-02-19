@@ -7,7 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Abstracts
 {
-    public abstract class BasicController<T> : Controller where T : IEntityUpdatable<T>, IEntity
+    public abstract class BasicController<T> : Controller where T : IEntity
     {
         [NonAction]
         protected abstract IBasicLogic<T> BasicLogic();

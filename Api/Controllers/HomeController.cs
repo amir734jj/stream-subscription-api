@@ -17,22 +17,6 @@ namespace Api.Controllers
         [Route("")]
         public async Task<IActionResult> Index()
         {
-            if (User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Index", "Stream");
-            }
-
-            return RedirectToAction("About");
-        }
-        
-        /// <summary>
-        /// About page
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("About")]
-        public async Task<IActionResult> About()
-        {
             return View();
         }
     }
