@@ -15,19 +15,15 @@ namespace Api.Controllers.Api
         private readonly IStreamLogic _streamLogic;
         
         private readonly UserManager<User> _userManager;
-        
-        private readonly IStreamRipperManagement _streamRipperManagement;
 
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
         /// <param name="streamLogic"></param>
-        /// <param name="streamRipperManagement"></param>
         /// <param name="userManager"></param>
-        public StreamingSubscriptionController(IStreamLogic streamLogic, IStreamRipperManagement streamRipperManagement , UserManager<User> userManager)
+        public StreamingSubscriptionController(IStreamLogic streamLogic, UserManager<User> userManager)
         {
             _streamLogic = streamLogic;
-            _streamRipperManagement = streamRipperManagement;
             _userManager = userManager;
         }
 
@@ -48,7 +44,7 @@ namespace Api.Controllers.Api
         {
             var user = await _userManager.GetUserAsync(User);
             
-            return Ok(_streamRipperManagement.Get(user));
+            return Ok(_streamLogic.GetAll(user));
         }
 
         /// <summary>
@@ -60,7 +56,7 @@ namespace Api.Controllers.Api
         {
             var user = await _userManager.GetUserAsync(User);
 
-            return Ok(_streamRipperManagement.Save(instance, user));
+            return Ok(_streamLogic.Save(user, instance));
         }
     }
 }
