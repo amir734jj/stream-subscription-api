@@ -1,11 +1,13 @@
-﻿using Dal.Abstracts;
+﻿using System.Linq;
+using Dal.Abstracts;
 using Dal.Interfaces;
+using Dal.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Models.Models;
 
 namespace Dal
 {
-    public class UserDal : BasicDalAbstract<User>, IUserDal
+    public class UserDal : BasicDalRelationalAbstract<User>, IUserDal
     {
         private readonly EntityDbContext _dbContext;
 
@@ -34,6 +36,13 @@ namespace Dal
         protected override DbSet<User> GetDbSet()
         {
             return _dbContext.Users;
+        }
+
+        protected override IQueryable<User> Intercept<TQueryable>(TQueryable queryable)
+        {
+            return queryable
+                .Include(x => x.Streams)
+                .Include(x => x.FtpSinks);
         }
     }
 }

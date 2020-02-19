@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using AgileObjects.AgileMapper;
 using Dal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Models.Interfaces;
 
 namespace Dal.Abstracts
 {
-    public abstract class BasicDalAbstract<T> : IBasicDal<T> where T : class, IEntityUpdatable<T>, IEntity
+    public abstract class BasicDalRelationalAbstract<T> : IBasicDal<T> where T : class, IEntity
     {
         /// <summary>
         /// Abstract to get database context
@@ -25,7 +26,7 @@ namespace Dal.Abstracts
 
         public async Task<IEnumerable<T>> Get(Expression<Func<T, bool>> filter)
         {
-            return await GetDbSet().Where(filter).ToListAsync();
+            return await Intercept(GetDbSet().Where(filter)).ToListAsync();
         }
 
         /// <summary>
@@ -34,7 +35,7 @@ namespace Dal.Abstracts
         /// <returns></returns>
         public virtual async Task<IEnumerable<T>> GetAll()
         {
-            return await GetDbSet().ToListAsync();
+            return await Intercept(GetDbSet()).ToListAsync();
         }
 
         /// <summary>
@@ -55,7 +56,9 @@ namespace Dal.Abstracts
         public virtual async Task<T> Save(T instance)
         {
             GetDbSet().Add(instance);
+            
             await GetDbContext().SaveChangesAsync();
+            
             return instance;
         }
 
@@ -71,7 +74,9 @@ namespace Dal.Abstracts
             if (entity != null)
             {
                 GetDbSet().Remove(entity);
+                
                 await GetDbContext().SaveChangesAsync();
+                
                 return entity;
             }
 
@@ -86,7 +91,18 @@ namespace Dal.Abstracts
         /// <returns></returns>
         public virtual async Task<T> Update(int id, T dto)
         {
-            return await Update(id, entity => entity.Update(dto));
+            var entity = await Get(id);
+
+            if (entity != null)
+            {
+                var result = Mapper.Map(dto).Over(await Get(id));
+                
+                await GetDbContext().SaveChangesAsync();
+
+                return result;
+            }
+
+            return null;
         }
 
         public async Task<T> Update(int id, Action<T> updater)
@@ -95,13 +111,23 @@ namespace Dal.Abstracts
 
             if (entity != null)
             {
-                // Copy the fields
                 updater(entity);
-                GetDbContext().SaveChanges();
+                
+                await GetDbContext().SaveChangesAsync();
+                
                 return entity;
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Intercept the IQueryable to include
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IQueryable<T> Intercept<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<T>
+        {
+            return queryable;
         }
     }
 }

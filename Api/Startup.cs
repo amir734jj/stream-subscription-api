@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Reflection;
-using AutoMapper;
-using Dal;
+using Dal.Utilities;
 using EFCache;
 using EFCache.Redis;
+using Logic;
+using Marten;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -62,12 +62,14 @@ namespace Api
         /// <returns></returns>
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            var postgresConnectionString =
+                ConnectionStringUrlToResource(_configuration.GetValue<string>("DATABASE_URL")
+                                              ?? throw new Exception("DATABASE_URL is null"));
+
             services.AddOptions();
 
             services.AddLogging();
-
-            services.AddAutoMapper(Assembly.Load("Models"));
-
+            
             services.AddRouting(options => { options.LowercaseUrls = true; });
 
             if (_env.IsDevelopment())
@@ -128,12 +130,7 @@ namespace Api
                 }
                 else
                 {
-                    opt.UseNpgsql(
-                        ConnectionStringUrlToResource(_configuration.GetValue<string>("DATABASE_URL_V2"))
-                        ?? throw new Exception("DATABASE_URL is null"), _ =>
-                        {
-                            // Further customizations ...
-                        });
+                    opt.UseNpgsql(ConnectionStringUrlToResource(postgresConnectionString));
                 }
             });
 
@@ -169,6 +166,18 @@ namespace Api
 
             _container = new Container(config =>
             {
+                config.For<StreamRipperState>().Singleton();
+                
+                config.For<DocumentStore>().Use(DocumentStore.For(y =>
+                {
+                    // Important as PLV8 is disabled on Heroku
+                    y.PLV8Enabled = false;
+                    
+                    y.Connection(postgresConnectionString);
+                    
+                    y.AutoCreateSchemaObjects = AutoCreate.CreateOrUpdate;
+                }));
+                
                 // Register stuff in container, using the StructureMap APIs...
                 config.Scan(_ =>
                 {

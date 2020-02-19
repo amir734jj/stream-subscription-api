@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Models.Enums;
 using Models.Interfaces;
 using Newtonsoft.Json;
@@ -8,7 +10,7 @@ namespace Models.Models
     /// <summary>
     /// Streaming Subscription
     /// </summary>
-    public class Stream : IEntity, IEntityUpdatable<Stream>
+    public class Stream : IEntity
     {
         [Key]
         public int Id { get; set; }
@@ -21,17 +23,7 @@ namespace Models.Models
         [JsonIgnore]
         public User User { get; set; }
         
-        /// <summary>
-        /// Service type
-        /// </summary>
-        public ServiceTypeEnum ServiceType { get; set; }
-
-        public Stream Update(Stream dto)
-        {
-            Url = dto.Url;
-            ServiceType = dto.ServiceType;
-
-            return this;
-        }
+        [Column(TypeName = "jsonb")]
+        public Dictionary<int, SinkTypeEnum> SubscribedSinks  { get; set; }
     }
 }
