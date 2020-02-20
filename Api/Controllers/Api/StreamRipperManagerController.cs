@@ -27,7 +27,7 @@ namespace Api.Controllers.Api
         }
         
         [HttpGet]
-        [Route("{id}")]
+        [Route("")]
         public async Task<IActionResult> Status()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -45,7 +45,7 @@ namespace Api.Controllers.Api
 
             await _streamRipper.For(user).Start(id);
             
-            return Ok(_streamRipper.For(user).Status());
+            return Ok(await _streamRipper.For(user).Status());
         }
 
         [HttpPost]
@@ -56,7 +56,7 @@ namespace Api.Controllers.Api
 
             await _streamRipper.For(user).Stop(id);
 
-            return Ok(_streamRipper.For(user).Status());
+            return Ok(await _streamRipper.For(user).Status());
         }
     }
 }

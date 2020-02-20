@@ -76,32 +76,30 @@ namespace Logic
         /// Pass username to GetAll
         /// </summary>
         /// <returns></returns>
-        public async Task<Dictionary<Stream, StreamStatusEnum>> Status()
+        public async Task<Dictionary<int, StreamStatusEnum>> Status()
         {
             var streams = await _streamLogic.For(_user).GetAll();
 
             return streams
-                .ToDictionary(x => x,
-                    x => _state.StreamItems.FirstOrDefault(x => x.Value.User.Id == _user.Id).Value?.State ??
+                .ToDictionary(x => x.Id,
+                    x => _state.StreamItems.FirstOrDefault(y => y.Value.User.Id == _user.Id).Value?.State ??
                          StreamStatusEnum.Stopped);
         }
 
         /// <summary>
         /// Start the stream
         /// </summary>
-        /// <param name="user"></param>
         /// <param name="id"></param>
         /// <returns></returns>
         public async Task<bool> Start(int id)
         {
+            Stream stream;
+            
             // Already started
-            if (_state.StreamItems.ContainsKey(id))
+            if (_state.StreamItems.ContainsKey(id) || (stream = await _streamLogic.For(_user).Get(id)) == null)
             {
                 return false;
             }
-
-            // Get the model from database
-            var stream = await _streamLogic.For(_user).Get(id);
 
             var streamRipperInstance = StreamRipperBuilder.New()
                 .WithUrl(new Uri(stream.Url))

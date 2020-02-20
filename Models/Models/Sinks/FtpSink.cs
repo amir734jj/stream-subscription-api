@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Models.Interfaces;
 using Newtonsoft.Json;
@@ -24,5 +25,7 @@ namespace Models.Models.Sinks
         /// </summary>
         [JsonIgnore]
         public User User { get; set; }
+        
+        public List<StreamFtpSinkRelationship> FtpSinkRelationships { get; set; }
     }
 }

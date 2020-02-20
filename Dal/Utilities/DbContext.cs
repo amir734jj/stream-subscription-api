@@ -14,6 +14,8 @@ namespace Dal.Utilities
         public DbSet<Stream> Streams { get; set; }
 
         public DbSet<FtpSink> FtpSinks { get; set; }
+
+        public DbSet<StreamFtpSinkRelationship> FtpSinkRelationships { get; set; }
         
         public EntityDbContext() { }
 
@@ -36,11 +38,19 @@ namespace Dal.Utilities
                 .HasMany(x => x.Streams)
                 .WithOne(x => x.User)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<StreamFtpSinkRelationship>()
+                .HasKey(x => new {x.StreamId, x.FtpSinkId});
+
+            modelBuilder.Entity<StreamFtpSinkRelationship>()
+                .HasOne(x => x.Stream)
+                .WithMany(x => x.FtpSinksRelationships)
+                .HasForeignKey(x => x.StreamId);
             
-            modelBuilder.Entity<User>()
-                .HasMany(x => x.FtpSinks)
-                .WithOne(x => x.User)
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<StreamFtpSinkRelationship>()
+                .HasOne(x => x.FtpSink)
+                .WithMany(x => x.FtpSinkRelationships)
+                .HasForeignKey(x => x.FtpSinkId);
         }
 
         
