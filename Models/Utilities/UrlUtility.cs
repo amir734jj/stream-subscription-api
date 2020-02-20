@@ -11,13 +11,13 @@ namespace Models.Utilities
         /// </summary>
         /// <param name="connectionStringUrl"></param>
         /// <returns></returns>
-        public static IReadOnlyDictionary<string, string> UrlToResource(string connectionStringUrl)
+        public static (Uri, IReadOnlyDictionary<string, string>) UrlToResource(string connectionStringUrl)
         {
             var isUrl = Uri.TryCreate(connectionStringUrl, UriKind.Absolute, out var url);
 
             if (!isUrl)
             {
-                return ImmutableDictionary.Create<string, string>();
+                return (default, ImmutableDictionary.Create<string, string>());
             }
 
             var connectionStringBuilder = new Dictionary<string, string>
@@ -29,7 +29,7 @@ namespace Models.Utilities
                 ["ApplicationName"] = "milwaukee-internationals"
             };
 
-            return connectionStringBuilder;
+            return (url, connectionStringBuilder);
         }
     }
 }

@@ -64,7 +64,7 @@ namespace Api
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             var postgresConnectionString =
-                ConnectionStringUrlToResource(_configuration.GetValue<string>("DATABASE_URL")
+                ConnectionStringUrlToPgResource(_configuration.GetValue<string>("DATABASE_URL")
                                               ?? throw new Exception("DATABASE_URL is null"));
 
             var redisUrl = _configuration.GetValue<string>("REDISTOGO_URL");
@@ -84,7 +84,7 @@ namespace Api
             }
             else
             {
-                // services.AddStackExchangeRedisCache(c => c.Configuration = redisUrl);
+                services.AddStackExchangeRedisCache(c => c.Configuration = redisUrl);
             }
 
             services.AddSession(options =>
@@ -204,7 +204,7 @@ namespace Api
         {
             app.UseCors("CorsPolicy");
 
-            if (true || _env.IsDevelopment())
+            if (_env.IsDevelopment())
             {
                 app.UseDatabaseErrorPage();
 
