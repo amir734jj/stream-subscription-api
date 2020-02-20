@@ -16,6 +16,6 @@ namespace Logic.Interfaces
 
         Task<bool> Stop(int id);
 
-        Task<Dictionary<Stream, StreamStatusEnum>> Status();
+        Task<Dictionary<int, StreamStatusEnum>> Status();
     }
 }

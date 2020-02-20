@@ -40,7 +40,22 @@ namespace Dal
 
         protected override IQueryable<FtpSink> Intercept<TQueryable>(TQueryable queryable)
         {
-            return queryable.Include(x => x.User);
+            return queryable
+                .Include(x => x.User)
+                .ThenInclude(x => x.Streams)
+                .ThenInclude(x => x.FtpSinksRelationships)
+                .ThenInclude(x => x.FtpSink);
+        }
+
+        protected override FtpSink UpdateEntity(FtpSink entity, FtpSink dto)
+        {
+            entity.Host = dto.Host;
+            entity.Username = dto.Username;
+            entity.Password = dto.Password;
+            entity.Path = dto.Path;
+            entity.Port = dto.Port;
+
+            return entity;
         }
     }
 }

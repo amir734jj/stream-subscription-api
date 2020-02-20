@@ -1,4 +1,7 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
+using Api.Configs;
 using Dal.Utilities;
 using EFCache;
 using EFCache.Redis;
@@ -66,7 +69,10 @@ namespace Api
 
             var redisUrl = _configuration.GetValue<string>("REDISTOGO_URL");
 
+            // Add framework services
+            // Add functionality to inject IOptions<T>
             services.AddOptions();
+            services.Configure<JwtSettings>(_configuration.GetSection("JwtSettings"));
 
             services.AddLogging();
             
@@ -92,7 +98,24 @@ namespace Api
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo {Title = "Milwaukee-Internationals-API", Version = "v1"});
+                c.SwaggerDoc("v1", new OpenApiInfo {Title = "Stream-Ripper-API", Version = "v1"});
+
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+                if (File.Exists(xmlPath))
+                {
+                    c.IncludeXmlComments(xmlPath);
+                }
+                
+                c.AddSecurityDefinition("Bearer", // Name the security scheme
+                    new OpenApiSecurityScheme
+                    {
+                        Description = "JWT Authorization header using the Bearer scheme.",
+                        Type = SecuritySchemeType.Http, // We set the scheme type to http since we're using bearer authentication
+                        Scheme = "bearer" // The name of the HTTP Authorization scheme to be used in the Authorization header. In this case "bearer".
+                    });
             });
 
             services.AddMvc(x =>
@@ -181,7 +204,7 @@ namespace Api
         {
             app.UseCors("CorsPolicy");
 
-            if (_env.IsDevelopment())
+            if (true || _env.IsDevelopment())
             {
                 app.UseDatabaseErrorPage();
 
@@ -208,8 +231,10 @@ namespace Api
                 .UseCookiePolicy()
                 .UseSession()
                 .UseRouting()
+                .UseCors("CorsPolicy")
                 .UseAuthentication()
-                .UseEndpoints(endpoints => endpoints.MapControllers());
+                .UseAuthorization()
+                .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());
 
             Console.WriteLine("Application Started!");
         }

@@ -38,7 +38,9 @@ namespace Api.Controllers.Api
         {
             if (User.Identity.IsAuthenticated)
             {
-                return Ok(await _userManager.FindByEmailAsync(User.Identity.Name));
+                var data = await _userManager.FindByNameAsync(User.Identity.Name);
+                
+                return Ok(data);
             }
 
             return Ok(new { });

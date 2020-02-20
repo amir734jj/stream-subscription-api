@@ -9,7 +9,6 @@ using Models.Models.Sinks;
 
 namespace Api.Controllers.Api
 {
-    [ApiExplorerSettings(IgnoreApi = true)]
     [AllowAnonymous]
     [Route("api/[controller]")]
     public class FtpSinkController : BasicCrudController<FtpSink>
