@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Dal.Abstracts;
+using DAL.Extensions;
 using Dal.Interfaces;
 using Dal.Utilities;
 using Microsoft.EntityFrameworkCore;
@@ -40,7 +41,19 @@ namespace Dal
 
         protected override IQueryable<Stream> Intercept<TQueryable>(TQueryable queryable)
         {
-            return queryable.Include(x => x.User);
+            return queryable
+                .Include(x => x.User)
+                .ThenInclude(x => x.Streams)
+                .ThenInclude(x => x.FtpSinksRelationships)
+                .ThenInclude(x => x.FtpSink);
+        }
+
+        protected override Stream UpdateEntity(Stream entity, Stream dto)
+        {
+            entity.Url = dto.Url;
+            entity.FtpSinksRelationships = entity.FtpSinksRelationships.IdAwareUpdate(dto.FtpSinksRelationships, x => x.Id);
+
+            return entity;
         }
     }
 }

@@ -11,19 +11,23 @@ namespace Logic.Crud
     public class StreamLogic : BasicLogicAbstract<Stream>, IStreamLogic
     {
         private readonly IStreamDal _streamDal;
+        
+        private readonly IFtpSinkLogic _ftpSinkLogic;
 
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
         /// <param name="streamDal"></param>
-        public StreamLogic(IStreamDal streamDal)
+        /// <param name="ftpSinkLogic"></param>
+        public StreamLogic(IStreamDal streamDal, IFtpSinkLogic ftpSinkLogic)
         {
             _streamDal = streamDal;
+            _ftpSinkLogic = ftpSinkLogic;
         }
 
         public IBasicLogic<Stream> For(User user)
         {
-            return new StreamLogicImpl(_streamDal, user);
+            return new StreamLogicImpl(_streamDal, _ftpSinkLogic, user);
         }
 
         protected override IBasicDal<Stream> GetBasicCrudDal()
@@ -37,10 +41,13 @@ namespace Logic.Crud
         private readonly IStreamDal _streamDal;
         
         private readonly User _user;
+        
+        private readonly IFtpSinkLogic _ftpSinkLogic;
 
-        public StreamLogicImpl(IStreamDal streamDal, User user)
+        public StreamLogicImpl(IStreamDal streamDal, IFtpSinkLogic ftpSinkLogic, User user)
         {
             _streamDal = streamDal;
+            _ftpSinkLogic = ftpSinkLogic;
             _user = user;
         }
         
@@ -52,7 +59,7 @@ namespace Logic.Crud
         public override Task<Stream> Save(Stream instance)
         {
             instance.User = _user;
-            
+
             return base.Save(instance);
         }
         

@@ -13,7 +13,5 @@ namespace Models.Models
         public string Fullname { get; set; }
 
         public List<Stream> Streams { get; set; }
-
-        public List<FtpSink> FtpSinks { get; set; }
     }
 }
