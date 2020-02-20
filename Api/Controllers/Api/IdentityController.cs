@@ -45,7 +45,7 @@ namespace Api.Controllers.Api
         }
 
         [HttpPost]
-        [Route("Register/{role}")]
+        [Route("Register")]
         [SwaggerOperation("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel registerViewModel)
         {
@@ -109,12 +109,9 @@ namespace Api.Controllers.Api
                 expires: DateTime.Now.AddMinutes(_jwtSettings.Value.AccessTokenDurationInMinutes),
                 signingCredentials: credentials);
 
-            var userRoleInfo = await _userManager.GetRolesAsync(user);
-  
             return Ok(new
             {
                 token = new JwtSecurityTokenHandler().WriteToken(token),
-                roles = userRoleInfo,
                 user.Fullname,
                 user.Email
             });
