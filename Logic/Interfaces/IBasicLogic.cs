@@ -1,17 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using Models.Interfaces;
 
 namespace Logic.Interfaces
 {
-    public interface IBasicLogic<T>
+    public interface IBasicLogic<T> where T: IEntity
     {
-        IEnumerable<T> GetAll();
-
-        T Get(int id);
-
-        T Save(T instance);
+        Task<IEnumerable<T>> Get(Expression<Func<T, bool>> filter);
         
-        T Delete(int id);
+        Task<IEnumerable<T>> GetAll();
 
-        T Update(int id, T updatedInstance);
+        Task<T> Get(int id);
+
+        Task<T> Save(T instance);
+        
+        Task<T> Delete(int id);
+
+        Task<T> Update(int id, T dto);
+
+        Task<T> Update(int id, Action<T> updater);
     }
 }
