@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Models.Enums;
 using Models.Interfaces;
+using Models.Models.Sinks;
 using Newtonsoft.Json;
 
 namespace Models.Models
@@ -22,8 +21,7 @@ namespace Models.Models
         /// </summary>
         [JsonIgnore]
         public User User { get; set; }
-        
-        [Column(TypeName = "jsonb")]
-        public Dictionary<int, SinkTypeEnum> SubscribedSinks  { get; set; }
+
+        public List<StreamFtpSinkRelationship> FtpSinksRelationships  { get; set; }
     }
 }

@@ -55,7 +55,7 @@ namespace Dal.Abstracts
         /// <returns></returns>
         public virtual async Task<T> Save(T instance)
         {
-            GetDbSet().Add(instance);
+            await GetDbSet().AddAsync(instance);
             
             await GetDbContext().SaveChangesAsync();
             
@@ -95,7 +95,7 @@ namespace Dal.Abstracts
 
             if (entity != null)
             {
-                var result = Mapper.Map(dto).Over(await Get(id));
+                var result = UpdateEntity(entity, dto);
                 
                 await GetDbContext().SaveChangesAsync();
 
@@ -128,6 +128,11 @@ namespace Dal.Abstracts
         protected virtual IQueryable<T> Intercept<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<T>
         {
             return queryable;
+        }
+
+        protected virtual T UpdateEntity(T entity, T dto)
+        {
+            return Mapper.Map(dto).Over(entity);
         }
     }
 }
