@@ -16,8 +16,6 @@ namespace Logic
     {
         private readonly IStreamLogic _streamLogic;
 
-        private readonly IUserLogic _userLogic;
-
         private readonly ISinkService _sinkService;
 
         private readonly StreamRipperState _state;
@@ -27,27 +25,23 @@ namespace Logic
         /// </summary>
         /// <param name="state"></param>
         /// <param name="streamLogic"></param>
-        /// <param name="userLogic"></param>
         /// <param name="sinkService"></param>
-        public StreamRipperManager(StreamRipperState state, IStreamLogic streamLogic, IUserLogic userLogic, ISinkService sinkService)
+        public StreamRipperManager(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService)
         {
             _state = state;
             _streamLogic = streamLogic;
-            _userLogic = userLogic;
             _sinkService = sinkService;
         }
 
         public IStreamRipperManagerImpl For(User user)
         {
-            return new StreamRipperManagerImpl(_state, _streamLogic, _userLogic, _sinkService, user);
+            return new StreamRipperManagerImpl(_state, _streamLogic, _sinkService, user);
         }
     }
 
     public class StreamRipperManagerImpl : IStreamRipperManagerImpl
     {
         private readonly IStreamLogic _streamLogic;
-
-        private readonly IUserLogic _userLogic;
 
         private readonly ISinkService _sinkService;
 
@@ -60,14 +54,12 @@ namespace Logic
         /// </summary>
         /// <param name="state"></param>
         /// <param name="streamLogic"></param>
-        /// <param name="userLogic"></param>
         /// <param name="sinkService"></param>
         /// <param name="user"></param>
-        public StreamRipperManagerImpl(StreamRipperState state, IStreamLogic streamLogic, IUserLogic userLogic, ISinkService sinkService, User user)
+        public StreamRipperManagerImpl(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService, User user)
         {
             _state = state;
             _streamLogic = streamLogic;
-            _userLogic = userLogic;
             _sinkService = sinkService;
             _user = user;
         }
