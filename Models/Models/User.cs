@@ -1,27 +1,17 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 using Models.Interfaces;
+using Models.Models.Sinks;
 
 namespace Models.Models
 {
     /// <summary>
     /// Website user model
     /// </summary>
-    public class User : IBasicModel
+    public class User : IdentityUser<int>, IEntity
     {
-        [Key]
-        public int Id { get; set; }
-        
-        public string Username { get; set; }
-        
-        public string Password { get; set; }
-        
-        public string Active { get; set; }
-        
         public string Fullname { get; set; }
-        
-        public string Email { get; set; }
-        
-        public List<StreamingSubscription> Streaming { get; set; }
+
+        public List<Stream> Streams { get; set; }
     }
 }
