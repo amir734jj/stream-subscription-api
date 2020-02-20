@@ -1,43 +1,48 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using System.Text;
-using API.Attributes;
-using API.Extensions;
-using AutoMapper;
-using Dal;
+using Api.Configs;
+using Dal.Utilities;
+using EFCache;
+using EFCache.Redis;
 using Logic;
-using Logic.DataStructures;
-using Logic.Interfaces;
-using Logic.UploadServices;
+using Marten;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using Models.Constants;
+using Models.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using StackExchange.Redis;
 using StructureMap;
-using Swashbuckle.AspNetCore.Swagger;
-using static  API.Utilities.ConnectionStringUtility;
+using static Api.Utilities.ConnectionStringUtility;
 
 namespace Api
 {
     public class Startup
     {
         private Container _container;
-        
-        private readonly IHostingEnvironment _env;
-        
+
+        private readonly IWebHostEnvironment _env;
+
         private readonly IConfigurationRoot _configuration;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="env"></param>
-        public Startup(IHostingEnvironment env)
+        public Startup(IWebHostEnvironment env)
         {
             _env = env;
 
@@ -49,7 +54,7 @@ namespace Api
 
             _configuration = builder.Build();
         }
-        
+
         /// <summary>
         /// This method gets called by the runtime. Use this method to add services to the container.
         /// For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
@@ -58,14 +63,29 @@ namespace Api
         /// <returns></returns>
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddCors();
-            
-            services.AddRouting(options =>
-            {
-                options.LowercaseUrls = true; 
-            });
+            var postgresConnectionString =
+                ConnectionStringUrlToResource(_configuration.GetValue<string>("DATABASE_URL")
+                                              ?? throw new Exception("DATABASE_URL is null"));
 
-            services.AddDistributedMemoryCache();
+            var redisUrl = _configuration.GetValue<string>("REDISTOGO_URL");
+
+            // Add framework services
+            // Add functionality to inject IOptions<T>
+            services.AddOptions();
+            services.Configure<JwtSettings>(_configuration.GetSection("JwtSettings"));
+
+            services.AddLogging();
+            
+            services.AddRouting(options => { options.LowercaseUrls = true; });
+
+            if (_env.IsDevelopment())
+            {
+                services.AddDistributedMemoryCache();
+            }
+            else
+            {
+                // services.AddStackExchangeRedisCache(c => c.Configuration = redisUrl);
+            }
 
             services.AddSession(options =>
             {
@@ -75,35 +95,93 @@ namespace Api
                 options.Cookie.Name = ApiConstants.AuthenticationSessionCookieName;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             });
-            
-            // All the other service configuration.
-            services.AddAutoMapper(x => { x.AddProfiles(Assembly.Load("Models")); });
 
-            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new Info { Title = "Streaming-Subscription", Version = "v1", Description = "Music Streaming Subscription" }); });
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo {Title = "Stream-Ripper-API", Version = "v1"});
+
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+                if (File.Exists(xmlPath))
+                {
+                    c.IncludeXmlComments(xmlPath);
+                }
+                
+                c.AddSecurityDefinition("Bearer", // Name the security scheme
+                    new OpenApiSecurityScheme
+                    {
+                        Description = "JWT Authorization header using the Bearer scheme.",
+                        Type = SecuritySchemeType.Http, // We set the scheme type to http since we're using bearer authentication
+                        Scheme = "bearer" // The name of the HTTP Authorization scheme to be used in the Authorization header. In this case "bearer".
+                    });
+            });
 
             services.AddMvc(x =>
-            {   
-                x.Filters.Add<AuthorizeActionFilter>();
-
+            {
                 x.ModelValidatorProviders.Clear();
 
                 // Not need to have https
                 x.RequireHttpsPermanent = false;
-            }).AddJsonOptions(x =>
+
+                // Allow anonymous for localhost
+                if (_env.IsDevelopment())
+                {
+                    x.Filters.Add<AllowAnonymousFilter>();
+                }
+            }).AddNewtonsoftJson(x =>
             {
                 x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                 x.SerializerSettings.Converters.Add(new StringEnumConverter());
-            });
-            
-            // Dependency injection
-            _container = new Container();
+            }).AddRazorPagesOptions(x => { x.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute()); });
 
-            _container.Configure(config =>
+            services.AddDbContext<EntityDbContext>(opt => opt.UseNpgsql(postgresConnectionString));
+
+            services.AddIdentity<User, IdentityRole<int>>(x => { x.User.RequireUniqueEmail = true; })
+                .AddEntityFrameworkStores<EntityDbContext>()
+                .AddRoles<IdentityRole<int>>()
+                .AddDefaultTokenProviders();
+
+            // L2 EF cache
+            if (_env.IsDevelopment())
             {
+                EntityFrameworkCache.Initialize(new InMemoryCache());
+            }
+            else
+            {
+                var redisConfigurationOptions = ConfigurationOptions.Parse(redisUrl);
+
+                // Important
+                redisConfigurationOptions.AbortOnConnectFail = false;
+
+                EntityFrameworkCache.Initialize(new RedisCache(redisConfigurationOptions));
+            }
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(x =>
+            {
+                x.Cookie.MaxAge = TimeSpan.FromMinutes(60);
+            });
+
+            _container = new Container(config =>
+            {
+                config.For<StreamRipperState>().Singleton();
+                
+                config.For<DocumentStore>().Use(DocumentStore.For(y =>
+                {
+                    // Important as PLV8 is disabled on Heroku
+                    y.PLV8Enabled = false;
+                    
+                    y.Connection(postgresConnectionString);
+                    
+                    y.AutoCreateSchemaObjects = AutoCreate.CreateOrUpdate;
+                }));
+
                 // Register stuff in container, using the StructureMap APIs...
                 config.Scan(_ =>
                 {
                     _.AssemblyContainingType(typeof(Startup));
+                    _.Assembly("Api");
                     _.Assembly("Logic");
                     _.Assembly("Dal");
                     _.WithDefaultConventions();
@@ -111,25 +189,10 @@ namespace Api
 
                 // Populate the container using the service collection
                 config.Populate(services);
-
-                config.For<EntityDbContext>().Use(new EntityDbContext(builder =>
-                {
-                    if (_env.IsLocalhost())
-                    {
-                        builder.UseSqlite(_configuration.GetValue<string>("ConnectionStrings:Sqlite"));    
-                    }
-                    else
-                    {
-                        builder.UseNpgsql(ConnectionStringUrlToResource(Environment.GetEnvironmentVariable("DATABASE_URL"))
-                                          ?? throw new Exception("DATABASE_URL is null"));
-                    }
-                })).Singleton();
-
-                config.For<IIdentityDictionary>().Use<IdentityDictionary>().Singleton();
-                
-                config.For<IStreamRipperManagement>().Use<StreamRipperManagement>().Singleton();
             });
-            
+
+            _container.AssertConfigurationIsValid();
+
             return _container.GetInstance<IServiceProvider>();
         }
 
@@ -137,11 +200,14 @@ namespace Api
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         /// </summary>
         /// <param name="app"></param>
-        /// <param name="env"></param>
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
-            if (_env.IsLocalhost())
+            app.UseCors("CorsPolicy");
+
+            if (true || _env.IsDevelopment())
             {
+                app.UseDatabaseErrorPage();
+
                 // Enable middleware to serve generated Swagger as a JSON endpoint.
                 app.UseSwagger();
 
@@ -150,27 +216,27 @@ namespace Api
                 app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"); });
             }
 
-            app.UseCors();
-            
-            app.UseDeveloperExceptionPage();
-
-            app.UseCookiePolicy();
-
-            app.UseSession();
-
-            app.UseMvc(routes =>
+            // Not necessary for this workshop but useful when running behind kubernetes
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
-                routes.MapRoute("default", "{controller=Home}/{action=Index}");
+                // Read and use headers coming from reverse proxy: X-Forwarded-For X-Forwarded-Proto
+                // This is particularly important so that HttpContent.Request.Scheme will be correct behind a SSL terminating proxy
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+                                   ForwardedHeaders.XForwardedProto
             });
 
-            app.UseStaticFiles();
+            // Use wwwroot folder as default static path
+            app.UseDefaultFiles()
+                .UseStaticFiles()
+                .UseCookiePolicy()
+                .UseSession()
+                .UseRouting()
+                .UseCors("CorsPolicy")
+                .UseAuthentication()
+                .UseAuthorization()
+                .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());
 
-            // Just to make sure everything is running fine
-            _container.GetInstance<EntityDbContext>();
-            
             Console.WriteLine("Application Started!");
-
-            new DropBoxUploadService("84l_qosu9mAAAAAAAAADi-WRIv_Fn3i59ycVs0z9q4BNSlmRQUSZoH5-dnna1ujp").UploadStream(new MemoryStream(Encoding.UTF8.GetBytes("Fuck")), "Asheghaneh-Farzad Farzin");
         }
     }
 }

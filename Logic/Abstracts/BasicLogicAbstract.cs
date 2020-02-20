@@ -1,49 +1,79 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Dal.Interfaces;
+using Logic.Interfaces;
+using Models.Interfaces;
 
 namespace Logic.Abstracts
 {
-    public abstract class BasicLogicAbstract<T>
+    public abstract class BasicLogicAbstract<T> : IBasicLogic<T> where T: IEntity
     {
         /// <summary>
         /// Returns instance of basic DAL
         /// </summary>
         /// <returns></returns>
-        public abstract IBasicDal<T> GetBasicCrudDal();
+        protected abstract IBasicDal<T> GetBasicCrudDal();
+
+        public Task<IEnumerable<T>> Get(Expression<Func<T, bool>> filter)
+        {
+            return GetBasicCrudDal().Get(filter);
+        }
 
         /// <summary>
         /// Call forwarding
         /// </summary>
         /// <returns></returns>
-        public virtual IEnumerable<T> GetAll() => GetBasicCrudDal().GetAll();
+        public virtual Task<IEnumerable<T>> GetAll()
+        {
+            return GetBasicCrudDal().GetAll();
+        }
 
         /// <summary>
         /// Call forwarding
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public virtual T Get(int id) => GetBasicCrudDal().Get(id);
+        public virtual Task<T> Get(int id)
+        {
+            return GetBasicCrudDal().Get(id);
+        }
 
         /// <summary>
         /// Call forwarding
         /// </summary>
         /// <param name="instance"></param>
         /// <returns></returns>
-        public virtual T Save(T instance) => GetBasicCrudDal().Save(instance);
+        public virtual Task<T> Save(T instance)
+        {
+            return GetBasicCrudDal().Save(instance);
+        }
 
         /// <summary>
         /// Call forwarding
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public virtual T Delete(int id) => GetBasicCrudDal().Delete(id);
+        public virtual Task<T> Delete(int id)
+        {
+            return GetBasicCrudDal().Delete(id);
+        }
 
         /// <summary>
         /// Call forwarding
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="updatedInstance"></param>
+        /// <param name="dto"></param>
         /// <returns></returns>
-        public virtual T Update(int id, T updatedInstance) => GetBasicCrudDal().Update(id, updatedInstance);
+        public virtual Task<T> Update(int id, T dto)
+        {
+            return GetBasicCrudDal().Update(id, dto);
+        }
+
+        public Task<T> Update(int id, Action<T> updater)
+        {
+            return GetBasicCrudDal().Update(id, updater);
+        }
     }
 }
