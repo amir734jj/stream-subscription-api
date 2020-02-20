@@ -21,10 +21,8 @@ using Models.Constants;
 using Models.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using reCAPTCHA.AspNetCore;
 using StackExchange.Redis;
 using StructureMap;
-using WebMarkupMin.AspNetCore2;
 using static Api.Utilities.ConnectionStringUtility;
 
 namespace Api
@@ -66,6 +64,8 @@ namespace Api
                 ConnectionStringUrlToResource(_configuration.GetValue<string>("DATABASE_URL")
                                               ?? throw new Exception("DATABASE_URL is null"));
 
+            var redisUrl = _configuration.GetValue<string>("REDISTOGO_URL");
+
             services.AddOptions();
 
             services.AddLogging();
@@ -78,8 +78,7 @@ namespace Api
             }
             else
             {
-                services.AddStackExchangeRedisCache(x =>
-                    x.Configuration = _configuration.GetValue<string>("REDISTOGO_URL"));
+                // services.AddStackExchangeRedisCache(c => c.Configuration = redisUrl);
             }
 
             services.AddSession(options =>
@@ -114,25 +113,7 @@ namespace Api
                 x.SerializerSettings.Converters.Add(new StringEnumConverter());
             }).AddRazorPagesOptions(x => { x.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute()); });
 
-            services.AddWebMarkupMin(opt =>
-                {
-                    opt.AllowMinificationInDevelopmentEnvironment = true;
-                    opt.AllowCompressionInDevelopmentEnvironment = true;
-                })
-                .AddHtmlMinification()
-                .AddHttpCompression();
-
-            services.AddDbContext<EntityDbContext>(opt =>
-            {
-                if (_env.IsDevelopment())
-                {
-                    opt.UseSqlite(_configuration.GetValue<string>("ConnectionStrings:Sqlite"));
-                }
-                else
-                {
-                    opt.UseNpgsql(ConnectionStringUrlToResource(postgresConnectionString));
-                }
-            });
+            services.AddDbContext<EntityDbContext>(opt => opt.UseNpgsql(postgresConnectionString));
 
             services.AddIdentity<User, IdentityRole<int>>(x => { x.User.RequireUniqueEmail = true; })
                 .AddEntityFrameworkStores<EntityDbContext>()
@@ -146,8 +127,7 @@ namespace Api
             }
             else
             {
-                var redisConfigurationOptions =
-                    ConfigurationOptions.Parse(_configuration.GetValue<string>("REDISTOGO_URL"));
+                var redisConfigurationOptions = ConfigurationOptions.Parse(redisUrl);
 
                 // Important
                 redisConfigurationOptions.AbortOnConnectFail = false;
@@ -159,10 +139,6 @@ namespace Api
             {
                 x.Cookie.MaxAge = TimeSpan.FromMinutes(60);
             });
-            
-            // Re-Captcha config
-            services.Configure<RecaptchaSettings>(_configuration.GetSection("RecaptchaSettings"));
-            services.AddTransient<IRecaptchaService, RecaptchaService>();
 
             _container = new Container(config =>
             {
@@ -177,7 +153,7 @@ namespace Api
                     
                     y.AutoCreateSchemaObjects = AutoCreate.CreateOrUpdate;
                 }));
-                
+
                 // Register stuff in container, using the StructureMap APIs...
                 config.Scan(_ =>
                 {
@@ -233,7 +209,6 @@ namespace Api
                 .UseSession()
                 .UseRouting()
                 .UseAuthentication()
-                .UseAuthorization()
                 .UseEndpoints(endpoints => endpoints.MapControllers());
 
             Console.WriteLine("Application Started!");
