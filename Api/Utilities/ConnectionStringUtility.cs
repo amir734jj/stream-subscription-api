@@ -1,4 +1,7 @@
 ﻿using System;
+using Dal.Extensions;
+using Models.Utilities;
+using Npgsql;
 
 namespace Api.Utilities
 {
@@ -11,12 +14,28 @@ namespace Api.Utilities
         /// <returns></returns>
         public static string ConnectionStringUrlToResource(string connectionStringUrl)
         {
-            var isUrl = Uri.TryCreate(connectionStringUrl, UriKind.Absolute, out var url);
+            var table = UrlUtility.UrlToResource(connectionStringUrl);
 
-            var connectionUrl =
-                $"host={url.Host};username={url.UserInfo.Split(':')[0]};password={url.UserInfo.Split(':')[1]};database={url.LocalPath.Substring(1)};pooling=true;";
-            
-            return isUrl ? connectionUrl : string.Empty;
+            if (!table.ContainKeys("Host", "Username", "Password", "Database", "ApplicationName"))
+            {
+                return string.Empty;
+            }
+
+            var connectionStringBuilder = new NpgsqlConnectionStringBuilder
+            {
+                Host = table["Host"],
+                Username = table["Username"],
+                Password = table["Password"],
+                Database = table["Database"],
+                ApplicationName = table["ApplicationName"],
+                SslMode = SslMode.Require,
+                TrustServerCertificate = true,
+                Pooling = true,
+                // Hard limit
+                MaxPoolSize = 5
+            };
+
+            return connectionStringBuilder.ToString();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Api.Abstracts;
+﻿using System.Threading.Tasks;
+using Api.Abstracts;
 using Logic.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,7 @@ namespace Api.Controllers.Api
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class UserController : BasicController<User>
+    public class UserController : BasicCrudController<User>
     {
         private readonly IUserLogic _userLogic;
 
@@ -25,7 +26,7 @@ namespace Api.Controllers.Api
         /// Returns instance of logic
         /// </summary>
         /// <returns></returns>
-        protected override IBasicLogic<User> BasicLogic()
+        protected override async Task<IBasicLogic<User>> BasicLogic()
         {
             return _userLogic;
         }

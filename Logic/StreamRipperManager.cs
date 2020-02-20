@@ -12,7 +12,7 @@ using Stream = Models.Models.Stream;
 
 namespace Logic
 {
-    public class StreamRipperManager : IStreamRipperManagement
+    public class StreamRipperManager : IStreamRipperManager
     {
         private readonly IStreamLogic _streamLogic;
 
@@ -37,17 +37,52 @@ namespace Logic
             _sinkService = sinkService;
         }
 
+        public IStreamRipperManagerImpl For(User user)
+        {
+            return new StreamRipperManagerImpl(_state, _streamLogic, _userLogic, _sinkService, user);
+        }
+    }
+
+    public class StreamRipperManagerImpl : IStreamRipperManagerImpl
+    {
+        private readonly IStreamLogic _streamLogic;
+
+        private readonly IUserLogic _userLogic;
+
+        private readonly ISinkService _sinkService;
+
+        private readonly StreamRipperState _state;
+        
+        private readonly User _user;
+
+        /// <summary>
+        /// Constructor dependency injection
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="streamLogic"></param>
+        /// <param name="userLogic"></param>
+        /// <param name="sinkService"></param>
+        /// <param name="user"></param>
+        public StreamRipperManagerImpl(StreamRipperState state, IStreamLogic streamLogic, IUserLogic userLogic, ISinkService sinkService, User user)
+        {
+            _state = state;
+            _streamLogic = streamLogic;
+            _userLogic = userLogic;
+            _sinkService = sinkService;
+            _user = user;
+        }
+        
         /// <summary>
         /// Pass username to GetAll
         /// </summary>
         /// <returns></returns>
-        public async Task<Dictionary<Stream, StreamStatusEnum>> Status(User user)
+        public async Task<Dictionary<Stream, StreamStatusEnum>> Status()
         {
-            var streams = await _streamLogic.For(user).GetAll();
+            var streams = await _streamLogic.For(_user).GetAll();
 
             return streams
                 .ToDictionary(x => x,
-                    x => _state.StreamItems.FirstOrDefault(x => x.Value.User.Id == user.Id).Value?.State ??
+                    x => _state.StreamItems.FirstOrDefault(x => x.Value.User.Id == _user.Id).Value?.State ??
                          StreamStatusEnum.Stopped);
         }
 
@@ -57,7 +92,7 @@ namespace Logic
         /// <param name="user"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<bool> Start(User user, int id)
+        public async Task<bool> Start(int id)
         {
             // Already started
             if (_state.StreamItems.ContainsKey(id))
@@ -66,7 +101,7 @@ namespace Logic
             }
 
             // Get the model from database
-            var stream = await _streamLogic.For(user).Get(id);
+            var stream = await _streamLogic.For(_user).Get(id);
 
             var streamRipperInstance = StreamRipperBuilder.New()
                 .WithUrl(new Uri(stream.Url))
@@ -103,7 +138,7 @@ namespace Logic
             // Add to the dictionary
             _state.StreamItems[id] = new StreamItem
             {
-                User = user,
+                User = _user,
                 StreamRipper = streamRipperInstance,
                 State = StreamStatusEnum.Started
             };
@@ -118,7 +153,7 @@ namespace Logic
         /// <returns></returns>
         public async Task<bool> Stop(int id)
         {
-            if (_state.StreamItems.ContainsKey(id))
+            if (_state.StreamItems.ContainsKey(id) && _state.StreamItems[id].User.Id == _user.Id)
             {
                 _state.StreamItems[id].StreamRipper.Dispose();
 
