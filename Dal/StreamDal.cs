@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using Dal.Abstracts;
-using DAL.Extensions;
+using Dal.Extensions;
 using Dal.Interfaces;
 using Dal.Utilities;
 using Microsoft.EntityFrameworkCore;

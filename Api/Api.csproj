@@ -5,7 +5,6 @@
     <RootNamespace>Api</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="EFCache.Redis" Version="2019.3.11.1" />
     <PackageReference Include="Flurl" Version="2.8.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.Extensions" Version="3.1.0" />
@@ -22,8 +21,5 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Logic\Logic.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Interfaces" />
   </ItemGroup>
 </Project>
