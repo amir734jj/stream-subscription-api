@@ -26,7 +26,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using StackExchange.Redis;
 using StructureMap;
-using static Api.Utilities.ConnectionStringUtility;
+using static Dal.Utilities.ConnectionStringUtility;
 
 namespace Api
 {
@@ -67,7 +67,8 @@ namespace Api
                 ConnectionStringUrlToPgResource(_configuration.GetValue<string>("DATABASE_URL")
                                               ?? throw new Exception("DATABASE_URL is null"));
 
-            var redisUrl = _configuration.GetValue<string>("REDISTOGO_URL");
+            var redisConnectionString =
+                ConnectionStringUrlToRedisResource(_configuration.GetValue<string>("REDISTOGO_URL"));
 
             // Add framework services
             // Add functionality to inject IOptions<T>
@@ -84,7 +85,7 @@ namespace Api
             }
             else
             {
-                services.AddStackExchangeRedisCache(c => c.Configuration = redisUrl);
+                services.AddStackExchangeRedisCache(c => c.Configuration = redisConnectionString);
             }
 
             services.AddSession(options =>
@@ -150,7 +151,7 @@ namespace Api
             }
             else
             {
-                var redisConfigurationOptions = ConfigurationOptions.Parse(redisUrl);
+                var redisConfigurationOptions = ConfigurationOptions.Parse(redisConnectionString);
 
                 // Important
                 redisConfigurationOptions.AbortOnConnectFail = false;
