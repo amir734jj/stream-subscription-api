@@ -1,19 +1,38 @@
+﻿using System;
 using Dal.Extensions;
+using Models.Utilities;
 using Npgsql;
-using static Models.Utilities.UrlUtility;
+using StackExchange.Redis;
 
 namespace Dal.Utilities
 {
     public static class ConnectionStringUtility
     {
+        public static string ConnectionStringUrlToRedisResource(string connectionStringUrl)
+        {
+            var (uri, _) = UrlUtility.UrlToResource(connectionStringUrl);
+
+            var userInfo = uri.UserInfo.Split(':');
+            var configurationOptions = new ConfigurationOptions
+            {
+                EndPoints = { { uri.Host, uri.Port } },
+                ClientName = userInfo[0],
+                Password = userInfo[1],
+                AbortOnConnectFail = false
+            };
+
+            return configurationOptions.ToString();
+        }
+        
+        
         /// <summary>
         /// Converts connection string url to resource
         /// </summary>
         /// <param name="connectionStringUrl"></param>
         /// <returns></returns>
-        public static string ConnectionStringUrlToResource(string connectionStringUrl)
+        public static string ConnectionStringUrlToPgResource(string connectionStringUrl)
         {
-            var table = UrlToResource(connectionStringUrl);
+            var (_, table) = UrlUtility.UrlToResource(connectionStringUrl);
 
             if (!table.ContainKeys("Host", "Username", "Password", "Database", "ApplicationName"))
             {
