@@ -66,7 +66,7 @@ namespace Dal.Utilities
                 .Build();
 
             var options = new DbContextOptionsBuilder<EntityDbContext>()
-                .UseNpgsql(ConnectionStringUrlToResource(configuration.GetValue<string>("DATABASE_URL")))
+                .UseNpgsql(ConnectionStringUrlToPgResource(configuration.GetValue<string>("DATABASE_URL")))
                 .Options;
 
             return new EntityDbContext(options);
