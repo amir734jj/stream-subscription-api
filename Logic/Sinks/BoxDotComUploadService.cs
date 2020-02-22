@@ -6,6 +6,7 @@ using Box.V2.Auth;
 using Box.V2.Config;
 using Box.V2.Models;
 using Logic.Interfaces;
+using Stream = Models.Models.Stream;
 
 namespace Logic.Sinks
 {
@@ -27,7 +28,7 @@ namespace Logic.Sinks
             _boxClient = new BoxClient(config, session);
         }
 
-        public Task UploadStream(MemoryStream stream, string filename)
+        public Task UploadStream(Stream stream, string filename, MemoryStream data)
         {
             var req = new BoxFileRequest
             {
@@ -36,7 +37,7 @@ namespace Logic.Sinks
                 Description = "ripped_music"
             };
 
-            return _boxClient.FilesManager.UploadAsync(req, stream);
+            return _boxClient.FilesManager.UploadAsync(req, data);
         }
     }
 }

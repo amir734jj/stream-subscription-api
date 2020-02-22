@@ -24,7 +24,7 @@ namespace Logic
             
             return async (data, filename) =>
             {
-                var uploadTasks = sinks.Select(x => x.UploadStream(data, filename));
+                var uploadTasks = sinks.Select(x => x.UploadStream(stream, filename, data));
                 
                 await Task.WhenAll(uploadTasks);
             };
