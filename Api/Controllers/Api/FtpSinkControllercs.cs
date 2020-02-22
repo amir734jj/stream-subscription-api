@@ -9,7 +9,7 @@ using Models.Models.Sinks;
 
 namespace Api.Controllers.Api
 {
-    [AllowAnonymous]
+    [Authorize]
     [Route("api/[controller]")]
     public class FtpSinkController : BasicCrudController<FtpSink>
     {
