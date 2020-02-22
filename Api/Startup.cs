@@ -73,6 +73,7 @@ namespace Api
             // Add framework services
             // Add functionality to inject IOptions<T>
             services.AddOptions();
+
             services.Configure<JwtSettings>(_configuration.GetSection("JwtSettings"));
 
             services.AddLogging();

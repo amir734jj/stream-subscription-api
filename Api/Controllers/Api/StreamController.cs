@@ -8,7 +8,7 @@ using Models.Models;
 
 namespace Api.Controllers.Api
 {
-    [AllowAnonymous]
+    [Authorize]
     [Route("api/[controller]")]
     public class StreamController : BasicCrudController<Stream>
     {
