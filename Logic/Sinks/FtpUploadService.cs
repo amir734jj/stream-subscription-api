@@ -1,9 +1,10 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using FluentFTP;
 using Logic.Interfaces;
 using Models.Models.Sinks;
-
+using Stream = Models.Models.Stream;
 namespace Logic.Sinks
 {
     public class FtpUploadService : IUploadService
@@ -19,9 +20,13 @@ namespace Logic.Sinks
             _client = new FtpClient(ftpSink.Host, ftpSink.Port, ftpSink.Username, ftpSink.Password);
         }
 
-        public async Task UploadStream(MemoryStream stream, string filename)
+        public async Task UploadStream(Stream stream, string filename, MemoryStream data)
         {
-            await _client.UploadAsync(stream, Path.Join(_ftpSink.Path, filename));
+            var directory = Path.Join(_ftpSink.Path, new Uri(stream.Url).Host);
+
+            await _client.CreateDirectoryAsync(directory);
+            
+            await _client.UploadAsync(data, Path.Join(directory, filename));
         }
     }
 }
