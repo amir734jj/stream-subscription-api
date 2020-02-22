@@ -15,6 +15,13 @@ namespace Api
                 .UseIISIntegration()
                 .ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Warning))
                 .UseStartup<Startup>()
+                .ConfigureLogging((hostingContext, logging) =>
+                {
+                    logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+                    logging.AddConsole();
+                    logging.AddDebug();
+                    logging.AddEventSourceLogger();
+                })
                 .Build();
             
             host.Run();
