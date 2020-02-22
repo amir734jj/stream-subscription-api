@@ -1,11 +1,14 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Api.Configs;
 using Dal.Utilities;
 using EFCache;
 using EFCache.Redis;
 using Logic;
+using Logic.Interfaces;
 using Marten;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -25,6 +28,7 @@ using Models.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using StackExchange.Redis;
+using StreamRipper.Interfaces;
 using StructureMap;
 using static Dal.Utilities.ConnectionStringUtility;
 
@@ -202,8 +206,14 @@ namespace Api
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         /// </summary>
         /// <param name="app"></param>
-        public void Configure(IApplicationBuilder app)
+        /// <param name="streamLogic"></param>
+        /// <param name="streamRipperManager"></param>
+        public void Configure(IApplicationBuilder app, IStreamLogic streamLogic, IStreamRipperManager streamRipperManager)
         {
+            var tasks = streamLogic.GetAll().Result.Select(x => (Task) streamRipperManager.For(x.User).Start(x.Id)).ToArray();
+
+            Task.WaitAll(tasks);
+            
             app.UseCors("CorsPolicy");
 
             if (_env.IsDevelopment())
