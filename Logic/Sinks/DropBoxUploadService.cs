@@ -4,6 +4,7 @@ using Dropbox.Api;
 using Dropbox.Api.Files;
 using Logic.Interfaces;
 using Models.Constants;
+using Stream = Models.Models.Stream;
 
 namespace Logic.Sinks
 {
@@ -12,7 +13,7 @@ namespace Logic.Sinks
     /// </summary>
     public class DropBoxUploadService : IUploadService
     {
-        private readonly DropboxClient _dropboxClient;
+        private readonly DropboxClient _dropBoxClient;
 
         /// <summary>
         /// Pass teh token
@@ -20,7 +21,7 @@ namespace Logic.Sinks
         /// <param name="token"></param>
         public DropBoxUploadService(string token)
         {
-            _dropboxClient = new DropboxClient(token);
+            _dropBoxClient = new DropboxClient(token);
         }
 
         /// <summary>
@@ -28,12 +29,13 @@ namespace Logic.Sinks
         /// </summary>
         /// <param name="stream"></param>
         /// <param name="filename"></param>
-        public Task UploadStream(MemoryStream stream, string filename)
+        /// <param name="data"></param>
+        public Task UploadStream(Stream stream, string filename, MemoryStream data)
         {
-            return _dropboxClient.Files.UploadAsync(
+            return _dropBoxClient.Files.UploadAsync(
                 $@"{StreamConstants.UploadFolder}/{filename}",
                 WriteMode.Overwrite.Instance,
-                body: stream,
+                body: data,
                 autorename: true);
         }
     }
