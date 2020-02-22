@@ -5,9 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Logic.Interfaces;
 using Logic.Models;
+using Microsoft.Extensions.Logging;
 using Models.Enums;
 using Models.Models;
-using StreamRipper.Builders;
+using StreamRipper;
+using StreamRipper.Interfaces;
 using Stream = Models.Models.Stream;
 
 namespace Logic
@@ -19,6 +21,8 @@ namespace Logic
         private readonly ISinkService _sinkService;
 
         private readonly StreamRipperState _state;
+        
+        private readonly ILogger<IStreamRipper> _logger;
 
         /// <summary>
         /// Constructor dependency injection
@@ -26,16 +30,18 @@ namespace Logic
         /// <param name="state"></param>
         /// <param name="streamLogic"></param>
         /// <param name="sinkService"></param>
-        public StreamRipperManager(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService)
+        /// <param name="logger"></param>
+        public StreamRipperManager(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService, ILogger<IStreamRipper> logger)
         {
             _state = state;
             _streamLogic = streamLogic;
             _sinkService = sinkService;
+            _logger = logger;
         }
 
         public IStreamRipperManagerImpl For(User user)
         {
-            return new StreamRipperManagerImpl(_state, _streamLogic, _sinkService, user);
+            return new StreamRipperManagerImpl(_state, _streamLogic, _sinkService, user, _logger);
         }
     }
 
@@ -48,6 +54,8 @@ namespace Logic
         private readonly StreamRipperState _state;
         
         private readonly User _user;
+        
+        private readonly ILogger<IStreamRipper> _logger;
 
         /// <summary>
         /// Constructor dependency injection
@@ -56,12 +64,14 @@ namespace Logic
         /// <param name="streamLogic"></param>
         /// <param name="sinkService"></param>
         /// <param name="user"></param>
-        public StreamRipperManagerImpl(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService, User user)
+        /// <param name="logger"></param>
+        public StreamRipperManagerImpl(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService, User user, ILogger<IStreamRipper> logger)
         {
             _state = state;
             _streamLogic = streamLogic;
             _sinkService = sinkService;
             _user = user;
+            _logger = logger;
         }
         
         /// <summary>
@@ -93,10 +103,7 @@ namespace Logic
                 return false;
             }
 
-            var streamRipperInstance = StreamRipperBuilder.New()
-                .WithUrl(new Uri(stream.Url))
-                .FinalizeFilters()
-                .Build();
+            var streamRipperInstance = new StreamRipperImpl(new Uri(stream.Url), _logger);
 
             var aggregatedSink = await _sinkService.Resolve(stream);
 
