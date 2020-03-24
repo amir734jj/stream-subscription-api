@@ -73,6 +73,17 @@ namespace Api
             var redisConnectionString =
                 ConnectionStringUrlToRedisResource(_configuration.GetValue<string>("REDISTOGO_URL"));
 
+            services.AddHttpsRedirection(options => { options.HttpsPort = 443; });
+
+            // If environment is localhost, then enable CORS policy, otherwise no cross-origin access
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", builder => builder
+                    .AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod());
+            });
+            
             // Add framework services
             // Add functionality to inject IOptions<T>
             services.AddOptions();
