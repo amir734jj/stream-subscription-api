@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Models.Interfaces;
-using Models.Models.Sinks;
 using Newtonsoft.Json;
 
 namespace Models.Models
