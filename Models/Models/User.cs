@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 using Models.Interfaces;
-using Models.Models.Sinks;
 
 namespace Models.Models
 {

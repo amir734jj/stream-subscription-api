@@ -1,5 +1,4 @@
-﻿using System;
-using Dal.Extensions;
+﻿using Dal.Extensions;
 using Models.Utilities;
 using Npgsql;
 using StackExchange.Redis;
