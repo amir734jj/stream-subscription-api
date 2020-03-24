@@ -13,9 +13,11 @@ using Microsoft.IdentityModel.Tokens;
 using Models.Models;
 using Models.ViewModels.Identities;
 using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers.Api
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     public class AccountController : Controller
     {
@@ -38,9 +40,9 @@ namespace Api.Controllers.Api
         {
             if (User.Identity.IsAuthenticated)
             {
-                var data = await _userManager.FindByNameAsync(User.Identity.Name);
+                var user = await _userManager.FindByEmailAsync(User.Identity.Name);
                 
-                return Ok(data);
+                return Ok(user);
             }
 
             return Ok(new { });
@@ -53,7 +55,7 @@ namespace Api.Controllers.Api
         {
             var user = new User
             {
-                Fullname = registerViewModel.Fullname,
+                Name = registerViewModel.Name,
                 Email = registerViewModel.Email,
                 UserName = registerViewModel.Username
             };
@@ -63,8 +65,6 @@ namespace Api.Controllers.Api
             {
                 await _userManager.CreateAsync(user, registerViewModel.Password)
             };
-
-            // Register the user to the role
 
             if (identityResults.Aggregate(true, (b, result) => b && result.Succeeded))
             {
@@ -96,9 +96,10 @@ namespace Api.Controllers.Api
             // Generate and issue a JWT token
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, user.Email),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Name, user.Email),    // use email as name
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.Key));
@@ -114,7 +115,7 @@ namespace Api.Controllers.Api
             return Ok(new
             {
                 token = new JwtSecurityTokenHandler().WriteToken(token),
-                user.Fullname,
+                user.Name,
                 user.Email
             });
         }
