@@ -9,7 +9,7 @@ namespace Models.Models
     /// </summary>
     public class User : IdentityUser<int>, IEntity
     {
-        public string Fullname { get; set; }
+        public string Name { get; set; }
 
         public List<Stream> Streams { get; set; }
     }

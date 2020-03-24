@@ -30,7 +30,7 @@ namespace Api.Controllers.Api
         [Route("")]
         public async Task<IActionResult> Status()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await _userManager.FindByEmailAsync(User.Identity.Name);
 
             var status = await _streamRipper.For(user).Status();
             
@@ -41,7 +41,7 @@ namespace Api.Controllers.Api
         [Route("{id}/start")]
         public async Task<IActionResult> Start([FromRoute] int id)
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await _userManager.FindByEmailAsync(User.Identity.Name);
 
             await _streamRipper.For(user).Start(id);
             
@@ -52,7 +52,7 @@ namespace Api.Controllers.Api
         [Route("{id}/stop")]
         public async Task<IActionResult> Stop([FromRoute] int id)
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await _userManager.FindByEmailAsync(User.Identity.Name);
 
             await _streamRipper.For(user).Stop(id);
 
