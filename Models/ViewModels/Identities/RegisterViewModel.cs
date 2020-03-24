@@ -5,7 +5,7 @@ namespace Models.ViewModels.Identities
     /// </summary>
     public class RegisterViewModel
     {
-        public string Fullname { get; set; }
+        public string Name { get; set; }
 
         public string Username { get; set; }
         
