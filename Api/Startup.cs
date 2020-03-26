@@ -11,8 +11,10 @@ using Logic.Interfaces;
 using Marten;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -79,9 +81,10 @@ namespace Api
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy", builder => builder
-                    .AllowAnyOrigin()
+                    .WithOrigins("http://localhost:4200")
                     .AllowAnyHeader()
-                    .AllowAnyMethod());
+                    .AllowAnyMethod()
+                    .AllowCredentials());
             });
             
             // Add framework services
@@ -149,10 +152,19 @@ namespace Api
             }).AddNewtonsoftJson(x =>
             {
                 x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                x.SerializerSettings.Converters.Add(new StringEnumConverter());
             }).AddRazorPagesOptions(x => { x.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute()); });
 
-            services.AddDbContext<EntityDbContext>(opt => opt.UseNpgsql(postgresConnectionString));
+            services.AddDbContext<EntityDbContext>(opt =>
+            {
+                if (_env.IsDevelopment())
+                {
+                    opt.UseSqlite(_configuration.GetValue<string>("ConnectionStrings:Sqlite"));
+                }
+                else
+                {
+                    opt.UseNpgsql(postgresConnectionString);
+                }
+            });
 
             services.AddIdentity<User, IdentityRole<int>>(x => { x.User.RequireUniqueEmail = true; })
                 .AddEntityFrameworkStores<EntityDbContext>()
