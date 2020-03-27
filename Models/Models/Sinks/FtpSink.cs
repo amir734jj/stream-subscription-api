@@ -10,6 +10,8 @@ namespace Models.Models.Sinks
         [Key]
         public int Id { get; set; }
         
+        public string Name { get; set; }
+        
         public string Username { get; set; }
         
         public string Password { get; set; }
@@ -26,6 +28,6 @@ namespace Models.Models.Sinks
         [JsonIgnore]
         public User User { get; set; }
         
-        public List<StreamFtpSinkRelationship> FtpSinkRelationships { get; set; }
+        public List<StreamFtpSinkRelationship> FtpSinkRelationships  { get; set; } = new List<StreamFtpSinkRelationship>();
     }
 }

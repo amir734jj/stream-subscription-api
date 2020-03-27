@@ -42,7 +42,7 @@ namespace Dal
         {
             return queryable
                 .Include(x => x.Streams)
-                .ThenInclude(x => x.FtpSinksRelationships);
+                .ThenInclude(x => x.FtpSinkRelationships);
         }
     }
 }
