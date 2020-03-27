@@ -23,6 +23,6 @@ namespace Models.Models
         [JsonIgnore]
         public User User { get; set; }
 
-        public List<StreamFtpSinkRelationship> FtpSinksRelationships  { get; set; }
+        public List<StreamFtpSinkRelationship> FtpSinkRelationships  { get; set; } = new List<StreamFtpSinkRelationship>();
     }
 }
