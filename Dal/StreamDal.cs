@@ -44,7 +44,7 @@ namespace Dal
             return queryable
                 .Include(x => x.User)
                 .ThenInclude(x => x.Streams)
-                .ThenInclude(x => x.FtpSinksRelationships)
+                .ThenInclude(x => x.FtpSinkRelationships)
                 .ThenInclude(x => x.FtpSink);
         }
 
@@ -52,7 +52,7 @@ namespace Dal
         {
             entity.Name = dto.Name;
             entity.Url = dto.Url;
-            entity.FtpSinksRelationships = entity.FtpSinksRelationships.IdAwareUpdate(dto.FtpSinksRelationships, x => x.Id);
+            entity.FtpSinkRelationships = entity.FtpSinkRelationships.IdAwareUpdate(dto.FtpSinkRelationships, x => x.Id);
 
             return entity;
         }
