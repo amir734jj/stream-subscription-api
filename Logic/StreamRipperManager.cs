@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Logic.Interfaces;
 using Logic.Models;
@@ -117,17 +118,21 @@ namespace Logic
 
             streamRipperInstance.SongChangedEventHandlers += async (_, arg) =>
             {
-                // Needed to reset the stream
-                arg.SongInfo.Stream.Seek(0, SeekOrigin.Begin);
-
-                // Create filename
                 var filename = $"{arg.SongInfo.SongMetadata.Artist}-{arg.SongInfo.SongMetadata.Title}";
 
-                // Upload the stream
-                await aggregatedSink(arg.SongInfo.Stream, $"{filename}.mp3");
+                if (Regex.IsMatch(filename, stream.Filter))
+                {
+                    // Needed to reset the stream
+                    arg.SongInfo.Stream.Seek(0, SeekOrigin.Begin);
 
-                // Invoke socket
-                await _hub.Clients.User(_user.Id.ToString()).SendAsync("downloaded", filename);
+                    // Create filename
+
+                    // Upload the stream
+                    await aggregatedSink(arg.SongInfo.Stream, $"{filename}.mp3");
+
+                    // Invoke socket
+                    await _hub.Clients.User(_user.Id.ToString()).SendAsync("downloaded", filename);
+                }
             };
 
             streamRipperInstance.StreamEndedEventHandlers += (sender, arg) =>
