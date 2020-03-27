@@ -4,8 +4,8 @@ By providing an Url and Access Token, this website rips the stream or partitions
 
 This service is free, we do not own the ripped `.mp3` files and we do not store them, only store them in your file sharing service.
 
-[API Url](https://streaming-subscription.herokuapp.com/)
-[UI Url](https://stream-subscription-ui.herokuapp.com/)
+- [API](https://streaming-subscription.herokuapp.com/) Url
+- [UI](https://stream-subscription-ui.herokuapp.com/) Url
 
 Notes:
 - Make sure you have the .NET Core SDK installed ([Download](https://www.microsoft.com/net/learn/get-started))
