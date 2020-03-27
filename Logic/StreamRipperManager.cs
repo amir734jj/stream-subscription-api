@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Logic.Interfaces;
 using Logic.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Models.Enums;
 using Models.Models;
@@ -23,6 +24,8 @@ namespace Logic
         private readonly StreamRipperState _state;
         
         private readonly ILogger<IStreamRipper> _logger;
+        
+        private readonly IHubContext<MessageHub> _hub;
 
         /// <summary>
         /// Constructor dependency injection
@@ -31,17 +34,18 @@ namespace Logic
         /// <param name="streamLogic"></param>
         /// <param name="sinkService"></param>
         /// <param name="logger"></param>
-        public StreamRipperManager(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService, ILogger<IStreamRipper> logger)
+        public StreamRipperManager(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService, IHubContext<MessageHub> hub, ILogger<IStreamRipper> logger)
         {
             _state = state;
             _streamLogic = streamLogic;
             _sinkService = sinkService;
+            _hub = hub;
             _logger = logger;
         }
 
         public IStreamRipperManagerImpl For(User user)
         {
-            return new StreamRipperManagerImpl(_state, _streamLogic, _sinkService, user, _logger);
+            return new StreamRipperManagerImpl(_state, _streamLogic, _sinkService, user, _hub, _logger);
         }
     }
 
@@ -57,6 +61,8 @@ namespace Logic
         
         private readonly ILogger<IStreamRipper> _logger;
 
+        private readonly IHubContext<MessageHub> _hub;
+
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
@@ -64,13 +70,15 @@ namespace Logic
         /// <param name="streamLogic"></param>
         /// <param name="sinkService"></param>
         /// <param name="user"></param>
+        /// <param name="hub"></param>
         /// <param name="logger"></param>
-        public StreamRipperManagerImpl(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService, User user, ILogger<IStreamRipper> logger)
+        public StreamRipperManagerImpl(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService, User user, IHubContext<MessageHub> hub ,ILogger<IStreamRipper> logger)
         {
             _state = state;
             _streamLogic = streamLogic;
             _sinkService = sinkService;
             _user = user;
+            _hub = hub;
             _logger = logger;
         }
         
@@ -109,7 +117,7 @@ namespace Logic
 
             streamRipperInstance.SongChangedEventHandlers += async (_, arg) =>
             {
-                // Needed
+                // Needed to reset the stream
                 arg.SongInfo.Stream.Seek(0, SeekOrigin.Begin);
 
                 // Create filename
@@ -117,6 +125,9 @@ namespace Logic
 
                 // Upload the stream
                 await aggregatedSink(arg.SongInfo.Stream, $"{filename}.mp3");
+
+                // Invoke socket
+                await _hub.Clients.User(_user.Id.ToString()).SendAsync("downloaded", filename);
             };
 
             streamRipperInstance.StreamEndedEventHandlers += (sender, arg) =>
