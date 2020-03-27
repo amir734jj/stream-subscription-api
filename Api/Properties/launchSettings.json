@@ -6,8 +6,8 @@
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "DATABASE_URL": "postgres://onwdyycxjbjdjt:19f77d7402d8b62fdd1ab6d5acd38ee9ab441df8b27d97d44c7304e85ad4d8af@ec2-35-174-88-65.compute-1.amazonaws.com:5432/dffi4d0be1ndv",
-        "REDISTOGO_URL": "redis://redistogo:5f5958756678f33dc7a72ecfbfc450c4@tarpon.redistogo.com:9169/"
+        "DATABASE_URL": "",
+        "REDISTOGO_URL": ""
       }
     }
   }
