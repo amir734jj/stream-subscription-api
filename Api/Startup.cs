@@ -7,14 +7,10 @@ using Dal.Utilities;
 using EFCache;
 using EFCache.Redis;
 using Logic;
-using Logic.Interfaces;
-using Marten;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +24,6 @@ using Microsoft.OpenApi.Models;
 using Models.Constants;
 using Models.Models;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using StackExchange.Redis;
 using StructureMap;
 using static Dal.Utilities.ConnectionStringUtility;
@@ -68,13 +63,6 @@ namespace Api
         /// <returns></returns>
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            var postgresConnectionString =
-                ConnectionStringUrlToPgResource(_configuration.GetValue<string>("DATABASE_URL")
-                                              ?? throw new Exception("DATABASE_URL is null"));
-
-            var redisConnectionString =
-                ConnectionStringUrlToRedisResource(_configuration.GetValue<string>("REDISTOGO_URL"));
-
             services.AddHttpsRedirection(options => { options.HttpsPort = 443; });
 
             // If environment is localhost, then enable CORS policy, otherwise no cross-origin access
@@ -103,6 +91,9 @@ namespace Api
             }
             else
             {
+                var redisConnectionString =
+                    ConnectionStringUrlToRedisResource(_configuration.GetValue<string>("REDISTOGO_URL"));
+
                 services.AddStackExchangeRedisCache(c => c.Configuration = redisConnectionString);
             }
 
@@ -162,6 +153,9 @@ namespace Api
                 }
                 else
                 {
+                    var postgresConnectionString =
+                        ConnectionStringUrlToPgResource(_configuration.GetValue<string>("DATABASE_URL")
+                                                        ?? throw new Exception("DATABASE_URL is null"));
                     opt.UseNpgsql(postgresConnectionString);
                 }
             });
@@ -178,6 +172,9 @@ namespace Api
             }
             else
             {
+                var redisConnectionString =
+                    ConnectionStringUrlToRedisResource(_configuration.GetValue<string>("REDISTOGO_URL"));
+
                 var redisConfigurationOptions = ConfigurationOptions.Parse(redisConnectionString);
 
                 // Important
@@ -216,16 +213,6 @@ namespace Api
             _container = new Container(config =>
             {
                 config.For<StreamRipperState>().Singleton();
-                
-                config.For<DocumentStore>().Use(DocumentStore.For(y =>
-                {
-                    // Important as PLV8 is disabled on Heroku
-                    y.PLV8Enabled = false;
-                    
-                    y.Connection(postgresConnectionString);
-                    
-                    y.AutoCreateSchemaObjects = AutoCreate.CreateOrUpdate;
-                }));
 
                 // Register stuff in container, using the StructureMap APIs...
                 config.Scan(_ =>
@@ -250,9 +237,7 @@ namespace Api
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         /// </summary>
         /// <param name="app"></param>
-        /// <param name="streamLogic"></param>
-        /// <param name="streamRipperManager"></param>
-        public void Configure(IApplicationBuilder app, IStreamLogic streamLogic, IStreamRipperManager streamRipperManager)
+        public void Configure(IApplicationBuilder app)
         {
             app.UseCors("CorsPolicy");
 
