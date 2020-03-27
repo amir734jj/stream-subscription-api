@@ -20,7 +20,7 @@ namespace Logic
         
         public async Task<Func<MemoryStream, string, Task>> Resolve(Stream stream)
         {
-            var sinks = stream.FtpSinksRelationships.Select(x => new FtpUploadService(x.FtpSink)).Cast<IUploadService>().ToList();
+            var sinks = stream.FtpSinkRelationships.Select(x => new FtpUploadService(x.FtpSink)).Cast<IUploadService>().ToList();
             
             return async (data, filename) =>
             {

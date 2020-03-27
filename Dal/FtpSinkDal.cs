@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Dal.Abstracts;
+using Dal.Extensions;
 using Dal.Interfaces;
 using Dal.Utilities;
 using Microsoft.EntityFrameworkCore;
@@ -43,17 +44,19 @@ namespace Dal
             return queryable
                 .Include(x => x.User)
                 .ThenInclude(x => x.Streams)
-                .ThenInclude(x => x.FtpSinksRelationships)
+                .ThenInclude(x => x.FtpSinkRelationships)
                 .ThenInclude(x => x.FtpSink);
         }
 
         protected override FtpSink UpdateEntity(FtpSink entity, FtpSink dto)
         {
+            entity.Name = dto.Name;
             entity.Host = dto.Host;
             entity.Username = dto.Username;
             entity.Password = dto.Password;
             entity.Path = dto.Path;
             entity.Port = dto.Port;
+            entity.FtpSinkRelationships = entity.FtpSinkRelationships.IdAwareUpdate(dto.FtpSinkRelationships, x => x.Id);
 
             return entity;
         }
