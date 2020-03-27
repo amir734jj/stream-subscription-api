@@ -44,7 +44,7 @@ namespace Dal.Utilities
 
             modelBuilder.Entity<StreamFtpSinkRelationship>()
                 .HasOne(x => x.Stream)
-                .WithMany(x => x.FtpSinksRelationships)
+                .WithMany(x => x.FtpSinkRelationships)
                 .HasForeignKey(x => x.StreamId);
             
             modelBuilder.Entity<StreamFtpSinkRelationship>()
