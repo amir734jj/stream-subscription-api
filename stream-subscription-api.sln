@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streaming-subscription", "Api\Api.csproj", "{5B579575-BFD3-48A2-8003-E2468A5248CB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stream-subscription-api", "Api\Api.csproj", "{5B579575-BFD3-48A2-8003-E2468A5248CB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logic", "Logic\Logic.csproj", "{E68DD402-5CC6-46ED-A624-AC5E17335802}"
 EndProject
