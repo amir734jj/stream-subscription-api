@@ -26,7 +26,7 @@ namespace Api.Controllers.Api
 
         protected override async Task<IBasicLogic<FtpSink>> BasicLogic()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await _userManager.FindByEmailAsync(User.Identity.Name);
 
             return _ftpSinkLogic.For(user);
         }

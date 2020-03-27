@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
+using System.Text;
 using Api.Configs;
 using Dal.Utilities;
 using EFCache;
@@ -10,10 +9,12 @@ using EFCache.Redis;
 using Logic;
 using Logic.Interfaces;
 using Marten;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -22,13 +23,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Models.Constants;
 using Models.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using StackExchange.Redis;
-using StreamRipper.Interfaces;
 using StructureMap;
 using static Dal.Utilities.ConnectionStringUtility;
 
@@ -74,6 +75,18 @@ namespace Api
             var redisConnectionString =
                 ConnectionStringUrlToRedisResource(_configuration.GetValue<string>("REDISTOGO_URL"));
 
+            services.AddHttpsRedirection(options => { options.HttpsPort = 443; });
+
+            // If environment is localhost, then enable CORS policy, otherwise no cross-origin access
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", builder => builder
+                    .WithOrigins("http://localhost:4200")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials());
+            });
+            
             // Add framework services
             // Add functionality to inject IOptions<T>
             services.AddOptions();
@@ -139,10 +152,19 @@ namespace Api
             }).AddNewtonsoftJson(x =>
             {
                 x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                x.SerializerSettings.Converters.Add(new StringEnumConverter());
             }).AddRazorPagesOptions(x => { x.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute()); });
 
-            services.AddDbContext<EntityDbContext>(opt => opt.UseNpgsql(postgresConnectionString));
+            services.AddDbContext<EntityDbContext>(opt =>
+            {
+                if (_env.IsDevelopment())
+                {
+                    opt.UseSqlite(_configuration.GetValue<string>("ConnectionStrings:Sqlite"));
+                }
+                else
+                {
+                    opt.UseNpgsql(postgresConnectionString);
+                }
+            });
 
             services.AddIdentity<User, IdentityRole<int>>(x => { x.User.RequireUniqueEmail = true; })
                 .AddEntityFrameworkStores<EntityDbContext>()
@@ -164,9 +186,31 @@ namespace Api
                 EntityFrameworkCache.Initialize(new RedisCache(redisConfigurationOptions));
             }
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(x =>
+            var jwtSetting = _configuration
+                .GetSection("JwtSettings")
+                .Get<JwtSettings>();
+            
+            services.AddAuthentication(options => {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(config =>
+                {
+                    config.RequireHttpsMetadata = false;
+                    config.SaveToken = true;
+
+                    config.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidIssuer = jwtSetting.Issuer,
+                        ValidAudience = jwtSetting.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSetting.Key))
+                    };
+                });
+
+            services.AddSignalR(config =>
             {
-                x.Cookie.MaxAge = TimeSpan.FromMinutes(60);
+                config.MaximumReceiveMessageSize = 5 * 1024 * 1024;    // 5 mega-bytes
+                config.StreamBufferCapacity = 50;
             });
 
             _container = new Container(config =>
@@ -210,10 +254,6 @@ namespace Api
         /// <param name="streamRipperManager"></param>
         public void Configure(IApplicationBuilder app, IStreamLogic streamLogic, IStreamRipperManager streamRipperManager)
         {
-            var tasks = streamLogic.GetAll().Result.Select(x => (Task) streamRipperManager.For(x.User).Start(x.Id)).ToArray();
-
-            Task.WaitAll(tasks);
-            
             app.UseCors("CorsPolicy");
 
             if (_env.IsDevelopment())
@@ -246,7 +286,12 @@ namespace Api
                 .UseCors("CorsPolicy")
                 .UseAuthentication()
                 .UseAuthorization()
-                .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());
+                .UseEndpoints(endpoints =>
+                {
+                    endpoints.MapDefaultControllerRoute();
+
+                    endpoints.MapHub<MessageHub>("/hub");
+                });
 
             Console.WriteLine("Application Started!");
         }
