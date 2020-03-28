@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Extensions.Configuration;
 
-namespace API.Extensions
+namespace Api.Extensions
 {
     public static class ConfigurationExtension
     {

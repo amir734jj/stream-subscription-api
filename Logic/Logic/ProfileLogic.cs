@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
 using Logic.Interfaces;
 using Models.Models;
-using Models.ViewModels;
+using Models.ViewModels.Api;
 
-namespace Logic
+namespace Logic.Logic
 {
     public class ProfileLogic : IProfileLogic
     {

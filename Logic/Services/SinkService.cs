@@ -7,7 +7,7 @@ using Logic.Interfaces;
 using Logic.Sinks;
 using Stream = Models.Models.Stream;
 
-namespace Logic
+namespace Logic.Services
 {
     public class SinkService : ISinkService
     {

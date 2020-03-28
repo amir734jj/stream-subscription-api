@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Models.Models;
 
-namespace Logic
+namespace Logic.Providers
 {
     public class CustomUserIdProvider : IUserIdProvider
     {
