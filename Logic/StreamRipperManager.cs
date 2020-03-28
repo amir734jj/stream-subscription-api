@@ -140,7 +140,7 @@ namespace Logic
                 var filename = $"{arg.SongInfo.SongMetadata.Artist}-{arg.SongInfo.SongMetadata.Title}";
 
                 if (!string.IsNullOrWhiteSpace(stream.Filter) &&
-                    !Regex.IsMatch(filename, stream.Filter, RegexOptions.IgnoreCase))
+                    !Regex.Matches(filename, stream.Filter, RegexOptions.IgnoreCase).Any())
                 {
                     // Needed to reset the stream
                     arg.SongInfo.Stream.Seek(0, SeekOrigin.Begin);
@@ -169,6 +169,16 @@ namespace Logic
                 await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} failed");
                 
                 _state.StreamItems[id].State = StreamStatusEnum.Fail;
+            };
+
+            streamRipperInstance.StreamStartedEventHandlers += async (sender, arg) =>
+            {
+                await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} started");
+            };
+            
+            streamRipperInstance.StreamUpdateEventHandlers += async (sender, arg) =>
+            {
+                await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} updated with {arg.SongRawPartial.Length} bytes");
             };
 
             // Start the ripper
