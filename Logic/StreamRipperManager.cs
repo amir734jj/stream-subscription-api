@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Models.Enums;
 using Models.Models;
+using Models.ViewModels.Config;
 using StreamRipper;
 using StreamRipper.Interfaces;
 using Stream = Models.Models.Stream;
@@ -23,10 +24,12 @@ namespace Logic
         private readonly ISinkService _sinkService;
 
         private readonly StreamRipperState _state;
-        
+
         private readonly ILogger<IStreamRipper> _logger;
-        
+
         private readonly IHubContext<MessageHub> _hub;
+
+        private readonly IConfigLogic _configLogic;
 
         /// <summary>
         /// Constructor dependency injection
@@ -34,19 +37,23 @@ namespace Logic
         /// <param name="state"></param>
         /// <param name="streamLogic"></param>
         /// <param name="sinkService"></param>
+        /// <param name="hub"></param>
+        /// <param name="configLogic"></param>
         /// <param name="logger"></param>
-        public StreamRipperManager(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService, IHubContext<MessageHub> hub, ILogger<IStreamRipper> logger)
+        public StreamRipperManager(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService,
+            IHubContext<MessageHub> hub, IConfigLogic configLogic, ILogger<IStreamRipper> logger)
         {
             _state = state;
             _streamLogic = streamLogic;
             _sinkService = sinkService;
             _hub = hub;
+            _configLogic = configLogic;
             _logger = logger;
         }
 
         public IStreamRipperManagerImpl For(User user)
         {
-            return new StreamRipperManagerImpl(_state, _streamLogic, _sinkService, user, _hub, _logger);
+            return new StreamRipperManagerImpl(_state, _streamLogic, _sinkService, user, _hub, _configLogic, _logger);
         }
     }
 
@@ -57,12 +64,14 @@ namespace Logic
         private readonly ISinkService _sinkService;
 
         private readonly StreamRipperState _state;
-        
+
         private readonly User _user;
-        
+
         private readonly ILogger<IStreamRipper> _logger;
 
         private readonly IHubContext<MessageHub> _hub;
+
+        private readonly IConfigLogic _configLogic;
 
         /// <summary>
         /// Constructor dependency injection
@@ -72,17 +81,22 @@ namespace Logic
         /// <param name="sinkService"></param>
         /// <param name="user"></param>
         /// <param name="hub"></param>
+        /// <param name="configLogic"></param>
         /// <param name="logger"></param>
-        public StreamRipperManagerImpl(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService, User user, IHubContext<MessageHub> hub ,ILogger<IStreamRipper> logger)
+        public StreamRipperManagerImpl(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService,
+            User user, IHubContext<MessageHub> hub, IConfigLogic configLogic, ILogger<IStreamRipper> logger)
         {
             _state = state;
             _streamLogic = streamLogic;
             _sinkService = sinkService;
             _user = user;
             _hub = hub;
+            _configLogic = configLogic;
             _logger = logger;
+
+            Task.WaitAll(_configLogic.ResolveGlobalConfig().StartedStreams.Select(Start).Cast<Task>().ToArray());
         }
-        
+
         /// <summary>
         /// Pass username to GetAll
         /// </summary>
@@ -105,7 +119,7 @@ namespace Logic
         public async Task<bool> Start(int id)
         {
             Stream stream;
-            
+
             // Already started
             if (_state.StreamItems.ContainsKey(id) || (stream = await _streamLogic.For(_user).Get(id)) == null)
             {
@@ -120,7 +134,8 @@ namespace Logic
             {
                 var filename = $"{arg.SongInfo.SongMetadata.Artist}-{arg.SongInfo.SongMetadata.Title}";
 
-                if (!string.IsNullOrWhiteSpace(stream.Filter) && !Regex.IsMatch(filename, stream.Filter, RegexOptions.IgnoreCase))
+                if (!string.IsNullOrWhiteSpace(stream.Filter) &&
+                    !Regex.IsMatch(filename, stream.Filter, RegexOptions.IgnoreCase))
                 {
                     // Needed to reset the stream
                     arg.SongInfo.Stream.Seek(0, SeekOrigin.Begin);
@@ -156,6 +171,11 @@ namespace Logic
                 State = StreamStatusEnum.Started
             };
 
+            await _configLogic.UpdateGlobalConfig(c => new GlobalConfigViewModel(c)
+            {
+                StartedStreams = c.StartedStreams.Add(id)
+            });
+            
             return true;
         }
 
@@ -171,6 +191,11 @@ namespace Logic
                 _state.StreamItems[id].StreamRipper.Dispose();
 
                 _state.StreamItems.Remove(id);
+                
+                await _configLogic.UpdateGlobalConfig(c => new GlobalConfigViewModel(c)
+                {
+                    StartedStreams = c.StartedStreams.Remove(id)
+                });
 
                 return true;
             }
