@@ -56,9 +56,7 @@ namespace Logic
                 {
                     _logger.LogInformation("Successfully fetched the config from S3");
 
-                    var globalConfigViewModel = response.Data.Deserialize<GlobalConfigViewModel>();
-
-                    UpdateGlobalConfigs(globalConfigViewModel);
+                    UpdateGlobalConfigs(response.Data.Deserialize<GlobalConfigViewModel>());
                 }
             }, e => Then(() => _logger.LogError("Failed to fetch the config from S3", e), Task.CompletedTask));
         }
