@@ -149,7 +149,7 @@ namespace Logic
                     await aggregatedSink(arg.SongInfo.Stream, $"{filename}.mp3");
 
                     // Invoke socket
-                    await _hub.Clients.User(_user.Id.ToString()).SendAsync("downloaded", filename);
+                    await _hub.Clients.User(_user.Id.ToString()).SendAsync("download", filename);
                 }
                 else
                 {
