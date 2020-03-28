@@ -120,7 +120,7 @@ namespace Logic
             {
                 var filename = $"{arg.SongInfo.SongMetadata.Artist}-{arg.SongInfo.SongMetadata.Title}";
 
-                if (!string.IsNullOrWhiteSpace(stream.Filter) && !Regex.IsMatch(filename, stream.Filter))
+                if (!string.IsNullOrWhiteSpace(stream.Filter) && !Regex.IsMatch(filename, stream.Filter, RegexOptions.IgnoreCase))
                 {
                     // Needed to reset the stream
                     arg.SongInfo.Stream.Seek(0, SeekOrigin.Begin);
