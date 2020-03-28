@@ -27,6 +27,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Models.Constants;
@@ -220,9 +221,10 @@ namespace Api
 
             _container = new Container(config =>
             {
+                // If environment is localhost then use mock email service
                 if (_env.IsDevelopment())
                 {
-                    config.For<IS3Service>().Use<MockS3Service>();
+                    config.For<IS3Service>().Use(new S3Service()).Singleton();
                 }
                 else
                 {
@@ -241,6 +243,12 @@ namespace Api
                     // Create S3 client
                     config.For<IAmazonS3>().Use(() => new AmazonS3Client(credentials, RegionEndpoint.USEast1));
                     config.For<S3ServiceConfig>().Use(new S3ServiceConfig(bucketName, prefix));
+                    
+                    config.For<IS3Service>().Use(ctx => new S3Service(
+                        ctx.GetInstance<ILogger<S3Service>>(),
+                        ctx.GetInstance<IAmazonS3>(),
+                        ctx.GetInstance<S3ServiceConfig>()
+                    ));
                 }
                 
                 config.For<StreamRipperState>().Singleton();
@@ -269,10 +277,13 @@ namespace Api
         /// </summary>
         /// <param name="app"></param>
         /// <param name="configLogic"></param>
-        public void Configure(IApplicationBuilder app, IConfigLogic configLogic)
+        /// <param name="streamRipperManager"></param>
+        public void Configure(IApplicationBuilder app, IConfigLogic configLogic, IStreamRipperManager streamRipperManager)
         {
-            configLogic.Refresh();
-            
+            configLogic.Refresh().Wait();
+
+            streamRipperManager.Refresh().Wait();
+
             app.UseCors("CorsPolicy");
 
             if (_env.IsDevelopment())
