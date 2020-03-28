@@ -50,6 +50,7 @@ namespace Dal
 
         protected override Stream UpdateEntity(Stream entity, Stream dto)
         {
+            entity.Filter = dto.Filter;
             entity.Name = dto.Name;
             entity.Url = dto.Url;
             entity.FtpSinkRelationships = entity.FtpSinkRelationships.IdAwareUpdate(dto.FtpSinkRelationships, x => x.Id);
