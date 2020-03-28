@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Dal.Extensions;
+using Logic.Extensions;
 using Logic.Interfaces;
 using Logic.Models;
+using Logic.State;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Models.Enums;
@@ -15,7 +17,7 @@ using StreamRipper;
 using StreamRipper.Interfaces;
 using Stream = Models.Models.Stream;
 
-namespace Logic
+namespace Logic.Services
 {
     public class StreamRipperManager : IStreamRipperManager
     {
@@ -137,19 +139,16 @@ namespace Logic
 
             streamRipperInstance.SongChangedEventHandlers += async (_, arg) =>
             {
-                var filename = $"{arg.SongInfo.SongMetadata.Artist}-{arg.SongInfo.SongMetadata.Title}";
+                var filename = $"{arg.SongInfo.SongMetadata.Artist}-{arg.SongInfo.SongMetadata.Title}.mp3";
 
                 if (!string.IsNullOrWhiteSpace(stream.Filter) &&
-                    !Regex.Matches(filename, stream.Filter, RegexOptions.IgnoreCase).Any())
-                {
-                    // Needed to reset the stream
-                    arg.SongInfo.Stream.Seek(0, SeekOrigin.Begin);
+                    !Regex.Matches(filename, stream.Filter, RegexOptions.IgnoreCase).Any()) {
 
                     // Upload the stream
-                    await aggregatedSink(arg.SongInfo.Stream, $"{filename}.mp3");
+                    await aggregatedSink(arg.SongInfo.Stream.Reset(), filename);
 
                     // Invoke socket
-                    await _hub.Clients.User(_user.Id.ToString()).SendAsync("download", filename);
+                    await _hub.Clients.User(_user.Id.ToString()).SendAsync("download", filename, arg.SongInfo.Stream.Reset().ToByteArray());
                 }
                 else
                 {
