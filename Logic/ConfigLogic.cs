@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using Models.ViewModels.Config;
 using static Models.Constants.GlobalConfigs;
 using static Models.Constants.ApplicationConstants;
-using static Logic.Utilities.LambdaUtility;
 
 namespace Logic
 {
@@ -29,11 +28,13 @@ namespace Logic
         {
             UpdateGlobalConfigs(globalConfigViewModel);
 
-            await IgnoreException(async () =>
-                    await _s3Service.Upload(ConfigFile, globalConfigViewModel.ToByteArray(),
-                        ImmutableDictionary.Create<string, string>().Add("Description", "Application config file")),
-                _ => Task.CompletedTask,
-                e => Then(() => _logger.LogError("Failed to sync config file with S3", e), Task.CompletedTask));
+            var response = await _s3Service.Upload(ConfigFile, globalConfigViewModel.ToByteArray(),
+                ImmutableDictionary.Create<string, string>().Add("Description", "Application config file"));
+
+            if (response.Status == HttpStatusCode.BadRequest)
+            {
+                _logger.LogError("Failed to sync config file with S3");
+            }
         }
 
         public GlobalConfigViewModel ResolveGlobalConfig()
@@ -43,22 +44,25 @@ namespace Logic
 
         public async Task UpdateGlobalConfig(Func<GlobalConfigViewModel, GlobalConfigViewModel> update)
         {
-            await SetGlobalConfig(update(ResolveGlobalConfig()));
+            var re = update(ResolveGlobalConfig());
+            
+            await SetGlobalConfig(re);
         }
 
         public async Task Refresh()
         {
-            await IgnoreException(async () => await _s3Service.Download(ConfigFile), async responseTsk =>
+            var response = await _s3Service.Download(ConfigFile);
+            
+            if (response.Status == HttpStatusCode.OK)
             {
-                var response = await responseTsk;
+                _logger.LogInformation("Successfully fetched the config from S3");
 
-                if (response.Status == HttpStatusCode.OK)
-                {
-                    _logger.LogInformation("Successfully fetched the config from S3");
-
-                    UpdateGlobalConfigs(response.Data.Deserialize<GlobalConfigViewModel>());
-                }
-            }, e => Then(() => _logger.LogError("Failed to fetch the config from S3", e), Task.CompletedTask));
+                UpdateGlobalConfigs(response.Data.Deserialize<GlobalConfigViewModel>());
+            }
+            else
+            {
+                _logger.LogError("Failed to fetch the config from S3");
+            }
         }
     }
 }

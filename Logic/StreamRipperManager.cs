@@ -55,6 +55,13 @@ namespace Logic
         {
             return new StreamRipperManagerImpl(_state, _streamLogic, _sinkService, user, _hub, _configLogic, _logger);
         }
+
+        public async Task Refresh()
+        {
+            await Task.WhenAll(_configLogic.ResolveGlobalConfig().StartedStreams
+                .Select(async streamId => await For((await _streamLogic.Get(streamId)).User).Start(streamId))
+                .Cast<Task>().ToArray());
+        }
     }
 
     public class StreamRipperManagerImpl : IStreamRipperManagerImpl
@@ -93,8 +100,6 @@ namespace Logic
             _hub = hub;
             _configLogic = configLogic;
             _logger = logger;
-
-            Task.WaitAll(_configLogic.ResolveGlobalConfig().StartedStreams.Select(Start).Cast<Task>().ToArray());
         }
 
         /// <summary>
@@ -140,23 +145,29 @@ namespace Logic
                     // Needed to reset the stream
                     arg.SongInfo.Stream.Seek(0, SeekOrigin.Begin);
 
-                    // Create filename
-
                     // Upload the stream
                     await aggregatedSink(arg.SongInfo.Stream, $"{filename}.mp3");
 
                     // Invoke socket
                     await _hub.Clients.User(_user.Id.ToString()).SendAsync("downloaded", filename);
                 }
+                else
+                {
+                    await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} with name {filename} skipped");
+                }
             };
 
-            streamRipperInstance.StreamEndedEventHandlers += (sender, arg) =>
+            streamRipperInstance.StreamEndedEventHandlers += async (sender, arg) =>
             {
+                await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} ended");
+                
                 _state.StreamItems[id].State = StreamStatusEnum.Stopped;
             };
 
-            streamRipperInstance.StreamFailedHandlers += (sender, arg) =>
+            streamRipperInstance.StreamFailedHandlers += async (sender, arg) =>
             {
+                await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} failed");
+                
                 _state.StreamItems[id].State = StreamStatusEnum.Fail;
             };
 
@@ -175,7 +186,7 @@ namespace Logic
             {
                 StartedStreams = c.StartedStreams.Add(id)
             });
-            
+
             return true;
         }
 
@@ -191,7 +202,7 @@ namespace Logic
                 _state.StreamItems[id].StreamRipper.Dispose();
 
                 _state.StreamItems.Remove(id);
-                
+
                 await _configLogic.UpdateGlobalConfig(c => new GlobalConfigViewModel(c)
                 {
                     StartedStreams = c.StartedStreams.Remove(id)

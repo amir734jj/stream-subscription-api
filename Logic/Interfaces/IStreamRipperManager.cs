@@ -8,6 +8,8 @@ namespace Logic.Interfaces
     public interface IStreamRipperManager
     {
         public IStreamRipperManagerImpl For(User user);
+
+        public Task Refresh();
     }
 
     public interface IStreamRipperManagerImpl
