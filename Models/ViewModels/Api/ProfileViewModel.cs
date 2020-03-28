@@ -1,6 +1,6 @@
 using Models.Models;
 
-namespace Models.ViewModels
+namespace Models.ViewModels.Api
 {
     public class ProfileViewModel
     {

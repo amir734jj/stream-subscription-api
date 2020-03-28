@@ -2,15 +2,15 @@ using System;
 using System.Collections.Immutable;
 using System.Net;
 using System.Threading.Tasks;
-using DAL.Extensions;
-using DAL.Interfaces;
+using Dal.Extensions;
+using Dal.Interfaces;
 using Logic.Interfaces;
 using Microsoft.Extensions.Logging;
 using Models.ViewModels.Config;
 using static Models.Constants.GlobalConfigs;
 using static Models.Constants.ApplicationConstants;
 
-namespace Logic
+namespace Logic.Logic
 {
     public class ConfigLogic : IConfigLogic
     {

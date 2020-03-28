@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Models.ViewModels.S3;
 
-namespace DAL.Interfaces
+namespace Dal.Interfaces
 {
     public interface IS3Service
     {

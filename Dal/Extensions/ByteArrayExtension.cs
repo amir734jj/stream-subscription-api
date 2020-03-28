@@ -2,7 +2,7 @@ using System.IO;
 using Newtonsoft.Json;
 using static Models.Constants.ApplicationConstants;
 
-namespace DAL.Extensions
+namespace Dal.Extensions
 {
     public static class ByteArrayExtension
     {
