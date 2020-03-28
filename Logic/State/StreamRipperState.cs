@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Logic.Models;
 
-namespace Logic
+namespace Logic.State
 {
     public class StreamRipperState
     {
