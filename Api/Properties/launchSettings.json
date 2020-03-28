@@ -5,9 +5,12 @@
       "launchBrowser": false,
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_ENVIRONMENT": "Production",
         "DATABASE_URL": "",
-        "REDISTOGO_URL": ""
+        "REDISTOGO_URL": "",
+        "CLOUDCUBE_ACCESS_KEY_ID": "",
+        "CLOUDCUBE_SECRET_ACCESS_KEY": "",
+        "CLOUDCUBE_URL": ""
       }
     }
   }
