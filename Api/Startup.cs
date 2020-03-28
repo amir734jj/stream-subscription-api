@@ -2,11 +2,19 @@
 using System.IO;
 using System.Reflection;
 using System.Text;
+using Amazon;
+using Amazon.Runtime;
+using Amazon.S3;
 using Api.Configs;
+using API.Extensions;
+using DAL.Configs;
+using DAL.Interfaces;
+using DAL.ServiceApi;
 using Dal.Utilities;
 using EFCache;
 using EFCache.Redis;
 using Logic;
+using Logic.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -212,6 +220,29 @@ namespace Api
 
             _container = new Container(config =>
             {
+                if (_env.IsDevelopment())
+                {
+                    config.For<IS3Service>().Use<MockS3Service>();
+                }
+                else
+                {
+                    var (accessKeyId, secretAccessKey, url) = (
+                        _configuration.GetRequiredValue<string>("CLOUDCUBE_ACCESS_KEY_ID"),
+                        _configuration.GetRequiredValue<string>("CLOUDCUBE_SECRET_ACCESS_KEY"),
+                        _configuration.GetRequiredValue<string>("CLOUDCUBE_URL")
+                    );
+
+                    var prefix = new Uri(url).Segments[1];
+                    const string bucketName = "cloud-cube";
+
+                    // Generally bad practice
+                    var credentials = new BasicAWSCredentials(accessKeyId, secretAccessKey);
+
+                    // Create S3 client
+                    config.For<IAmazonS3>().Use(() => new AmazonS3Client(credentials, RegionEndpoint.USEast1));
+                    config.For<S3ServiceConfig>().Use(new S3ServiceConfig(bucketName, prefix));
+                }
+                
                 config.For<StreamRipperState>().Singleton();
 
                 // Register stuff in container, using the StructureMap APIs...
@@ -237,8 +268,11 @@ namespace Api
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         /// </summary>
         /// <param name="app"></param>
-        public void Configure(IApplicationBuilder app)
+        /// <param name="configLogic"></param>
+        public void Configure(IApplicationBuilder app, IConfigLogic configLogic)
         {
+            configLogic.Refresh();
+            
             app.UseCors("CorsPolicy");
 
             if (_env.IsDevelopment())
