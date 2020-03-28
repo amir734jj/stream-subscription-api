@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -213,9 +214,11 @@ namespace Api
                     };
                 });
 
+            services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+
             services.AddSignalR(config =>
             {
-                config.MaximumReceiveMessageSize = 5 * 1024 * 1024;    // 5 mega-bytes
+                config.MaximumReceiveMessageSize = 5 * 1024 * 1024; // 5 mega-bytes
                 config.StreamBufferCapacity = 50;
             });
 
@@ -250,7 +253,7 @@ namespace Api
                         ctx.GetInstance<S3ServiceConfig>()
                     ));
                 }
-                
+
                 config.For<StreamRipperState>().Singleton();
 
                 // Register stuff in container, using the StructureMap APIs...
