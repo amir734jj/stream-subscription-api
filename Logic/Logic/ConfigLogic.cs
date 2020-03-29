@@ -28,7 +28,7 @@ namespace Logic.Logic
         {
             UpdateGlobalConfigs(globalConfigViewModel);
 
-            var response = await _s3Service.Upload(ConfigFile, globalConfigViewModel.ToByteArray(),
+            var response = await _s3Service.Upload(ConfigFile, globalConfigViewModel.ObjectToByteArray(),
                 ImmutableDictionary.Create<string, string>().Add("Description", "Application config file"));
 
             if (response.Status == HttpStatusCode.BadRequest)
