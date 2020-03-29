@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Threading.Tasks;
 using FluentFTP;
@@ -22,7 +21,7 @@ namespace Logic.Sinks
 
         public async Task UploadStream(Stream stream, string filename, MemoryStream data)
         {
-            var directory = Path.Join(_ftpSink.Path, new Uri(stream.Url).Host);
+            var directory = Path.Join(_ftpSink.Path, stream.Name);
 
             await _client.CreateDirectoryAsync(directory);
             

@@ -13,7 +13,6 @@ using Dal.ServiceApi;
 using Dal.Utilities;
 using EFCache;
 using EFCache.Redis;
-using Logic;
 using Logic.Interfaces;
 using Logic.Providers;
 using Logic.Services;

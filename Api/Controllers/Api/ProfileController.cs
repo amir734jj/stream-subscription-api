@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Models.Models;
-using Models.ViewModels;
 using Models.ViewModels.Api;
 
 namespace Api.Controllers.Api
