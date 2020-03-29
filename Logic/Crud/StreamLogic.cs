@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dal.Interfaces;
@@ -13,21 +14,25 @@ namespace Logic.Crud
         private readonly IStreamDal _streamDal;
         
         private readonly IFtpSinkLogic _ftpSinkLogic;
+        
+        private readonly Lazy<IStreamRipperManager> _streamRipperManager;
 
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
         /// <param name="streamDal"></param>
         /// <param name="ftpSinkLogic"></param>
-        public StreamLogic(IStreamDal streamDal, IFtpSinkLogic ftpSinkLogic)
+        /// <param name="streamRipperManager"></param>
+        public StreamLogic(IStreamDal streamDal, IFtpSinkLogic ftpSinkLogic, Lazy<IStreamRipperManager> streamRipperManager)
         {
             _streamDal = streamDal;
             _ftpSinkLogic = ftpSinkLogic;
+            _streamRipperManager = streamRipperManager;
         }
 
         public IBasicLogic<Stream> For(User user)
         {
-            return new StreamLogicImpl(_streamDal, _ftpSinkLogic, user);
+            return new StreamLogicImpl(_streamDal, user, _streamRipperManager);
         }
 
         protected override IBasicDal<Stream> GetBasicCrudDal()
@@ -41,14 +46,14 @@ namespace Logic.Crud
         private readonly IStreamDal _streamDal;
         
         private readonly User _user;
-        
-        private readonly IFtpSinkLogic _ftpSinkLogic;
 
-        public StreamLogicImpl(IStreamDal streamDal, IFtpSinkLogic ftpSinkLogic, User user)
+        private readonly Lazy<IStreamRipperManager> _streamManager;
+
+        public StreamLogicImpl(IStreamDal streamDal, User user, Lazy<IStreamRipperManager> streamManager)
         {
             _streamDal = streamDal;
-            _ftpSinkLogic = ftpSinkLogic;
             _user = user;
+            _streamManager = streamManager;
         }
         
         protected override IBasicDal<Stream> GetBasicCrudDal()
@@ -71,6 +76,20 @@ namespace Logic.Crud
         public override async Task<Stream> Get(int id)
         {
             return (await _streamDal.GetAll()).Where(x => x.User.Id == _user.Id).FirstOrDefault(x => x.Id == id);
+        }
+
+        public override async Task<Stream> Delete(int id)
+        {
+            await _streamManager.Value.For(_user).Stop(id);
+            
+            return await base.Delete(id);
+        }
+
+        public override async Task<Stream> Update(int id, Stream dto)
+        {
+            await _streamManager.Value.For(_user).Stop(id);
+
+            return await base.Update(id, dto);
         }
     }
 }
