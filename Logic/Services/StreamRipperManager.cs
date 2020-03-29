@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Dal.Extensions;
 using Logic.Extensions;
 using Logic.Interfaces;
 using Logic.Models;
