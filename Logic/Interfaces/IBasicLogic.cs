@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Models.Interfaces;
 
@@ -8,8 +7,6 @@ namespace Logic.Interfaces
 {
     public interface IBasicLogic<T> where T: IEntity
     {
-        Task<IEnumerable<T>> Get(Expression<Func<T, bool>> filter);
-        
         Task<IEnumerable<T>> GetAll();
 
         Task<T> Get(int id);
