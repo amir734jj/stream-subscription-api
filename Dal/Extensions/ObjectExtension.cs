@@ -5,7 +5,7 @@ namespace Dal.Extensions
 {
     public static class ObjectExtension
     {
-        public static byte[] ToByteArray(this object data)
+        public static byte[] ObjectToByteArray(this object data)
         {
             var json = JsonConvert.SerializeObject(data);
             
