@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Logic.Extensions;
 using Logic.Interfaces;
@@ -32,6 +31,8 @@ namespace Logic.Services
 
         private readonly IConfigLogic _configLogic;
 
+        private readonly IFilterSongLogic _filterSongLogic;
+
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
@@ -40,21 +41,25 @@ namespace Logic.Services
         /// <param name="sinkService"></param>
         /// <param name="hub"></param>
         /// <param name="configLogic"></param>
+        /// <param name="filterSongLogic"></param>
         /// <param name="logger"></param>
         public StreamRipperManager(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService,
-            IHubContext<MessageHub> hub, IConfigLogic configLogic, ILogger<IStreamRipper> logger)
+            IHubContext<MessageHub> hub, IConfigLogic configLogic, IFilterSongLogic filterSongLogic,
+            ILogger<IStreamRipper> logger)
         {
             _state = state;
             _streamLogic = streamLogic;
             _sinkService = sinkService;
             _hub = hub;
             _configLogic = configLogic;
+            _filterSongLogic = filterSongLogic;
             _logger = logger;
         }
 
         public IStreamRipperManagerImpl For(User user)
         {
-            return new StreamRipperManagerImpl(_state, _streamLogic, _sinkService, user, _hub, _configLogic, _logger);
+            return new StreamRipperManagerImpl(_state, _streamLogic, _sinkService, user, _hub, _configLogic,
+                _filterSongLogic, _logger);
         }
 
         public async Task Refresh()
@@ -81,6 +86,8 @@ namespace Logic.Services
 
         private readonly IConfigLogic _configLogic;
 
+        private readonly IFilterSongLogic _filterSongLogic;
+
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
@@ -90,9 +97,11 @@ namespace Logic.Services
         /// <param name="user"></param>
         /// <param name="hub"></param>
         /// <param name="configLogic"></param>
+        /// <param name="filterSongLogic"></param>
         /// <param name="logger"></param>
         public StreamRipperManagerImpl(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService,
-            User user, IHubContext<MessageHub> hub, IConfigLogic configLogic, ILogger<IStreamRipper> logger)
+            User user, IHubContext<MessageHub> hub, IConfigLogic configLogic, IFilterSongLogic filterSongLogic,
+            ILogger<IStreamRipper> logger)
         {
             _state = state;
             _streamLogic = streamLogic;
@@ -100,6 +109,7 @@ namespace Logic.Services
             _user = user;
             _hub = hub;
             _configLogic = configLogic;
+            _filterSongLogic = filterSongLogic;
             _logger = logger;
         }
 
@@ -113,7 +123,7 @@ namespace Logic.Services
 
             return streams
                 .ToDictionary(x => x.Id,
-                    x => _state.StreamItems.FirstOrDefault(y => y.Value.User.Id == _user.Id).Value?.State ??
+                    x => _state.StreamItems.FirstOrDefault(y => y.Key == x.Id).Value?.State ??
                          StreamStatusEnum.Stopped);
         }
 
@@ -140,32 +150,33 @@ namespace Logic.Services
             {
                 var filename = $"{arg.SongInfo.SongMetadata.Artist}-{arg.SongInfo.SongMetadata.Title}.mp3";
 
-                if (!string.IsNullOrWhiteSpace(stream.Filter) &&
-                    !Regex.Matches(filename, stream.Filter, RegexOptions.IgnoreCase).Any()) {
-
+                if (_filterSongLogic.ShouldInclude(filename, stream.Filter))
+                {
                     // Upload the stream
                     await aggregatedSink(arg.SongInfo.Stream.Reset(), filename);
 
                     // Invoke socket
-                    await _hub.Clients.User(_user.Id.ToString()).SendAsync("download", filename, arg.SongInfo.SongMetadata, arg.SongInfo.Stream.Reset().ConvertToBase64());
+                    await _hub.Clients.User(_user.Id.ToString()).SendAsync("download", filename,
+                        arg.SongInfo.SongMetadata, arg.SongInfo.Stream.Reset().ConvertToBase64());
                 }
                 else
                 {
-                    await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} with name {filename} skipped");
+                    await _hub.Clients.User(_user.Id.ToString())
+                        .SendAsync("log", $"Stream {id} with name {filename} skipped");
                 }
             };
 
             streamRipperInstance.StreamEndedEventHandlers += async (sender, arg) =>
             {
                 await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} ended");
-                
+
                 _state.StreamItems[id].State = StreamStatusEnum.Stopped;
             };
 
             streamRipperInstance.StreamFailedHandlers += async (sender, arg) =>
             {
                 await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} failed");
-                
+
                 _state.StreamItems[id].State = StreamStatusEnum.Fail;
             };
 
@@ -173,10 +184,11 @@ namespace Logic.Services
             {
                 await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} started");
             };
-            
+
             streamRipperInstance.StreamUpdateEventHandlers += async (sender, arg) =>
             {
-                await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} updated with {arg.SongRawPartial.Length} bytes");
+                await _hub.Clients.User(_user.Id.ToString()).SendAsync("log",
+                    $"Stream {id} updated with {arg.SongRawPartial.Length} bytes");
             };
 
             // Start the ripper
