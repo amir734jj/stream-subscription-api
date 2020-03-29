@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AgileObjects.AgileMapper.Extensions;
 using Logic.Extensions;
 using Logic.Interfaces;
 using Logic.Models;
@@ -64,9 +65,11 @@ namespace Logic.Services
 
         public async Task Refresh()
         {
-            await Task.WhenAll(_configLogic.ResolveGlobalConfig().StartedStreams
-                .Select(async streamId => await For((await _streamLogic.Get(streamId)).User).Start(streamId))
-                .Cast<Task>().ToArray());
+            foreach (var (stream, streamId) in (await _streamLogic.GetAll()).Join(_configLogic.ResolveGlobalConfig().StartedStreams,
+                stream => stream.Id, streamId => streamId, (stream, streamId) => (stream, streamId)))
+            {
+                await For(stream.User).Start(streamId);
+            }
         }
     }
 
