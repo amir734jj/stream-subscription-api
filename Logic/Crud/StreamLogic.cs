@@ -12,21 +12,17 @@ namespace Logic.Crud
     public class StreamLogic : BasicLogicAbstract<Stream>, IStreamLogic
     {
         private readonly IStreamDal _streamDal;
-        
-        private readonly IFtpSinkLogic _ftpSinkLogic;
-        
+
         private readonly Lazy<IStreamRipperManager> _streamRipperManager;
 
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
         /// <param name="streamDal"></param>
-        /// <param name="ftpSinkLogic"></param>
         /// <param name="streamRipperManager"></param>
-        public StreamLogic(IStreamDal streamDal, IFtpSinkLogic ftpSinkLogic, Lazy<IStreamRipperManager> streamRipperManager)
+        public StreamLogic(IStreamDal streamDal, Lazy<IStreamRipperManager> streamRipperManager)
         {
             _streamDal = streamDal;
-            _ftpSinkLogic = ftpSinkLogic;
             _streamRipperManager = streamRipperManager;
         }
 
