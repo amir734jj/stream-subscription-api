@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AgileObjects.AgileMapper;
 using Dal.Interfaces;
@@ -24,11 +23,6 @@ namespace Dal.Abstracts
         /// <returns></returns>
         protected abstract DbSet<T> GetDbSet();
 
-        public async Task<IEnumerable<T>> Get(Expression<Func<T, bool>> filter)
-        {
-            return await Intercept(GetDbSet().Where(filter)).ToListAsync();
-        }
-
         /// <summary>
         /// Returns all entities
         /// </summary>
@@ -45,7 +39,7 @@ namespace Dal.Abstracts
         /// <returns></returns>
         public virtual async Task<T> Get(int id)
         {
-            return (await Get(x => x.Id == id)).FirstOrDefault();
+            return await Intercept(GetDbSet()).FirstOrDefaultAsync(x => x.Id == id);
         }
 
         /// <summary>
@@ -130,6 +124,12 @@ namespace Dal.Abstracts
             return queryable;
         }
 
+        /// <summary>
+        /// Default update method
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         protected virtual T UpdateEntity(T entity, T dto)
         {
             return Mapper.Map(dto).Over(entity);
