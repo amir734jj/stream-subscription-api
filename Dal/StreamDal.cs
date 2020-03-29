@@ -53,7 +53,7 @@ namespace Dal
             entity.Filter = dto.Filter;
             entity.Name = dto.Name;
             entity.Url = dto.Url;
-            entity.FtpSinkRelationships = entity.FtpSinkRelationships.IdAwareUpdate(dto.FtpSinkRelationships, x => x.Id);
+            entity.FtpSinkRelationships = entity.FtpSinkRelationships.IdAwareUpdate(dto.FtpSinkRelationships, x => x.GetHashCode());
 
             return entity;
         }
