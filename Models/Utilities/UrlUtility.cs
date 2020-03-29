@@ -26,7 +26,7 @@ namespace Models.Utilities
                 ["Username"] = url.UserInfo.Split(':')[0],
                 ["Password"] = url.UserInfo.Split(':')[1],
                 ["Database"] = url.LocalPath.Substring(1),
-                ["ApplicationName"] = "milwaukee-internationals"
+                ["ApplicationName"] = "stream-subscription-api"
             };
 
             return (url, connectionStringBuilder);
