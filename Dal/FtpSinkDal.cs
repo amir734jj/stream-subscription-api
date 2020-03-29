@@ -56,7 +56,7 @@ namespace Dal
             entity.Password = dto.Password;
             entity.Path = dto.Path;
             entity.Port = dto.Port;
-            entity.FtpSinkRelationships = entity.FtpSinkRelationships.IdAwareUpdate(dto.FtpSinkRelationships, x => x.Id);
+            entity.FtpSinkRelationships = entity.FtpSinkRelationships.IdAwareUpdate(dto.FtpSinkRelationships, x => x.GetHashCode());
 
             return entity;
         }
