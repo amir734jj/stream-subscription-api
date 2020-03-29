@@ -39,9 +39,7 @@ namespace Dal.Extensions
             {
                 source.Remove(entityPropValListItem);
             }
-            
-            // TODO: to a recursive update
-            
+
             return source;
         }
     }
