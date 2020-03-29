@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dal.Interfaces;
 using Logic.Interfaces;
@@ -15,11 +14,6 @@ namespace Logic.Abstracts
         /// </summary>
         /// <returns></returns>
         protected abstract IBasicDal<T> GetBasicCrudDal();
-
-        public Task<IEnumerable<T>> Get(Expression<Func<T, bool>> filter)
-        {
-            return GetBasicCrudDal().Get(filter);
-        }
 
         /// <summary>
         /// Call forwarding
