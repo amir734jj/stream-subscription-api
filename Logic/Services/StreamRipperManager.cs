@@ -148,7 +148,7 @@ namespace Logic.Services
                     await aggregatedSink(arg.SongInfo.Stream.Reset(), filename);
 
                     // Invoke socket
-                    await _hub.Clients.User(_user.Id.ToString()).SendAsync("download", filename, arg.SongInfo.Stream.Reset().ToByteArray());
+                    await _hub.Clients.User(_user.Id.ToString()).SendAsync("download", filename, arg.SongInfo.SongMetadata, arg.SongInfo.Stream.Reset().ToByteArray());
                 }
                 else
                 {
