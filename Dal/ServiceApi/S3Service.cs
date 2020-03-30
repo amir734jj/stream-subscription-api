@@ -128,7 +128,7 @@ namespace Dal.ServiceApi
                 var metadata = response.Metadata.Keys.ToDictionary(x => x, x => response.Metadata[x]);
 
                 // Copy stream to another stream
-                responseStream.CopyTo(memoryStream);
+                await responseStream.CopyToAsync(memoryStream);
 
                 return new DownloadS3Response(HttpStatusCode.OK, "Successfully downloaded S3 object", memoryStream.ToArray(), metadata, contentType,
                     title);
