@@ -70,10 +70,10 @@ namespace Logic.Services
             
            streamsToStart.ToObservable()
                 .Throttle(TimeSpan.FromSeconds(3))
-                .SelectMany(stream => For(stream.User).Start(stream.Id))
-                .Subscribe(_ =>
+                .SelectMany(stream => For(stream.User).Start(stream.Id).WrapResultOrException(false, _logger))
+                .Subscribe(wrappedResult =>
                 {
-                    _logger.LogInformation("Starting streams ...");
+                    _logger.LogInformation($"Starting stream yielded: {wrappedResult.Result}");
                 });
         }
     }
