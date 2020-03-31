@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
-using AgileObjects.AgileMapper.Extensions;
 using Logic.Extensions;
 using Logic.Interfaces;
 using Logic.Models;
@@ -65,11 +65,16 @@ namespace Logic.Services
 
         public async Task Refresh()
         {
-            foreach (var (stream, streamId) in (await _streamLogic.GetAll()).Join(_configLogic.ResolveGlobalConfig().StartedStreams,
-                stream => stream.Id, streamId => streamId, (stream, streamId) => (stream, streamId)))
-            {
-                await For(stream.User).Start(streamId);
-            }
+           var streamsToStart = (await _streamLogic.GetAll()).Join(_configLogic.ResolveGlobalConfig().StartedStreams,
+                   stream => stream.Id, streamId => streamId, (stream, streamId) => (stream, streamId)).Select(x => x.stream);
+            
+           streamsToStart.ToObservable()
+                .Throttle(TimeSpan.FromSeconds(3))
+                .SelectMany(stream => For(stream.User).Start(stream.Id))
+                .Subscribe(_ =>
+                {
+                    _logger.LogInformation("Starting streams ...");
+                });
         }
     }
 
