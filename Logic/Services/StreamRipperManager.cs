@@ -186,6 +186,8 @@ namespace Logic.Services
                 await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} failed");
 
                 _state.StreamItems[id].State = StreamStatusEnum.Fail;
+                
+                _logger.LogError($"Failed to start {id}", arg.Exception);
             };
 
             streamRipperInstance.StreamStartedEventHandlers += async (sender, arg) =>
