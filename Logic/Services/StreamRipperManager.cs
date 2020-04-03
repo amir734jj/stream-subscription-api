@@ -74,6 +74,7 @@ namespace Logic.Services
                     (stream, _) => stream)
                 .ToObservable()
                 .Throttle(TimeSpan.FromSeconds(5))
+                .Timeout(TimeSpan.FromSeconds(5))
                 .SelectMany(stream => For(stream.User).Start(stream.Id).WrapResultOrException(false, _logger))
                 .Subscribe(wrappedResult =>
                 {
