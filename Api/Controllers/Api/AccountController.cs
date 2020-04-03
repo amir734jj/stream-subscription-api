@@ -105,19 +105,21 @@ namespace Api.Controllers.Api
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.Key));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expires = DateTime.Now.AddMinutes(_jwtSettings.Value.AccessTokenDurationInMinutes);
 
             var token = new JwtSecurityToken(
                 _jwtSettings.Value.Issuer,
                 _jwtSettings.Value.Issuer,
                 claims,
-                expires: DateTime.Now.AddMinutes(_jwtSettings.Value.AccessTokenDurationInMinutes),
+                expires,
                 signingCredentials: credentials);
 
             return Ok(new
             {
                 token = new JwtSecurityTokenHandler().WriteToken(token),
                 user.Name,
-                user.Email
+                user.Email,
+                expires
             });
         }
 
