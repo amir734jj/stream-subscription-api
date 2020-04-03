@@ -237,7 +237,7 @@ namespace Api
                         _configuration.GetRequiredValue<string>("CLOUDCUBE_URL")
                     );
 
-                    var prefix = new Uri(url).Segments[1];
+                    var prefix = new Uri(url).Segments.GetValue(1)?.ToString();
                     const string bucketName = "cloud-cube";
 
                     // Generally bad practice
