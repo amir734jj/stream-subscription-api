@@ -65,11 +65,16 @@ namespace Logic.Services
 
         public async Task Refresh()
         {
-           var streamsToStart = (await _streamLogic.GetAll()).Join(_configLogic.ResolveGlobalConfig().StartedStreams,
-                   stream => stream.Id, streamId => streamId, (stream, streamId) => (stream, streamId)).Select(x => x.stream);
-            
-           streamsToStart.ToObservable()
-                .Throttle(TimeSpan.FromSeconds(3))
+            var startedStreamIds = _configLogic.ResolveGlobalConfig().StartedStreams;
+            var streams = await _streamLogic.GetAll();
+
+            streams.Join(startedStreamIds,
+                    stream => stream.Id,
+                    streamId => streamId,
+                    (stream, _) => stream)
+                .ToObservable()
+                .Throttle(TimeSpan.FromSeconds(5))
+                .Timeout(TimeSpan.FromSeconds(5))
                 .SelectMany(stream => For(stream.User).Start(stream.Id).WrapResultOrException(false, _logger))
                 .Subscribe(wrappedResult =>
                 {
@@ -186,7 +191,7 @@ namespace Logic.Services
                 await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} failed");
 
                 _state.StreamItems[id].State = StreamStatusEnum.Fail;
-                
+
                 _logger.LogError($"Failed to start {id}", arg.Exception);
             };
 

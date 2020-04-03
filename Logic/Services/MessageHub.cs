@@ -15,7 +15,7 @@ namespace Logic.Services
         private readonly UserManager<User> _userManager;
 
         // Connected IDs
-        private static readonly IDictionary<string, User> Users = new ConcurrentDictionary<string, User>();
+        private static readonly IDictionary<string, User> UserTable = new ConcurrentDictionary<string, User>();
 
         public MessageHub(UserManager<User> userManager)
         {
@@ -24,18 +24,18 @@ namespace Logic.Services
             
         public override async Task OnConnectedAsync()
         {
-            Users.Add(Context.ConnectionId, await _userManager.FindByNameAsync(Context.User.Identity.Name));
+            UserTable[Context.ConnectionId] = await _userManager.FindByNameAsync(Context.User.Identity.Name);
 
             await Clients.All.SendAsync("log", "joined", Context.ConnectionId);
-            await Clients.All.SendAsync("count", Users.Count);
+            await Clients.All.SendAsync("count", UserTable.Count);
         }
 
         public override async Task OnDisconnectedAsync(Exception ex)
         {
-            Users.Remove(Context.ConnectionId);
+            UserTable.Remove(Context.ConnectionId);
 
             await Clients.All.SendAsync("log", "left", Context.ConnectionId);
-            await Clients.All.SendAsync("count", Users.Count);
+            await Clients.All.SendAsync("count", UserTable.Count);
         }
     }
 }
