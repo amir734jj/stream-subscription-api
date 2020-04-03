@@ -219,6 +219,7 @@ namespace Api
             {
                 config.MaximumReceiveMessageSize = 10 * 1024 * 1024; // 10 mega-bytes
                 config.StreamBufferCapacity = 50;
+                config.EnableDetailedErrors = true;
             });
 
             _container = new Container(config =>
