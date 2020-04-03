@@ -60,8 +60,8 @@ namespace Api
 
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddJsonFile("appsettings.json", true, true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true)
                 .AddEnvironmentVariables();
 
             _configuration = builder.Build();
@@ -75,17 +75,14 @@ namespace Api
         /// <returns></returns>
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddHttpsRedirection(options => { options.HttpsPort = 443; });
+            services.AddHttpsRedirection(options => options.HttpsPort = 443);
 
             // If environment is localhost, then enable CORS policy, otherwise no cross-origin access
-            services.AddCors(options =>
-            {
-                options.AddPolicy("CorsPolicy", builder => builder
-                    .WithOrigins("http://localhost:4200", "https://stream-subscription-ui.herokuapp.com")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials());
-            });
+            services.AddCors(options => options.AddPolicy("CorsPolicy", builder => builder
+                .WithOrigins(_configuration.GetSection("TrustedSpaUrls").Get<string[]>())
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()));
             
             // Add framework services
             // Add functionality to inject IOptions<T>
@@ -112,7 +109,7 @@ namespace Api
             services.AddSession(options =>
             {
                 // Set a short timeout for easy testing.
-                options.IdleTimeout = TimeSpan.FromMinutes(50);
+                options.IdleTimeout = TimeSpan.FromMinutes(60);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.Name = ApiConstants.AuthenticationSessionCookieName;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
@@ -155,7 +152,7 @@ namespace Api
             }).AddNewtonsoftJson(x =>
             {
                 x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            }).AddRazorPagesOptions(x => { x.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute()); });
+            }).AddRazorPagesOptions(x => x.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute()));
 
             services.AddDbContext<EntityDbContext>(opt =>
             {
@@ -220,7 +217,7 @@ namespace Api
 
             services.AddSignalR(config =>
             {
-                config.MaximumReceiveMessageSize = 5 * 1024 * 1024; // 5 mega-bytes
+                config.MaximumReceiveMessageSize = 10 * 1024 * 1024; // 10 mega-bytes
                 config.StreamBufferCapacity = 50;
             });
 
