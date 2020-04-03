@@ -83,7 +83,7 @@ namespace Api
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials()));
-            
+
             // Add framework services
             // Add functionality to inject IOptions<T>
             services.AddOptions();
@@ -92,7 +92,7 @@ namespace Api
 
             services.AddLogging();
             
-            services.AddRouting(options => { options.LowercaseUrls = true; });
+            services.AddRouting(options => options.LowercaseUrls = true);
 
             if (_env.IsDevelopment())
             {
