@@ -111,7 +111,7 @@ namespace Api.Controllers.Api
                 _jwtSettings.Value.Issuer,
                 _jwtSettings.Value.Issuer,
                 claims,
-                expires,
+                expires: expires,
                 signingCredentials: credentials);
 
             return Ok(new
