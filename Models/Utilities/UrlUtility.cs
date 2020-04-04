@@ -23,8 +23,8 @@ namespace Models.Utilities
             var connectionStringBuilder = new Dictionary<string, string>
             {
                 ["Host"] = url.Host,
-                ["Username"] = url.UserInfo.Split(':')[0],
-                ["Password"] = url.UserInfo.Split(':')[1],
+                ["Username"] = url.UserInfo.Split(':').GetValue(0)?.ToString(),
+                ["Password"] = url.UserInfo.Split(':').GetValue(1)?.ToString(),
                 ["Database"] = url.LocalPath.Substring(1),
                 ["ApplicationName"] = "stream-subscription-api"
             };
