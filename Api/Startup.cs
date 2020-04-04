@@ -44,8 +44,6 @@ namespace Api
 {
     public class Startup
     {
-        private Container _container;
-
         private readonly IWebHostEnvironment _env;
 
         private readonly IConfigurationRoot _configuration;
@@ -87,6 +85,8 @@ namespace Api
             // Add framework services
             // Add functionality to inject IOptions<T>
             services.AddOptions();
+
+            services.AddResponseCompression();
 
             services.Configure<JwtSettings>(_configuration.GetSection("JwtSettings"));
 
@@ -222,7 +222,7 @@ namespace Api
                 config.EnableDetailedErrors = true;
             });
 
-            _container = new Container(config =>
+            var container = new Container(config =>
             {
                 // If environment is localhost then use mock email service
                 if (_env.IsDevelopment())
@@ -270,9 +270,9 @@ namespace Api
                 config.Populate(services);
             });
 
-            _container.AssertConfigurationIsValid();
+            container.AssertConfigurationIsValid();
 
-            return _container.GetInstance<IServiceProvider>();
+            return container.GetInstance<IServiceProvider>();
         }
 
         /// <summary>
@@ -288,6 +288,8 @@ namespace Api
             streamRipperManager.Refresh().Wait();
 
             app.UseCors("CorsPolicy");
+
+            app.UseResponseCompression();
 
             if (_env.IsDevelopment())
             {
