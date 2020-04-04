@@ -73,6 +73,17 @@ namespace Api
         /// <returns></returns>
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            services.AddMiniProfiler(opt =>
+            {
+                // opt.RouteBasePath = "/profiler";
+                opt.ShouldProfile = _ => true;
+                opt.ShowControls = true;
+                opt.StackMaxLength = short.MaxValue;
+                opt.PopupStartHidden = false;
+                opt.PopupShowTrivial = true;
+                opt.PopupShowTimeWithChildren = true;
+            });
+            
             services.AddHttpsRedirection(options => options.HttpsPort = 443);
 
             // If environment is localhost, then enable CORS policy, otherwise no cross-origin access
@@ -287,6 +298,8 @@ namespace Api
 
             streamRipperManager.Refresh().Wait();
 
+            app.UseMiniProfiler();
+            
             app.UseCors("CorsPolicy");
 
             app.UseResponseCompression();
