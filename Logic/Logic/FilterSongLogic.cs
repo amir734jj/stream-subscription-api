@@ -16,6 +16,7 @@ namespace Logic.Logic
 
             var flag = filter.Split(Environment.NewLine)
                 .Where(pattern => !string.IsNullOrWhiteSpace(pattern))
+                .Select(x => x.Trim())
                 .All(pattern => !Regex.Matches(filename, pattern, RegexOptions.IgnoreCase).Any());
 
             return flag;
