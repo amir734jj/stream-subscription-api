@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Logic.Extensions;
 using Logic.Interfaces;
@@ -72,11 +71,9 @@ namespace Logic.Services
                     stream => stream.Id,
                     streamId => streamId,
                     (stream, _) => stream)
-                .ToObservable()
-                .Throttle(TimeSpan.FromSeconds(5))
-                .Timeout(TimeSpan.FromSeconds(5))
-                .SelectMany(stream => For(stream.User).Start(stream.Id).WrapResultOrException(false, _logger))
-                .Subscribe(wrappedResult =>
+                .AsParallel()
+                .Select(stream => For(stream.User).Start(stream.Id).WrapResultOrException(false, _logger))
+                .ForAll(wrappedResult =>
                 {
                     _logger.LogInformation($"Starting stream yielded: {wrappedResult.Result}");
                 });
