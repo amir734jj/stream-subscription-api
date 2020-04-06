@@ -93,6 +93,54 @@ namespace Api.Controllers.Api
 
             await _signManager.SignInAsync(user, true);
 
+            var (token, expires) = ResolveToken(user);
+
+            return Ok(new
+            {
+                token,
+                user.Name,
+                user.Email,
+                expires
+            });
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("Logout")]
+        [SwaggerOperation("Logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await _signManager.SignOutAsync();
+
+            return Ok("Logged-Out");
+        }
+        
+        [Authorize]
+        [HttpGet]
+        [Route("Refresh")]
+        [SwaggerOperation("Refresh")]
+        public async Task<IActionResult> Refresh()
+        {
+            var user = await _userManager.FindByEmailAsync(User.Identity.Name);
+                
+            var (token, expires) = ResolveToken(user);
+
+            return Ok(new
+            {
+                token,
+                user.Name,
+                user.Email,
+                expires
+            });
+        }
+
+        /// <summary>
+        ///     Resolves a token given a user
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        private (string, DateTime) ResolveToken(User user)
+        {
             // Generate and issue a JWT token
             var claims = new[]
             {
@@ -105,6 +153,7 @@ namespace Api.Controllers.Api
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.Key));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            
             var expires = DateTime.Now.AddMinutes(_jwtSettings.Value.AccessTokenDurationInMinutes);
 
             var token = new JwtSecurityToken(
@@ -114,23 +163,7 @@ namespace Api.Controllers.Api
                 expires: expires,
                 signingCredentials: credentials);
 
-            return Ok(new
-            {
-                token = new JwtSecurityTokenHandler().WriteToken(token),
-                user.Name,
-                user.Email,
-                expires
-            });
-        }
-
-        [HttpPost]
-        [Route("Logout")]
-        [SwaggerOperation("Logout")]
-        public async Task<IActionResult> Logout()
-        {
-            await _signManager.SignOutAsync();
-
-            return Ok("Logged-Out");
+            return (new JwtSecurityTokenHandler().WriteToken(token), expires);
         }
     }
 }
