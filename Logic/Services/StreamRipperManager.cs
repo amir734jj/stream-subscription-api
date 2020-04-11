@@ -160,9 +160,9 @@ namespace Logic.Services
             streamRipperInstance.SongChangedEventHandlers += async (_, arg) =>
             {
                 var filename = $"{arg.SongInfo.SongMetadata.Artist}-{arg.SongInfo.SongMetadata.Title}.mp3";
-                var reader = new Mp3FileReader(arg.SongInfo.Stream.Reset());
+                // var reader = new Mp3FileReader(arg.SongInfo.Stream.Reset());
 
-                if (_filterSongLogic.ShouldInclude(filename, stream.Filter) && reader.TotalTime.TotalSeconds >= 30)
+                if (_filterSongLogic.ShouldInclude(filename, stream.Filter) /*&& reader.TotalTime.TotalSeconds >= 30*/)
                 {
                     // Upload the stream
                     await aggregatedSink(arg.SongInfo.Stream.Reset(), filename);
