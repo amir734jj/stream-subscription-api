@@ -10,6 +10,7 @@
     <PackageReference Include="Dropbox.Api" Version="4.9.4" />
     <PackageReference Include="FluentFTP" Version="29.0.1" />
     <PackageReference Include="HashLib" Version="2.0.1" />
+    <PackageReference Include="NAudio" Version="1.10.0" />
     <PackageReference Include="StreamRipper" Version="2.1.3" />
     <PackageReference Include="System.Reactive.Linq" Version="4.3.2" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
