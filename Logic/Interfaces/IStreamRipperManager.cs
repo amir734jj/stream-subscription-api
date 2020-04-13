@@ -10,6 +10,8 @@ namespace Logic.Interfaces
         public IStreamRipperManagerImpl For(User user);
 
         public Task Refresh();
+
+        public Task StartMany(IEnumerable<Stream> streams);
     }
 
     public interface IStreamRipperManagerImpl

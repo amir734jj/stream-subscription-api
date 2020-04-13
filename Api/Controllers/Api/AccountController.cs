@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Api.Configs;
+using Logic.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -24,13 +25,15 @@ namespace Api.Controllers.Api
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signManager;
         private readonly IOptions<JwtSettings> _jwtSettings;
+        private readonly IUserSetup _userSetup;
 
         public AccountController(IOptions<JwtSettings> jwtSettings, UserManager<User> userManager,
-            SignInManager<User> signManager)
+            SignInManager<User> signManager, IUserSetup userSetup)
         {
             _jwtSettings = jwtSettings;
             _userManager = userManager;
             _signManager = signManager;
+            _userSetup = userSetup;
         }
 
         [HttpGet]
@@ -68,6 +71,8 @@ namespace Api.Controllers.Api
 
             if (identityResults.Aggregate(true, (b, result) => b && result.Succeeded))
             {
+                await _userSetup.Setup(user);
+                
                 return Ok("Successfully registered!");
             }
 

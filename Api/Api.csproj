@@ -27,4 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Logic\Logic.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="SetupUser.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

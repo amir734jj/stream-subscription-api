@@ -7,5 +7,7 @@ namespace Models.Constants
         public const string ConfigFile = "stream-subscription-config.json";
         
         public static readonly Encoding DefaultEncoding = Encoding.UTF8;
+
+        public const string SetupUserJson = "SetupUser.json";
     }
 }

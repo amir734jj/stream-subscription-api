@@ -69,16 +69,22 @@ namespace Logic.Services
             var startedStreamIds = _configLogic.ResolveGlobalConfig().StartedStreams;
             var streams = await _streamLogic.GetAll();
 
-            streams.Join(startedStreamIds,
+            await StartMany(streams.Join(startedStreamIds,
                     stream => stream.Id,
                     streamId => streamId,
                     (stream, _) => stream)
-                .AsParallel()
-                .Select(stream => For(stream.User).Start(stream.Id).WrapResultOrException(false, _logger))
+                .AsParallel());
+        }
+
+        public Task StartMany(IEnumerable<Stream> streams)
+        {
+            streams.AsParallel().Select(stream => For(stream.User).Start(stream.Id).WrapResultOrException(false, _logger))
                 .ForAll(wrappedResult =>
                 {
                     _logger.LogInformation($"Starting stream yielded: {wrappedResult.Result}");
                 });
+
+            return Task.CompletedTask;
         }
     }
 
@@ -148,8 +154,14 @@ namespace Logic.Services
         {
             Stream stream;
 
-            // Already started
-            if (_state.StreamItems.ContainsKey(id) || (stream = await _streamLogic.For(_user).Get(id)) == null)
+            // Stream does not exist
+            if ((stream = await _streamLogic.For(_user).Get(id)) == null)
+            {
+                return false;
+            }
+
+            // Stream already started
+            if (_state.StreamItems.ContainsKey(id))
             {
                 return false;
             }
