@@ -11,10 +11,11 @@ using Microsoft.Extensions.Logging;
 using Models.Enums;
 using Models.Models;
 using Models.ViewModels.Config;
-using NAudio.Wave;
 using StreamRipper;
 using StreamRipper.Interfaces;
 using Stream = Models.Models.Stream;
+using NAudio.Wave;
+using NLayer.NAudioSupport;
 
 namespace Logic.Services
 {
@@ -160,9 +161,12 @@ namespace Logic.Services
             streamRipperInstance.SongChangedEventHandlers += async (_, arg) =>
             {
                 var filename = $"{arg.SongInfo.SongMetadata.Artist}-{arg.SongInfo.SongMetadata.Title}.mp3";
-                // var reader = new Mp3FileReader(arg.SongInfo.Stream.Reset());
+                
+                var builder = new Mp3FileReader.FrameDecompressorBuilder(wf => new Mp3FrameDecompressor(wf));
 
-                if (_filterSongLogic.ShouldInclude(filename, stream.Filter) /*&& reader.TotalTime.TotalSeconds >= 30*/)
+                var reader = new Mp3FileReader(arg.SongInfo.Stream.Reset(), builder);
+
+                if (_filterSongLogic.ShouldInclude(filename, stream.Filter) && reader.TotalTime.TotalSeconds >= 30)
                 {
                     // Upload the stream
                     await aggregatedSink(arg.SongInfo.Stream.Reset(), filename);
