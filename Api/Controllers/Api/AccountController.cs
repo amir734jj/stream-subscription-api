@@ -76,7 +76,11 @@ namespace Api.Controllers.Api
                 return Ok("Successfully registered!");
             }
 
-            return BadRequest("Failed to register!");
+            return BadRequest(new
+            {
+                Message = "Failed to register!",
+                Errors = identityResults.SelectMany(x => x.Errors.Select(y => y.Description))
+            });
         }
 
         [HttpPost]
