@@ -8,6 +8,7 @@ This service is free, we do not own the ripped `.mp3` files and we do not store 
 - [UI](https://stream-subscription-ui.herokuapp.com/) URL
 
 Libraries:
+  - [StreamRipper](https://github.com/amir734jj/Stream-ripper): used to rip online radios
   - SignalR: used to send live log and song infos to the front-end
   - ReactiveX: used to manage concurrency
   - EntityFramework.Core: database ORM
