@@ -1,0 +1,18 @@
+﻿{
+  "profiles": {
+    "Api": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "CLOUDCUBE_ACCESS_KEY_ID": "",
+        "CLOUDCUBE_SECRET_ACCESS_KEY": "",
+        "CLOUDCUBE_URL": "",
+        "DATABASE_URL": "",
+        "JwtSettings:Key": "",
+        "REDISTOGO_URL": ""
+      }
+    }
+  }
+}
