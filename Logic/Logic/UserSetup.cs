@@ -12,9 +12,9 @@ namespace Logic.Logic
 {
     public class UserSetup : IUserSetup
     {
-        private readonly Container _container;
+        private readonly IContainer _container;
 
-        public UserSetup(Container container)
+        public UserSetup(IContainer container)
         {
             _container = container;
         }
