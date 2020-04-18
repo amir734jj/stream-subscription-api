@@ -69,7 +69,7 @@ namespace Api.Controllers.Api
                 await _userManager.CreateAsync(user, registerViewModel.Password)
             };
 
-            if (identityResults.Aggregate(true, (b, result) => b && result.Succeeded))
+            if (identityResults.All(x => x.Succeeded))
             {
                 await _userSetup.Setup(user);
                 
