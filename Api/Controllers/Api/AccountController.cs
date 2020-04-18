@@ -75,7 +75,7 @@ namespace Api.Controllers.Api
 
             if (identityResults.All(x => x.Succeeded))
             {
-                TempData[SetupUserTempDataKey] = user.Id;
+                TempData[SetupUserTempDataKey] = user.UserName;
                 
                 return RedirectToAction("Setup");
             }
@@ -90,9 +90,9 @@ namespace Api.Controllers.Api
         [AllowAnonymous]
         public async Task<IActionResult> Setup()
         {
-            if (TempData.TryGetValue(SetupUserTempDataKey, out var untypedUserId) && untypedUserId is string userId)
+            if (TempData.TryGetValue(SetupUserTempDataKey, out var untypedUserId) && untypedUserId is string username)
             {
-                var user = await _userManager.FindByIdAsync(userId);
+                var user = await _userManager.FindByNameAsync(username);
             
                 await _userSetup.Setup(user);
 
