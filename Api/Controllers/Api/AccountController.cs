@@ -15,6 +15,7 @@ using Models.Models;
 using Models.ViewModels.Identities;
 using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.AspNetCore.Authorization;
+using Models.ViewModels.Api;
 
 namespace Api.Controllers.Api
 {
@@ -76,11 +77,8 @@ namespace Api.Controllers.Api
                 return Ok("Successfully registered!");
             }
 
-            return BadRequest(new
-            {
-                Message = "Failed to register!",
-                Errors = identityResults.SelectMany(x => x.Errors.Select(y => y.Description))
-            });
+            return BadRequest(new ErrorViewModel(new[] {"Failed to register!"}
+                .Concat(identityResults.SelectMany(x => x.Errors.Select(y => y.Description))).ToArray()));
         }
 
         [HttpPost]
@@ -93,11 +91,7 @@ namespace Api.Controllers.Api
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, loginViewModel.Password))
             {
-                return BadRequest(new
-                {
-                    error = "", // OpenIdConnectConstants.Errors.InvalidGrant,
-                    error_description = "The username or password is invalid."
-                });
+                return BadRequest(new ErrorViewModel("The username or password is invalid."));
             }
 
             await _signManager.SignInAsync(user, true);

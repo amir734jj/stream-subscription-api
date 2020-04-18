@@ -5,6 +5,7 @@ using System.Text;
 using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
+using Api.Attributes;
 using Api.Configs;
 using Api.Extensions;
 using Dal.Configs;
@@ -160,6 +161,9 @@ namespace Api
                 {
                     x.Filters.Add<AllowAnonymousFilter>();
                 }
+
+                // Exception filter attribute
+                x.Filters.Add<ExceptionFilterAttribute>();
             }).AddNewtonsoftJson(x =>
             {
                 x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
