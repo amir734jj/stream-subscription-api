@@ -14,29 +14,26 @@ namespace Logic.Logic
 {
     public class UserSetup : IUserSetup
     {
-        private readonly IContainer _container;
+        private readonly DbContext _dbContext;
+        private readonly IStreamRipperManager _streamRipperManager;
 
-        public UserSetup(IContainer container)
+        public UserSetup(DbContext dbContext, IStreamRipperManager streamRipperManager)
         {
-            _container = container;
+            _dbContext = dbContext;
+            _streamRipperManager = streamRipperManager;
         }
 
         public async Task Setup(User user)
         {
-            using var nestedContainer = _container.GetNestedContainer();
-
-            var dbContext = nestedContainer.GetInstance<DbContext>();
-            var streamRipperManager = nestedContainer.GetInstance<IStreamRipperManager>();
-
             var fileString = await File.ReadAllTextAsync(SetupUserRecipe);
 
             JsonConvert.DeserializeAnonymousType(fileString, new {Streams = new List<Stream>()})
                 .Streams
                 .ForEach(x => user.Streams.Add(x));
 
-            await dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
 
-            await streamRipperManager.StartMany(user.Streams);
+            await _streamRipperManager.StartMany(user.Streams);
         }
     }
 }
