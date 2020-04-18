@@ -75,9 +75,7 @@ namespace Api.Controllers.Api
 
             if (identityResults.All(x => x.Succeeded))
             {
-                TempData[SetupUserTempDataKey] = user.UserName;
-                
-                return RedirectToAction("Setup");
+                return RedirectToAction("Setup", new {userId = user.Id});
             }
 
             return BadRequest(new ErrorViewModel(new[] {"Failed to register!"}
@@ -85,23 +83,14 @@ namespace Api.Controllers.Api
         }
 
         [HttpGet]
-        [Route("Setup")]
+        [Route("Setup/{userId}")]
         [SwaggerOperation("Setup")]
         [AllowAnonymous]
-        public async Task<IActionResult> Setup()
+        public async Task<IActionResult> Setup([FromRoute] int userId)
         {
-            if (TempData.TryGetValue(SetupUserTempDataKey, out var untypedUserId) && untypedUserId is string username)
-            {
-                var user = await _userManager.FindByNameAsync(username);
-            
-                await _userSetup.Setup(user);
+            await _userSetup.Setup(userId);
 
-                return Ok("Successfully registered and setup user");
-            }
-
-            TempData.Remove(SetupUserTempDataKey);
-
-            return BadRequest("Setup user failed!");
+            return Ok("Successfully registered and setup user");
         }
 
         [HttpPost]

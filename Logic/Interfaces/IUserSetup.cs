@@ -5,6 +5,6 @@ namespace Logic.Interfaces
 {
     public interface IUserSetup
     {
-        Task Setup(User user);
+        Task Setup(int user);
     }
 }

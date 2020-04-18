@@ -124,7 +124,7 @@ namespace Api
                 options.IdleTimeout = TimeSpan.FromMinutes(60);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.Name = ApiConstants.AuthenticationSessionCookieName;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.None;
             });
 
             services.AddSwaggerGen(c =>
