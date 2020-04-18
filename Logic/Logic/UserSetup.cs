@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Logic.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Models.Models;
 using Newtonsoft.Json;
 using StructureMap;
 using Stream = Models.Models.Stream;
@@ -19,23 +21,22 @@ namespace Logic.Logic
             _container = container;
         }
 
-        public async Task Setup(string username)
+        public async Task Setup(User user)
         {
             using var nestedContainer = _container.GetNestedContainer();
 
+            var dbContext = nestedContainer.GetInstance<DbContext>();
             var streamRipperManager = nestedContainer.GetInstance<IStreamRipperManager>();
-            var userLogic = nestedContainer.GetInstance<IUserLogic>();
-            var streamLogic = nestedContainer.GetInstance<IStreamLogic>();
-
-            var user = (await userLogic.GetAll()).First(x => x.UserName == username);
 
             var fileString = await File.ReadAllTextAsync(SetupUserRecipe);
 
-            await Task.WhenAll(JsonConvert.DeserializeAnonymousType(fileString, new {Streams = new List<Stream>()})
+            JsonConvert.DeserializeAnonymousType(fileString, new {Streams = new List<Stream>()})
                 .Streams
-                .Select(x => streamLogic.For(user).Save(x)));
+                .ForEach(x => user.Streams.Add(x));
 
-            await streamRipperManager.StartMany(await streamLogic.For(user).GetAll());
+            await dbContext.SaveChangesAsync();
+
+            await streamRipperManager.StartMany(user.Streams);
         }
     }
 }
