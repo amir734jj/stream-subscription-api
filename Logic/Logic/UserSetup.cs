@@ -16,16 +16,22 @@ namespace Logic.Logic
         
         private readonly IStreamRipperManager _streamRipperManager;
 
-        public UserSetup(IStreamLogic streamLogic, IStreamRipperManager streamRipperManager)
+        private readonly IUserLogic _userLogic;
+
+        public UserSetup(IStreamLogic streamLogic, IStreamRipperManager streamRipperManager, IUserLogic userLogic)
         {
             _streamLogic = streamLogic;
             _streamRipperManager = streamRipperManager;
+            _userLogic = userLogic;
         }
         
-        public async Task Setup(User user)
+        public async Task Setup(string username)
         {
-            await Task.WhenAll(JsonConvert.DeserializeAnonymousType(await File.ReadAllTextAsync(SetupUserJson),
-                    new {Streams = new List<Stream>()})
+            var user = (await _userLogic.GetAll()).First(x => x.UserName == username);
+            
+            var fileString = await File.ReadAllTextAsync(SetupUserRecipe);
+
+            await Task.WhenAll(JsonConvert.DeserializeAnonymousType(fileString, new {Streams = new List<Stream>()})
                 .Streams
                 .Select(x => _streamLogic.For(user).Save(x)));
 

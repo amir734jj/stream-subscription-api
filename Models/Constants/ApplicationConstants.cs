@@ -8,6 +8,6 @@ namespace Models.Constants
         
         public static readonly Encoding DefaultEncoding = Encoding.UTF8;
 
-        public const string SetupUserJson = "SetupUser.json";
+        public const string SetupUserRecipe = "SetupUser.json";
     }
 }

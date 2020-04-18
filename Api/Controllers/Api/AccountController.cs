@@ -72,7 +72,7 @@ namespace Api.Controllers.Api
 
             if (identityResults.All(x => x.Succeeded))
             {
-                await _userSetup.Setup(user);
+                await _userSetup.Setup(user.UserName);
                 
                 return Ok("Successfully registered!");
             }
