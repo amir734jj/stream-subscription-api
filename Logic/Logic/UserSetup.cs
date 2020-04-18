@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Dal.Utilities;
 using Logic.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Stream = Models.Models.Stream;
 using static Models.Constants.ApplicationConstants;
@@ -11,26 +13,25 @@ namespace Logic.Logic
 {
     public class UserSetup : IUserSetup
     {
-        private readonly DbContext _dbContext;
+        private readonly EntityDbContext _dbContext;
         private readonly IStreamRipperManager _streamRipperManager;
-        private readonly IUserLogic _userLogic;
 
-        public UserSetup(DbContext dbContext, IStreamRipperManager streamRipperManager, IUserLogic userLogic)
+        public UserSetup(EntityDbContext dbContext, IStreamRipperManager streamRipperManager)
         {
             _dbContext = dbContext;
             _streamRipperManager = streamRipperManager;
-            _userLogic = userLogic;
         }
 
         public async Task Setup(int userId)
         {
-            var user = await _userLogic.Get(userId);
+            var user = _dbContext.Users
+                .Include(x => x.Streams)
+                .First(x => x.Id == userId);
             
             var fileString = await File.ReadAllTextAsync(SetupUserRecipe);
 
-            JsonConvert.DeserializeAnonymousType(fileString, new {Streams = new List<Stream>()})
-                .Streams
-                .ForEach(x => user.Streams.Add(x));
+            user.Streams.AddRange(JsonConvert.DeserializeAnonymousType(fileString, new {Streams = new List<Stream>()})
+                .Streams);
 
             await _dbContext.SaveChangesAsync();
 

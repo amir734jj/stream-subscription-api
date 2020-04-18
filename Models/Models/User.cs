@@ -12,7 +12,7 @@ namespace Models.Models
     {
         public string Name { get; set; }
 
-        public List<Stream> Streams { get; set; }
+        public List<Stream> Streams { get; set; } = new List<Stream>();
 
         public object Obfuscate()
         {

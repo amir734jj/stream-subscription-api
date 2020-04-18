@@ -9,7 +9,7 @@ namespace Models.ViewModels.Api
 
         public ErrorViewModel(params string[] errors)
         {
-            Errors = errors.Take(3).ToList();
+            Errors = errors.Take(1).ToList();
         }
     }
 }

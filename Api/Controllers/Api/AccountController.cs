@@ -27,10 +27,10 @@ namespace Api.Controllers.Api
 
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signManager;
-        private readonly IOptions<JwtSettings> _jwtSettings;
+        private readonly JwtSettings _jwtSettings;
         private readonly IUserSetup _userSetup;
 
-        public AccountController(IOptions<JwtSettings> jwtSettings, UserManager<User> userManager,
+        public AccountController(JwtSettings jwtSettings, UserManager<User> userManager,
             SignInManager<User> signManager, IUserSetup userSetup)
         {
             _jwtSettings = jwtSettings;
@@ -165,14 +165,14 @@ namespace Api.Controllers.Api
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.Key));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             
-            var expires = DateTime.Now.AddMinutes(_jwtSettings.Value.AccessTokenDurationInMinutes);
+            var expires = DateTime.Now.AddMinutes(_jwtSettings.AccessTokenDurationInMinutes);
 
             var token = new JwtSecurityToken(
-                _jwtSettings.Value.Issuer,
-                _jwtSettings.Value.Issuer,
+                _jwtSettings.Issuer,
+                _jwtSettings.Issuer,
                 claims,
                 expires: expires,
                 signingCredentials: credentials);
