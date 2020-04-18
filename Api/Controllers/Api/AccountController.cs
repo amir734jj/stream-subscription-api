@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -23,6 +24,8 @@ namespace Api.Controllers.Api
     [Route("api/[controller]")]
     public class AccountController : Controller
     {
+        private const string SetupUserTempDataKey = nameof(SetupUserTempDataKey);
+
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signManager;
         private readonly IOptions<JwtSettings> _jwtSettings;
@@ -72,13 +75,33 @@ namespace Api.Controllers.Api
 
             if (identityResults.All(x => x.Succeeded))
             {
-                await _userSetup.Setup(user);
+                TempData[SetupUserTempDataKey] = user.Id;
                 
-                return Ok("Successfully registered!");
+                return RedirectToAction("Setup");
             }
 
             return BadRequest(new ErrorViewModel(new[] {"Failed to register!"}
                 .Concat(identityResults.SelectMany(x => x.Errors.Select(y => y.Description))).ToArray()));
+        }
+
+        [HttpGet]
+        [Route("Setup")]
+        [SwaggerOperation("Setup")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Setup()
+        {
+            if (TempData.TryGetValue(SetupUserTempDataKey, out var untypedUserId) && untypedUserId is string userId)
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+            
+                await _userSetup.Setup(user);
+
+                return Ok("Successfully registered and setup user");
+            }
+
+            TempData.Remove(SetupUserTempDataKey);
+
+            return BadRequest("Setup user failed!");
         }
 
         [HttpPost]
