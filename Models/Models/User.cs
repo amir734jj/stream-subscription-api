@@ -18,7 +18,7 @@ namespace Models.Models
         {
             const string pattern = @"(?<=[\w]{1})[\w-\._\+%]*(?=[\w]{1}@)";
 
-            var obfuscatedEmail = Regex.Replace(string.Empty, pattern, m => new string('*', m.Length));
+            var obfuscatedEmail = Regex.Replace(Email, pattern, m => new string('*', m.Length));
             
             return new {Email = obfuscatedEmail, Name};
         }
