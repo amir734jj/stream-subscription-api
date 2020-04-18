@@ -26,10 +26,10 @@ namespace Api.Controllers.Api
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signManager;
         private readonly IOptions<JwtSettings> _jwtSettings;
-        private readonly IUserSetup _userSetup;
+        private readonly Lazy<IUserSetup> _userSetup;
 
         public AccountController(IOptions<JwtSettings> jwtSettings, UserManager<User> userManager,
-            SignInManager<User> signManager, IUserSetup userSetup)
+            SignInManager<User> signManager, Lazy<IUserSetup> userSetup)
         {
             _jwtSettings = jwtSettings;
             _userManager = userManager;
@@ -72,7 +72,7 @@ namespace Api.Controllers.Api
 
             if (identityResults.All(x => x.Succeeded))
             {
-                await _userSetup.Setup(user.UserName);
+                await _userSetup.Value.Setup(user.UserName);
                 
                 return Ok("Successfully registered!");
             }
