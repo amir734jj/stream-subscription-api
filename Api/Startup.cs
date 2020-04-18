@@ -182,7 +182,7 @@ namespace Api
                                                         ?? throw new Exception("DATABASE_URL is null"));
                     opt.UseNpgsql(postgresConnectionString);
                 }
-            });
+            }, ServiceLifetime.Transient);
 
             services.AddIdentity<User, IdentityRole<int>>(x => { x.User.RequireUniqueEmail = true; })
                 .AddEntityFrameworkStores<EntityDbContext>()
