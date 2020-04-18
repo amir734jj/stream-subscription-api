@@ -22,5 +22,10 @@ namespace Models.Models
             
             return new {Email = obfuscatedEmail, Name};
         }
+
+        public object ToAnonymousObject()
+        {
+            return new {Email, Name};
+        }
     }
 }

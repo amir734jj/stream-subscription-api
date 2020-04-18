@@ -37,7 +37,7 @@ namespace Api.Controllers.Api
         {
             var user = await _userManager.FindByEmailAsync(User.Identity.Name);
 
-            var users = (await _userLogic.GetAll()).Select(x => x.Id == user.Id ? x : x.Obfuscate());
+            var users = (await _userLogic.GetAll()).Select(x => x.Id == user.Id ? x.ToAnonymousObject() : x.Obfuscate());
 
             return Ok(users);
         }
