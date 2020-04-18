@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Logic.Interfaces;
-using Models.Models;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Stream = Models.Models.Stream;
 using static Models.Constants.ApplicationConstants;
@@ -12,29 +11,30 @@ namespace Logic.Logic
 {
     public class UserSetup : IUserSetup
     {
-        private readonly IStreamLogic _streamLogic;
-        
+        private readonly DbContext _dbContext;
         private readonly IStreamRipperManager _streamRipperManager;
-
         private readonly IUserLogic _userLogic;
 
-        public UserSetup(IStreamLogic streamLogic, IStreamRipperManager streamRipperManager, IUserLogic userLogic)
+        public UserSetup(DbContext dbContext, IStreamRipperManager streamRipperManager, IUserLogic userLogic)
         {
-            _streamLogic = streamLogic;
+            _dbContext = dbContext;
             _streamRipperManager = streamRipperManager;
             _userLogic = userLogic;
         }
-        
+
         public async Task Setup(int userId)
         {
-            var user = await _userLogic.Get(userId);            
+            var user = await _userLogic.Get(userId);
             
-            await Task.WhenAll(JsonConvert.DeserializeAnonymousType(await File.ReadAllTextAsync(SetupUserRecipe),
-                    new {Streams = new List<Stream>()})
-                .Streams
-                .Select(x => _streamLogic.For(user).Save(x)));
+            var fileString = await File.ReadAllTextAsync(SetupUserRecipe);
 
-            await _streamRipperManager.StartMany(await _streamLogic.For(user).GetAll());
+            JsonConvert.DeserializeAnonymousType(fileString, new {Streams = new List<Stream>()})
+                .Streams
+                .ForEach(x => user.Streams.Add(x));
+
+            await _dbContext.SaveChangesAsync();
+
+            await _streamRipperManager.StartMany(user.Streams);
         }
     }
 }
