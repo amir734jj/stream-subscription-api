@@ -72,7 +72,7 @@ namespace Api.Controllers.Api
 
             if (identityResults.All(x => x.Succeeded))
             {
-                await _userSetup.Setup(user.UserName);
+                await Task.Delay(TimeSpan.FromSeconds(5)).ContinueWith(t => _userSetup.Setup(user.UserName));
                 
                 return Ok("Successfully registered!");
             }
