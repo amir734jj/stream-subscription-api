@@ -1,15 +1,16 @@
-﻿using System.Threading.Tasks;
-using Api.Abstracts;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Logic.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Controllers.Api
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class UserController : BasicCrudController<User>
+    public class UserController : Controller
     {
         private readonly IUserLogic _userLogic;
 
@@ -22,13 +23,13 @@ namespace Api.Controllers.Api
             _userLogic = userLogic;
         }
 
-        /// <summary>
-        /// Returns instance of logic
-        /// </summary>
-        /// <returns></returns>
-        protected override async Task<IBasicLogic<User>> BasicLogic()
+        [HttpGet]
+        [Route("")]
+        [SwaggerOperation("GetAll")]
+        [ProducesResponseType(typeof(IEnumerable<>), 200)]
+        public async Task<IActionResult> GetAll()
         {
-            return _userLogic;
+            return Ok((await _userLogic.GetAll()).Select(x => x.Obfuscate()));
         }
     }
 }

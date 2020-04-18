@@ -206,6 +206,11 @@ namespace Api
             var jwtSetting = _configuration
                 .GetSection("JwtSettings")
                 .Get<JwtSettings>();
+
+            if (_env.IsDevelopment() && string.IsNullOrEmpty(jwtSetting.Key))
+            {
+                jwtSetting.Key = Guid.NewGuid().ToString();
+            }
             
             services.AddAuthentication(options => {
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
