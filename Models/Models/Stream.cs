@@ -17,7 +17,7 @@ namespace Models.Models
         
         public string Url { get; set; }
 
-        public string Filter { get; set; } = string.Empty;
+        public string Filter { get; set; } = "advertisement";
 
         /// <summary>
         /// User reference
