@@ -3,7 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Logic.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Models.Models;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Controllers.Api
@@ -14,13 +16,17 @@ namespace Api.Controllers.Api
     {
         private readonly IUserLogic _userLogic;
 
+        private readonly UserManager<User> _userManager;
+
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
         /// <param name="userLogic"></param>
-        public UserController(IUserLogic userLogic)
+        /// <param name="userManager"></param>
+        public UserController(IUserLogic userLogic, UserManager<User> userManager)
         {
             _userLogic = userLogic;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -29,7 +35,11 @@ namespace Api.Controllers.Api
         [ProducesResponseType(typeof(IEnumerable<>), 200)]
         public async Task<IActionResult> GetAll()
         {
-            return Ok((await _userLogic.GetAll()).Select(x => x.Obfuscate()));
+            var user = await _userManager.FindByEmailAsync(User.Identity.Name);
+
+            var users = (await _userLogic.GetAll()).Select(x => x.Id == user.Id ? x : x.Obfuscate());
+
+            return Ok(users);
         }
     }
 }
