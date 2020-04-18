@@ -32,8 +32,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MlkPwgen;
 using Models.Constants;
 using Models.Models;
 using Newtonsoft.Json;
@@ -182,9 +184,9 @@ namespace Api
                                                         ?? throw new Exception("DATABASE_URL is null"));
                     opt.UseNpgsql(postgresConnectionString);
                 }
-            }, ServiceLifetime.Transient);
+            });
 
-            services.AddIdentity<User, IdentityRole<int>>(x => { x.User.RequireUniqueEmail = true; })
+            services.AddIdentity<User, IdentityRole<int>>(x => x.User.RequireUniqueEmail = true)
                 .AddEntityFrameworkStores<EntityDbContext>()
                 .AddRoles<IdentityRole<int>>()
                 .AddDefaultTokenProviders();
@@ -213,7 +215,9 @@ namespace Api
 
             if (_env.IsDevelopment() && string.IsNullOrEmpty(jwtSetting.Key))
             {
-                jwtSetting.Key = Guid.NewGuid().ToString();
+                jwtSetting.Key = PasswordGenerator.Generate(length: 100, allowed: Sets.Alphanumerics);
+                
+                IdentityModelEventSource.ShowPII = true;
             }
             
             services.AddAuthentication(options => {
@@ -244,6 +248,8 @@ namespace Api
 
             var container = new Container(config =>
             {
+                config.For<JwtSettings>().Use(jwtSetting).Singleton();
+                
                 // If environment is localhost then use mock email service
                 if (_env.IsDevelopment())
                 {
