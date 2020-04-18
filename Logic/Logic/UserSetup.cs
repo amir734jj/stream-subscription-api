@@ -24,7 +24,6 @@ namespace Logic.Logic
             using var nestedContainer = _container.GetNestedContainer();
 
             var streamRipperManager = nestedContainer.GetInstance<IStreamRipperManager>();
-
             var userLogic = nestedContainer.GetInstance<IUserLogic>();
             var streamLogic = nestedContainer.GetInstance<IStreamLogic>();
 
