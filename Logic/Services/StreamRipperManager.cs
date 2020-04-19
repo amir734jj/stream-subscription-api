@@ -199,7 +199,7 @@ namespace Logic.Services
                         filename,
                         arg.SongInfo.SongMetadata,
                         arg.SongInfo.Stream.Reset().ConvertToBase64(),
-                        stream
+                        new { stream.Name, stream.Id }
                     );
                 }
                 else
