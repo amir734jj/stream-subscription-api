@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
+using System.Threading;
 using System.Threading.Tasks;
 using Logic.Extensions;
 using Logic.Interfaces;
@@ -77,17 +76,26 @@ namespace Logic.Services
                     (stream, _) => stream));
         }
 
-        public Task StartMany(IEnumerable<Stream> streams)
+        public async Task StartMany(IEnumerable<Stream> streams)
         {
-            streams.ToObservable()
-                .Throttle(TimeSpan.FromSeconds(5))
-                .Select(stream => For(stream.User).Start(stream.Id).WrapResultOrException(false, _logger).Result)
-                .Subscribe(wrappedResult =>
-                {
-                    _logger.LogInformation($"Starting stream yielded: {wrappedResult.Result}");
-                });
+            var mutex = new SemaphoreSlim(1);
 
-            return Task.CompletedTask;
+            var tasks = streams.Select(async stream =>
+            {
+                await mutex.WaitAsync();
+                try
+                {
+                    await For(stream.User).Start(stream.Id);
+
+                    _logger.LogInformation($"Started stream {stream.Id} yielded");
+                }
+                finally
+                {
+                    mutex.Release();
+                }
+            });
+
+            await Task.WhenAll(tasks);
         }
     }
 
