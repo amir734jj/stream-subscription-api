@@ -15,7 +15,7 @@
     <PackageReference Include="NAudio" Version="1.10.0" />
     <PackageReference Include="NLayer" Version="1.13.0" />
     <PackageReference Include="NLayer.NAudioSupport" Version="1.1.0" />
-    <PackageReference Include="StreamRipper" Version="2.1.4" />
+    <PackageReference Include="StreamRipper" Version="2.1.5" />
     <PackageReference Include="structuremap" Version="4.7.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
   </ItemGroup>
