@@ -81,10 +81,10 @@ namespace Logic.Services
         {
             streams.ToObservable()
                 .Throttle(TimeSpan.FromSeconds(5))
-                .Select(stream => For(stream.User).Start(stream.Id).WrapResultOrException(false, _logger).ToObservable())
+                .Select(stream => For(stream.User).Start(stream.Id).WrapResultOrException(false, _logger).Result)
                 .Subscribe(wrappedResult =>
                 {
-                    _logger.LogInformation($"Starting stream yielded: {wrappedResult}");
+                    _logger.LogInformation($"Starting stream yielded: {wrappedResult.Result}");
                 });
 
             return Task.CompletedTask;
