@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Logic.Extensions;
 using Logic.Interfaces;
@@ -72,16 +74,17 @@ namespace Logic.Services
             await StartMany(streams.Join(startedStreamIds,
                     stream => stream.Id,
                     streamId => streamId,
-                    (stream, _) => stream)
-                .AsParallel());
+                    (stream, _) => stream));
         }
 
         public Task StartMany(IEnumerable<Stream> streams)
         {
-            streams.AsParallel().Select(stream => For(stream.User).Start(stream.Id).WrapResultOrException(false, _logger))
-                .ForAll(wrappedResult =>
+            streams.ToObservable()
+                .Throttle(TimeSpan.FromSeconds(5))
+                .Select(stream => For(stream.User).Start(stream.Id).WrapResultOrException(false, _logger).ToObservable())
+                .Subscribe(wrappedResult =>
                 {
-                    _logger.LogInformation($"Starting stream yielded: {wrappedResult.Result}");
+                    _logger.LogInformation($"Starting stream yielded: {wrappedResult}");
                 });
 
             return Task.CompletedTask;
