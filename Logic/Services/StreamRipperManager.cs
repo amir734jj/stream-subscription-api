@@ -17,6 +17,7 @@ using StreamRipper.Interfaces;
 using Stream = Models.Models.Stream;
 using NAudio.Wave;
 using NLayer.NAudioSupport;
+using StreamRipper.Models;
 
 namespace Logic.Services
 {
@@ -177,7 +178,12 @@ namespace Logic.Services
                 return false;
             }
 
-            var streamRipperInstance = new StreamRipperImpl(new Uri(stream.Url), _logger);
+            var streamRipperInstance = new StreamRipperImpl(new StreamRipperOptions
+            {
+                Url = new Uri(stream.Url),
+                Logger = _logger,
+                MaxBufferSize = 15 * 1000000    // stop when buffer size passes 15 megabytes
+            });
 
             streamRipperInstance.SongChangedEventHandlers += async (_, arg) =>
             {
