@@ -76,7 +76,7 @@ namespace Logic.Services
                     streamId => streamId,
                     (stream, _) => stream)
                 // in the last 7 days user should have logged in for stream to auto start
-                .Where(x => DateTimeOffset.Now - x.User?.LastLoginTime >= TimeSpan.FromDays(7)));
+                .Where(x => DateTimeOffset.Now - x.User?.LastLoginTime <= TimeSpan.FromDays(7)));
         }
 
         public async Task StartMany(IEnumerable<Stream> streams)
