@@ -13,7 +13,7 @@ namespace Models.Models
     {
         public string Name { get; set; }
         
-        public virtual DateTimeOffset? LastLoginTime { get; set; }  = DateTimeOffset.MinValue;
+        public virtual DateTimeOffset LastLoginTime { get; set; }  = DateTimeOffset.MinValue;
 
         public List<Stream> Streams { get; set; } = new List<Stream>();
 
