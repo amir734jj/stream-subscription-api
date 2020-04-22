@@ -178,7 +178,7 @@ namespace Logic.Services
                 return false;
             }
 
-            var streamRipperInstance = new StreamRipperImpl(new StreamRipperOptions
+            var streamRipperInstance = StreamRipperImpl.New(new StreamRipperOptions
             {
                 Url = new Uri(stream.Url),
                 Logger = _logger,
