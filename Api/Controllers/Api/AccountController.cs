@@ -29,14 +29,16 @@ namespace Api.Controllers.Api
         private readonly SignInManager<User> _signManager;
         private readonly JwtSettings _jwtSettings;
         private readonly IUserSetup _userSetup;
+        private readonly IUserLogic _userLogic;
 
         public AccountController(JwtSettings jwtSettings, UserManager<User> userManager,
-            SignInManager<User> signManager, IUserSetup userSetup)
+            SignInManager<User> signManager, IUserSetup userSetup, IUserLogic userLogic)
         {
             _jwtSettings = jwtSettings;
             _userManager = userManager;
             _signManager = signManager;
             _userSetup = userSetup;
+            _userLogic = userLogic;
         }
 
         [HttpGet]
@@ -106,6 +108,9 @@ namespace Api.Controllers.Api
             }
 
             await _signManager.SignInAsync(user, true);
+
+            // Set LastLoginTime
+            await _userLogic.Update(user.Id, x => x.LastLoginTime = DateTimeOffset.Now);
 
             var (token, expires) = ResolveToken(user);
 

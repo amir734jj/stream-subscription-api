@@ -44,5 +44,12 @@ namespace Dal
                 .Include(x => x.Streams)
                 .ThenInclude(x => x.FtpSinkRelationships);
         }
+
+        protected override User UpdateEntity(User entity, User dto)
+        {
+            entity.LastLoginTime = dto.LastLoginTime;
+            
+            return entity;
+        }
     }
 }

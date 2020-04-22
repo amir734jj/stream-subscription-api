@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using Models.Interfaces;
@@ -11,6 +12,8 @@ namespace Models.Models
     public class User : IdentityUser<int>, IEntity
     {
         public string Name { get; set; }
+        
+        public virtual DateTimeOffset? LastLoginTime { get; set; }  = DateTimeOffset.MinValue;
 
         public List<Stream> Streams { get; set; } = new List<Stream>();
 

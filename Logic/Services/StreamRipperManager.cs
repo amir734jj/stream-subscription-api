@@ -17,6 +17,7 @@ using StreamRipper.Interfaces;
 using Stream = Models.Models.Stream;
 using NAudio.Wave;
 using NLayer.NAudioSupport;
+using Org.BouncyCastle.Asn1.Cms;
 
 namespace Logic.Services
 {
@@ -73,7 +74,9 @@ namespace Logic.Services
             await StartMany(streams.Join(startedStreamIds,
                     stream => stream.Id,
                     streamId => streamId,
-                    (stream, _) => stream));
+                    (stream, _) => stream)
+                // in the last 7 days user should have logged in for stream to auto start
+                .Where(x => DateTimeOffset.Now - x.User?.LastLoginTime <= TimeSpan.FromDays(7)));
         }
 
         public async Task StartMany(IEnumerable<Stream> streams)
