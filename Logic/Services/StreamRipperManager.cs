@@ -15,8 +15,6 @@ using Models.ViewModels.Config;
 using StreamRipper;
 using StreamRipper.Interfaces;
 using Stream = Models.Models.Stream;
-using NAudio.Wave;
-using NLayer.NAudioSupport;
 using StreamRipper.Models;
 
 namespace Logic.Services
@@ -189,13 +187,10 @@ namespace Logic.Services
 
             streamRipperInstance.SongChangedEventHandlers += async (_, arg) =>
             {
-                var filename = $"{arg.SongInfo.SongMetadata.Artist}-{arg.SongInfo.SongMetadata.Title}.mp3";
-                
-                var builder = new Mp3FileReader.FrameDecompressorBuilder(wf => new Mp3FrameDecompressor(wf));
+                var track = $"{arg.SongInfo.SongMetadata.Artist}-{arg.SongInfo.SongMetadata.Title}";
+                var filename = $"{track}.mp3";
 
-                var reader = new Mp3FileReader(arg.SongInfo.Stream.Reset(), builder);
-
-                if (_filterSongLogic.ShouldInclude(filename, stream.Filter) && reader.TotalTime.TotalSeconds >= 30)
+                if (_filterSongLogic.ShouldInclude(arg.SongInfo.Stream, track, stream.Filter))
                 {
                     var aggregatedSink = await _sinkService.Resolve(stream);
 

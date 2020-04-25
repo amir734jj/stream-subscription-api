@@ -23,9 +23,13 @@ namespace Logic.Sinks
         {
             var directory = Path.Join(_ftpSink.Path, stream.Name);
 
+            await _client.ConnectAsync();
+
             await _client.CreateDirectoryAsync(directory);
             
             await _client.UploadAsync(data, Path.Join(directory, filename));
+
+            await _client.DisconnectAsync();
         }
     }
 }

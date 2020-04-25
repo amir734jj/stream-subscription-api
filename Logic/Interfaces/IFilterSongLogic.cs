@@ -1,7 +1,9 @@
+using System.IO;
+
 namespace Logic.Interfaces
 {
     public interface IFilterSongLogic
     {
-        bool ShouldInclude(string filename, string pattern);
+        bool ShouldInclude(MemoryStream stream, string track, string pattern);
     }
 }
