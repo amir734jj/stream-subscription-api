@@ -21,7 +21,7 @@ namespace Logic.Services
         
         public async Task<Func<MemoryStream, string, Task>> ResolveStreamSink(Stream stream)
         {
-            var sinks = stream.FtpSinkRelationships
+            var sinks = stream.StreamFtpSinkRelationships
                 .Select(x => new FtpUploadService(x.FtpSink))
                 .Cast<IUploadService>()
                 .ToList();

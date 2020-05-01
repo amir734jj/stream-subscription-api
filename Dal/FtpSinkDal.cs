@@ -42,10 +42,13 @@ namespace Dal
         protected override IQueryable<FtpSink> Intercept<TQueryable>(TQueryable queryable)
         {
             return queryable
+                .Include(x => x.StreamFtpSinkRelationships)
+                    .ThenInclude(x => x.FtpSink)
+                    .ThenInclude(x => x.User)
                 .Include(x => x.User)
-                .ThenInclude(x => x.Streams)
-                .ThenInclude(x => x.FtpSinkRelationships)
-                .ThenInclude(x => x.FtpSink);
+                    .ThenInclude(x => x.Streams)
+                    .ThenInclude(x => x.StreamFtpSinkRelationships)
+                    .ThenInclude(x => x.FtpSink);
         }
 
         protected override FtpSink UpdateEntity(FtpSink entity, FtpSink dto)
@@ -57,7 +60,9 @@ namespace Dal
             entity.Path = dto.Path;
             entity.Port = dto.Port;
             entity.Favorite = dto.Favorite;
-            entity.FtpSinkRelationships = entity.FtpSinkRelationships.IdAwareUpdate(dto.FtpSinkRelationships, x => x.GetHashCode());
+            entity.StreamFtpSinkRelationships =
+                entity.StreamFtpSinkRelationships.IdAwareUpdate(dto.StreamFtpSinkRelationships,
+                    x => new {x.StreamId, x.FtpSinkId});
 
             return entity;
         }

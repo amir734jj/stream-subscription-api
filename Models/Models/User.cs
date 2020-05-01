@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using Models.Interfaces;
+using Models.Models.Relationships;
 using Models.Models.Sinks;
 
 namespace Models.Models
@@ -18,6 +20,9 @@ namespace Models.Models
 
         public List<Stream> Streams { get; set; } = new List<Stream>();
 
+        /// <summary>
+        /// FtpSink - User relationship
+        /// </summary>
         public List<FtpSink> FtpSinks { get; set; } = new List<FtpSink>();
 
         public object Obfuscate()

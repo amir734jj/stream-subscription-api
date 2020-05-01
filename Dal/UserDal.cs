@@ -41,8 +41,9 @@ namespace Dal
         protected override IQueryable<User> Intercept<TQueryable>(TQueryable queryable)
         {
             return queryable
+                .Include(x => x.FtpSinks)
                 .Include(x => x.Streams)
-                .ThenInclude(x => x.FtpSinkRelationships);
+                    .ThenInclude(x => x.StreamFtpSinkRelationships);
         }
 
         protected override User UpdateEntity(User entity, User dto)

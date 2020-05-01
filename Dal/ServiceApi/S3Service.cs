@@ -17,8 +17,11 @@ namespace Dal.ServiceApi
     public class S3Service : IS3Service
     {
         private readonly IAmazonS3 _client;
+        
         private readonly ILogger<S3Service> _logger;
+        
         private readonly S3ServiceConfig _s3ServiceConfig;
+        
         private readonly bool _connected;
         
         public S3Service()

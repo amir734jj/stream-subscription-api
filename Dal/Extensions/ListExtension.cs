@@ -13,13 +13,12 @@ namespace Dal.Extensions
         /// <param name="destination"></param>
         /// <param name="idSelector"></param>
         /// <typeparam name="T"></typeparam>
-        /// <typeparam name="TProperty"></typeparam>
+        /// <typeparam name="TKey"></typeparam>
         /// <returns></returns>
         // ReSharper disable once ParameterTypeCanBeEnumerable.Global
-        public static List<T> IdAwareUpdate<T, TProperty>(this List<T> source, List<T> destination,
-            Func<T, TProperty> idSelector)
+        public static List<T> IdAwareUpdate<T, TKey>(this List<T> source, List<T> destination,
+            Func<T, TKey> idSelector)
             where T : class
-            where TProperty : IComparable<TProperty>
         {
             source ??= new List<T>();
             destination ??= new List<T>();

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Models.Interfaces;
+using Models.Models.Relationships;
 using Newtonsoft.Json;
 
 namespace Models.Models.Sinks
@@ -30,6 +31,6 @@ namespace Models.Models.Sinks
         [JsonIgnore]
         public User User { get; set; }
         
-        public List<StreamFtpSinkRelationship> FtpSinkRelationships  { get; set; } = new List<StreamFtpSinkRelationship>();
+        public List<StreamFtpSinkRelationship> StreamFtpSinkRelationships  { get; set; } = new List<StreamFtpSinkRelationship>();
     }
 }
