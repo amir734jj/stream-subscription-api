@@ -4,6 +4,6 @@ namespace Logic.Interfaces
 {
     public interface IFavoriteLogic
     {
-        IFavoriteLogicUserBound For(User user);
+        IFavoriteLogicUserBound For(int userId);
     }
 }

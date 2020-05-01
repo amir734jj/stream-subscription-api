@@ -36,7 +36,7 @@ namespace Api.Controllers.Api
             
             var user = await _userManager.FindByEmailAsync(User.Identity.Name);
 
-            await _favoriteLogic.For(user).UploadFavorite(favorite.Filename, new MemoryStream(
+            await _favoriteLogic.For(user.Id).UploadFavorite(favorite.Filename, new MemoryStream(
                 Convert.FromBase64String(favorite.Stream)
             ));
 

@@ -9,18 +9,22 @@ namespace Logic.Logic
     {
         private readonly ISinkService _sinkService;
 
+        private readonly IUserLogic _userLogic;
+
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
         /// <param name="sinkService"></param>
-        public FavoriteLogic(ISinkService sinkService)
+        /// <param name="userLogic"></param>
+        public FavoriteLogic(ISinkService sinkService, IUserLogic userLogic)
         {
             _sinkService = sinkService;
+            _userLogic = userLogic;
         }
 
-        public IFavoriteLogicUserBound For(User user)
+        public IFavoriteLogicUserBound For(int userId)
         {
-            return new FavoriteLogicUserBound(user, _sinkService);
+            return new FavoriteLogicUserBound(userId, _userLogic, _sinkService);
         }
     }
 
@@ -28,22 +32,28 @@ namespace Logic.Logic
     {
         private readonly ISinkService _sinkService;
 
-        private readonly User _user;
+        private readonly int _userId;
+
+        private readonly IUserLogic _userLogic;
 
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
-        /// <param name="user"></param>
+        /// <param name="userId"></param>
+        /// <param name="userLogic"></param>
         /// <param name="sinkService"></param>
-        public FavoriteLogicUserBound(User user, ISinkService sinkService)
+        public FavoriteLogicUserBound(int userId, IUserLogic userLogic, ISinkService sinkService)
         {
-            _user = user;
+            _userId = userId;
+            _userLogic = userLogic;
             _sinkService = sinkService;
         }
 
         public async Task UploadFavorite(string filename, MemoryStream stream)
         {
-            await _sinkService.ResolveFavoriteStream(_user)(filename, stream);
+            var user = await _userLogic.Get(_userId);
+
+            await _sinkService.ResolveFavoriteStream(user)(filename, stream);
         }
     }
 }
