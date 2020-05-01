@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using Models.Interfaces;
+using Models.Models.Sinks;
 
 namespace Models.Models
 {
@@ -16,6 +17,8 @@ namespace Models.Models
         public virtual DateTimeOffset LastLoginTime { get; set; }  = DateTimeOffset.MinValue;
 
         public List<Stream> Streams { get; set; } = new List<Stream>();
+
+        public List<FtpSink> FtpSinks { get; set; } = new List<FtpSink>();
 
         public object Obfuscate()
         {

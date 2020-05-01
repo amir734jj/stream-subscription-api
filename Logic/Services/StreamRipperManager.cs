@@ -192,7 +192,7 @@ namespace Logic.Services
 
                 if (_filterSongLogic.ShouldInclude(arg.SongInfo.Stream, track, stream.Filter))
                 {
-                    var aggregatedSink = await _sinkService.Resolve(stream);
+                    var aggregatedSink = await _sinkService.ResolveStreamSink(stream);
 
                     // Upload the stream
                     await aggregatedSink(arg.SongInfo.Stream.Reset(), filename);

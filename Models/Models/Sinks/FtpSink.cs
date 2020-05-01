@@ -21,6 +21,8 @@ namespace Models.Models.Sinks
         public int Port { get; set; } = 21;
 
         public string Path { get; set; } = string.Empty;
+
+        public bool Favorite { get; set; }
         
         /// <summary>
         /// User reference
