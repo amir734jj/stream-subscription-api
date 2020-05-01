@@ -38,5 +38,10 @@ namespace Logic.Sinks
                 body: data,
                 autorename: true);
         }
+
+        public Task UploadToFavorite(string filename, MemoryStream data)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -166,6 +166,7 @@ namespace Api
 
                 // Exception filter attribute
                 x.Filters.Add<ExceptionFilterAttribute>();
+                
             }).AddNewtonsoftJson(x =>
             {
                 x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;

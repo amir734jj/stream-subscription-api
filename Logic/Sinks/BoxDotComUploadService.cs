@@ -39,5 +39,10 @@ namespace Logic.Sinks
 
             return _boxClient.FilesManager.UploadAsync(req, data);
         }
+
+        public Task UploadToFavorite(string filename, MemoryStream data)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
