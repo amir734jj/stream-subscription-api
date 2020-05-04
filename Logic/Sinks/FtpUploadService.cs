@@ -21,21 +21,18 @@ namespace Logic.Sinks
 
         public async Task UploadStream(Stream stream, string filename, MemoryStream data)
         {
-            var directory = Path.Join(_ftpSink.Path, stream.Name);
-
-            await _client.ConnectAsync();
-
-            await _client.CreateDirectoryAsync(directory);
-            
-            await _client.UploadAsync(data, Path.Join(directory, filename));
-
-            await _client.DisconnectAsync();
+            await Upload(stream.Name, filename, data);
         }
 
         public async Task UploadToFavorite(string filename, MemoryStream data)
         {
-            var directory = Path.Join(_ftpSink.Path, "favorite");
+            await Upload("favorite", filename, data);
+        }
 
+        private async Task Upload(string folder, string filename, System.IO.Stream data)
+        {
+            var directory = Path.Join(_ftpSink.Path, folder);
+            
             await _client.ConnectAsync();
 
             await _client.CreateDirectoryAsync(directory);
