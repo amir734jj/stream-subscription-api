@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using Amazon;
@@ -14,6 +15,7 @@ using Dal.ServiceApi;
 using Dal.Utilities;
 using EFCache;
 using EFCache.Redis;
+using IF.Lastfm.Core.Api;
 using Logic.Interfaces;
 using Logic.Providers;
 using Logic.Services;
@@ -279,6 +281,13 @@ namespace Api
                         ctx.GetInstance<IAmazonS3>(),
                         ctx.GetInstance<S3ServiceConfig>()
                     ));
+
+                    var (lastFmKey, lastFmSecret) = (
+                        _configuration.GetRequiredValue<string>("last.fm:Key"),
+                        _configuration.GetRequiredValue<string>("last.fm:Secret")
+                    );
+
+                    config.For<LastfmClient>().Use("last.FM", () => new LastfmClient(lastFmKey, lastFmSecret, new HttpClient()));
                 }
 
                 config.For<StreamRipperState>().Singleton();
