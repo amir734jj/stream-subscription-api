@@ -11,7 +11,9 @@
         "CLOUDCUBE_URL": "",
         "DATABASE_URL": "",
         "JwtSettings:Key": "",
-        "REDISTOGO_URL": ""
+        "REDISTOGO_URL": "",
+        "last.fm:Key": "",
+        "last.fm:Secret": ""
       }
     }
   }
