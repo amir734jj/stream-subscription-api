@@ -198,7 +198,10 @@ namespace Logic.Services
             {
                 var songMetaData = ExtendedSongMetadata.From(arg.SongInfo.SongMetadata);
                 
-                var trackInfo = await _lastFmClient.Track.SearchAsync($"{songMetaData.Artist} {songMetaData.Title}");
+                var track = $"{songMetaData.Artist}-{songMetaData.Title}";
+                var filename = $"{track}.mp3";
+
+                var trackInfo = await _lastFmClient.Track.SearchAsync(track);
 
                 if (trackInfo.Success && trackInfo.Content.Any())
                 {
@@ -209,9 +212,6 @@ namespace Logic.Services
                     songMetaData.Duration = (firstTrack.Duration ?? TimeSpan.Zero).TotalSeconds;
                     songMetaData.Tags = (firstTrack.TopTags ?? Enumerable.Empty<LastTag>()).Select(x => x.Name).ToList();
                 }
-                
-                var track = $"{songMetaData.Artist}-{songMetaData.Title}";
-                var filename = $"{track}.mp3";
 
                 if (_filterSongLogic.ShouldInclude(arg.SongInfo.Stream, track, stream.Filter))
                 {
