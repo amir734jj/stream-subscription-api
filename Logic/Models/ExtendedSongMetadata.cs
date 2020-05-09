@@ -14,7 +14,7 @@ namespace Logic.Models
         
         public List<string> Tags { get; set; } = new List<string>();
 
-        public TimeSpan Duration { get; set; } = TimeSpan.Zero;
+        public double Duration { get; set; }
 
         public static ExtendedSongMetadata From(SongMetadata songMetadata)
         {

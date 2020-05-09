@@ -208,7 +208,7 @@ namespace Logic.Services
                     songMetaData.Album = firstTrack.AlbumName;
                     songMetaData.Url = firstTrack.Url?.AbsoluteUri;
                     songMetaData.PlayCount = firstTrack.PlayCount ?? 0;
-                    songMetaData.Duration = firstTrack.Duration ?? TimeSpan.Zero;
+                    songMetaData.Duration = (firstTrack.Duration ?? TimeSpan.Zero).TotalSeconds;
                     songMetaData.Tags = (firstTrack.TopTags ?? Enumerable.Empty<LastTag>()).Select(x => x.Name).ToList();
                 }
                 
