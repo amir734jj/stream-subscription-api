@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using IF.Lastfm.Core.Api;
+using IF.Lastfm.Core.Objects;
 using Logic.Extensions;
 using Logic.Interfaces;
 using Logic.Models;
@@ -202,13 +203,13 @@ namespace Logic.Services
                 if (trackInfo.Success && trackInfo.Content.Any())
                 {
                     var firstTrack = trackInfo.Content.First();
-                    songMetaData.Album = firstTrack.AlbumName;
                     songMetaData.Artist = firstTrack.ArtistName;
                     songMetaData.Title = firstTrack.Name;
-                    songMetaData.Url = firstTrack.Url;
+                    songMetaData.Album = firstTrack.AlbumName;
+                    songMetaData.Url = firstTrack.Url?.AbsoluteUri;
                     songMetaData.PlayCount = firstTrack.PlayCount ?? 0;
                     songMetaData.Duration = firstTrack.Duration ?? TimeSpan.Zero;
-                    songMetaData.Tags = firstTrack.TopTags.Select(x => x.Name).ToList();
+                    songMetaData.Tags = (firstTrack.TopTags ?? Enumerable.Empty<LastTag>()).Select(x => x.Name).ToList();
                 }
                 
                 var track = $"{songMetaData.Artist}-{songMetaData.Title}";

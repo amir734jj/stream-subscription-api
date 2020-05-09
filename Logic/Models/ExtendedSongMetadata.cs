@@ -8,7 +8,7 @@ namespace Logic.Models
     {
         public int PlayCount { get; set; }
 
-        public Uri Url { get; set; }
+        public string Url { get; set; }
         
         public string Album { get; set; } = string.Empty;
         
