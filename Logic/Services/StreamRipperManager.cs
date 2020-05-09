@@ -201,20 +201,22 @@ namespace Logic.Services
                 var track = $"{songMetaData.Artist}-{songMetaData.Title}";
                 var filename = $"{track}.mp3";
 
-                var trackInfo = await _lastFmClient.Track.SearchAsync(track);
-
-                if (trackInfo.Success && trackInfo.Content.Any())
-                {
-                    var firstTrack = trackInfo.Content.First();
-                    songMetaData.Album = firstTrack.AlbumName;
-                    songMetaData.Url = firstTrack.Url?.AbsoluteUri;
-                    songMetaData.PlayCount = firstTrack.PlayCount ?? 0;
-                    songMetaData.Duration = (firstTrack.Duration ?? TimeSpan.Zero).TotalSeconds;
-                    songMetaData.Tags = (firstTrack.TopTags ?? Enumerable.Empty<LastTag>()).Select(x => x.Name).ToList();
-                }
-
                 if (_filterSongLogic.ShouldInclude(arg.SongInfo.Stream, track, stream.Filter))
                 {
+                    var trackInfo = await _lastFmClient.Track.SearchAsync(track);
+
+                    if (trackInfo.Success && trackInfo.Content.Any())
+                    {
+                        var firstTrack = trackInfo.Content.First();
+                        var album = await _lastFmClient.Album.GetInfoByMbidAsync(firstTrack.Mbid);
+
+                        songMetaData.Album = album.Success ? album.Content.Name : string.Empty;
+                        songMetaData.Url = firstTrack.Url?.AbsoluteUri;
+                        songMetaData.PlayCount = firstTrack.PlayCount ?? 0;
+                        songMetaData.Duration = (firstTrack.Duration ?? TimeSpan.Zero).TotalSeconds;
+                        songMetaData.Tags = (firstTrack.TopTags ?? Enumerable.Empty<LastTag>()).Select(x => x.Name).ToList();
+                    }
+
                     var aggregatedSink = await _sinkService.ResolveStreamSink(stream);
 
                     // Upload the stream
