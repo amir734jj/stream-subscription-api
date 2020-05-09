@@ -203,8 +203,6 @@ namespace Logic.Services
                 if (trackInfo.Success && trackInfo.Content.Any())
                 {
                     var firstTrack = trackInfo.Content.First();
-                    songMetaData.Artist = firstTrack.ArtistName;
-                    songMetaData.Title = firstTrack.Name;
                     songMetaData.Album = firstTrack.AlbumName;
                     songMetaData.Url = firstTrack.Url?.AbsoluteUri;
                     songMetaData.PlayCount = firstTrack.PlayCount ?? 0;
