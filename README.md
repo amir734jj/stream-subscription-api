@@ -19,5 +19,5 @@ Notes:
 - To view environment variables make sure to install `heroku cli` and then
   - `heroku config --json --app="stream-subscription-api"`
 
-Aknoledgement:
+Acknowledgment:
 - Thanks to [@nabster](https://stackoverflow.com/a/61706419/1834787) for help with last.fm integration
