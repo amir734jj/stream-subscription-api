@@ -203,21 +203,24 @@ namespace Logic.Services
 
                 if (_filterSongLogic.ShouldInclude(arg.SongInfo.Stream, track, stream.Filter))
                 {
-                    var trackInfo = await _lastFmClient.Track.SearchAsync(track);
+                    var searchResult = await _lastFmClient.Track.SearchAsync(track);
 
-                    if (trackInfo.Success && trackInfo.Content.Any())
+                    if (searchResult.Success && searchResult.Content.Any())
                     {
-                        var firstTrack = trackInfo.Content.First();
-                        var album = await _lastFmClient.Album.GetInfoAsync(songMetaData.Artist, songMetaData.Title, true);
-                        var artist = await _lastFmClient.Artist.GetTopTagsAsync(songMetaData.Artist);
+                        var searchResultTrack = searchResult.Content.First();
+                        var trackInfo =
+                            await _lastFmClient.Track.GetInfoAsync(searchResultTrack.Name, searchResultTrack.ArtistName);
 
-                        songMetaData.Album = album.Success && album.Content.Name != null ? album.Content.Name : string.Empty;
-                        songMetaData.Url = firstTrack.Url?.AbsoluteUri;
-                        songMetaData.PlayCount = firstTrack.PlayCount ?? 0;
-                        songMetaData.Duration = (firstTrack.Duration ?? TimeSpan.Zero).TotalSeconds;
-                        songMetaData.Tags = (artist.Success && artist.Content != null ? artist.Content : Enumerable.Empty<LastTag>())
-                            .Select(x => x.Name)
-                            .ToList();
+                        if (trackInfo.Success && trackInfo.Content != null)
+                        {
+                            songMetaData.Album = trackInfo.Content.AlbumName;
+                            songMetaData.Url = trackInfo.Content.Url?.AbsoluteUri;
+                            songMetaData.PlayCount = trackInfo.Content.PlayCount ?? 0;
+                            songMetaData.Duration = (trackInfo.Content.Duration ?? TimeSpan.Zero).TotalSeconds;
+                            songMetaData.Tags = (trackInfo.Content.TopTags ?? Enumerable.Empty<LastTag>())
+                                .Select(x => x.Name)
+                                .ToList();
+                        }
                     }
 
                     var aggregatedSink = await _sinkService.ResolveStreamSink(stream);
