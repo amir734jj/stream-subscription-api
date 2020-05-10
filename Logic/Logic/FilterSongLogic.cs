@@ -19,10 +19,12 @@ namespace Logic.Logic
             _logger = logger;
         }
         
-        public bool ShouldInclude(MemoryStream stream, string track, string filter)
+        public bool ShouldInclude(MemoryStream stream, string track, string filter, out double duration)
         {
             if (string.IsNullOrWhiteSpace(filter))
             {
+                duration = 0;
+                
                 return true;
             }
 
@@ -37,13 +39,17 @@ namespace Logic.Logic
 
                 var reader = new Mp3FileReader(stream.Reset(), builder);
 
-                flag &= reader.TotalTime.TotalSeconds >= 30;
+                duration = reader.TotalTime.TotalSeconds;
+
+                flag &= duration >= 30;
             }
             catch(Exception e)
             {
                 _logger.LogError($"Stream with name '{track}' is not a valid mp3 file", e);
 
                 flag = false;
+                
+                duration = 0;
             }
             
             return flag;

@@ -36,7 +36,8 @@ namespace Logic.Services
         private readonly IConfigLogic _configLogic;
 
         private readonly IFilterSongLogic _filterSongLogic;
-        private readonly LastfmClient _lastFmClient;
+        
+        private readonly ISongMetaDataExtract _songMetaDataExtract;
 
         /// <summary>
         /// Constructor dependency injection
@@ -47,11 +48,11 @@ namespace Logic.Services
         /// <param name="hub"></param>
         /// <param name="configLogic"></param>
         /// <param name="filterSongLogic"></param>
-        /// <param name="lastFmClient"></param>
+        /// <param name="songMetaDataExtract"></param>
         /// <param name="logger"></param>
         public StreamRipperManager(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService,
             IHubContext<MessageHub> hub, IConfigLogic configLogic, IFilterSongLogic filterSongLogic,
-           LastfmClient lastFmClient, ILogger<IStreamRipper> logger)
+           ISongMetaDataExtract songMetaDataExtract, ILogger<IStreamRipper> logger)
         {
             _state = state;
             _streamLogic = streamLogic;
@@ -59,14 +60,14 @@ namespace Logic.Services
             _hub = hub;
             _configLogic = configLogic;
             _filterSongLogic = filterSongLogic;
-            _lastFmClient = lastFmClient;
+            _songMetaDataExtract = songMetaDataExtract;
             _logger = logger;
         }
 
         public IStreamRipperManagerImpl For(User user)
         {
             return new StreamRipperManagerImpl(_state, _streamLogic, _sinkService, user, _hub, _configLogic,
-                _filterSongLogic, _lastFmClient, _logger);
+                _filterSongLogic, _songMetaDataExtract, _logger);
         }
 
         public async Task Refresh()
@@ -122,7 +123,8 @@ namespace Logic.Services
         private readonly IConfigLogic _configLogic;
 
         private readonly IFilterSongLogic _filterSongLogic;
-        private readonly LastfmClient _lastFmClient;
+        
+        private readonly ISongMetaDataExtract _songMetaDataExtract;
 
         /// <summary>
         /// Constructor dependency injection
@@ -134,11 +136,11 @@ namespace Logic.Services
         /// <param name="hub"></param>
         /// <param name="configLogic"></param>
         /// <param name="filterSongLogic"></param>
-        /// <param name="lastFmClient"></param>
+        /// <param name="songMetaDataExtract"></param>
         /// <param name="logger"></param>
         public StreamRipperManagerImpl(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService,
             User user, IHubContext<MessageHub> hub, IConfigLogic configLogic, IFilterSongLogic filterSongLogic,
-            LastfmClient lastFmClient,
+            ISongMetaDataExtract songMetaDataExtract,
             ILogger<IStreamRipper> logger)
         {
             _state = state;
@@ -148,7 +150,7 @@ namespace Logic.Services
             _hub = hub;
             _configLogic = configLogic;
             _filterSongLogic = filterSongLogic;
-            _lastFmClient = lastFmClient;
+            _songMetaDataExtract = songMetaDataExtract;
             _logger = logger;
         }
 
@@ -196,42 +198,28 @@ namespace Logic.Services
 
             streamRipperInstance.SongChangedEventHandlers += async (_, arg) =>
             {
-                var songMetaData = ExtendedSongMetadata.From(arg.SongInfo.SongMetadata);
-                
+                var songMetaData = arg.SongInfo.SongMetadata;
+
                 var track = $"{songMetaData.Artist}-{songMetaData.Title}";
                 var filename = $"{track}.mp3";
 
-                if (_filterSongLogic.ShouldInclude(arg.SongInfo.Stream, track, stream.Filter))
+                if (_filterSongLogic.ShouldInclude(arg.SongInfo.Stream, track, stream.Filter, out var duration))
                 {
-                    var searchResult = await _lastFmClient.Track.SearchAsync(track);
-
-                    if (searchResult.Success && searchResult.Content.Any())
-                    {
-                        var searchResultTrack = searchResult.Content.First();
-                        var trackInfo =
-                            await _lastFmClient.Track.GetInfoAsync(searchResultTrack.Name, searchResultTrack.ArtistName);
-
-                        if (trackInfo.Success && trackInfo.Content != null)
-                        {
-                            songMetaData.Album = trackInfo.Content.AlbumName;
-                            songMetaData.Url = trackInfo.Content.Url?.AbsoluteUri;
-                            songMetaData.PlayCount = trackInfo.Content.PlayCount ?? 0;
-                            songMetaData.Duration = (trackInfo.Content.Duration ?? TimeSpan.Zero).TotalSeconds;
-                            songMetaData.Tags = (trackInfo.Content.TopTags ?? Enumerable.Empty<LastTag>())
-                                .Select(x => x.Name)
-                                .ToList();
-                        }
-                    }
-
                     var aggregatedSink = await _sinkService.ResolveStreamSink(stream);
 
                     // Upload the stream
                     await aggregatedSink(arg.SongInfo.Stream.Reset(), filename);
 
+                    var extendedSongMetadata = await _songMetaDataExtract.Populate(ExtendedSongMetadata.Extend(
+                        arg.SongInfo.SongMetadata, x =>
+                        {
+                            x.Duration = duration;
+                        }));
+
                     // Invoke socket
                     await _hub.Clients.User(_user.Id.ToString()).SendAsync("download",
                         filename,
-                        songMetaData,
+                        extendedSongMetadata,
                         arg.SongInfo.Stream.Reset().ConvertToBase64(),
                         new { stream.Name, stream.Id }
                     );

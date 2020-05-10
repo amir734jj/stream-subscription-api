@@ -16,14 +16,18 @@ namespace Logic.Models
 
         public double Duration { get; set; }
 
-        public static ExtendedSongMetadata From(SongMetadata songMetadata)
+        public static ExtendedSongMetadata Extend(SongMetadata songMetadata, Action<ExtendedSongMetadata> extras)
         {
-            return new ExtendedSongMetadata
+            var result = new ExtendedSongMetadata
             {
                 Artist = songMetadata.Artist,
                 Raw = songMetadata.Raw,
                 Title = songMetadata.Title
             };
+
+            extras(result);
+
+            return result;
         }
     }
 }
