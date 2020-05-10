@@ -208,13 +208,16 @@ namespace Logic.Services
                     if (trackInfo.Success && trackInfo.Content.Any())
                     {
                         var firstTrack = trackInfo.Content.First();
-                        var album = await _lastFmClient.Album.GetInfoByMbidAsync(firstTrack.Mbid);
+                        var album = await _lastFmClient.Album.GetInfoAsync(songMetaData.Artist, songMetaData.Title, true);
+                        var artist = await _lastFmClient.Artist.GetTopTagsAsync(songMetaData.Artist);
 
-                        songMetaData.Album = album.Success ? album.Content.Name : string.Empty;
+                        songMetaData.Album = album.Success && album.Content.Name != null ? album.Content.Name : string.Empty;
                         songMetaData.Url = firstTrack.Url?.AbsoluteUri;
                         songMetaData.PlayCount = firstTrack.PlayCount ?? 0;
                         songMetaData.Duration = (firstTrack.Duration ?? TimeSpan.Zero).TotalSeconds;
-                        songMetaData.Tags = (firstTrack.TopTags ?? Enumerable.Empty<LastTag>()).Select(x => x.Name).ToList();
+                        songMetaData.Tags = (artist.Success && artist.Content != null ? artist.Content : Enumerable.Empty<LastTag>())
+                            .Select(x => x.Name)
+                            .ToList();
                     }
 
                     var aggregatedSink = await _sinkService.ResolveStreamSink(stream);
