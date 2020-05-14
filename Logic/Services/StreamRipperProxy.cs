@@ -40,7 +40,7 @@ namespace Logic.Services
                     Url = uri,
                     Logger = _logger,
                     MaxBufferSize = 15 * 1000000 // stop when buffer size passes 15 megabytes
-                }));
+                }), proxy => _streamRippers.Remove(uri));
 
                 _streamRippers.Add(uri, instance);
             }
@@ -94,10 +94,13 @@ namespace Logic.Services
         private readonly IStreamRipper _streamRipper;
 
         private bool _running;
+        
+        private readonly Action<StreamRipperItemProxy> _onDispose;
 
-        public StreamRipperItemProxy(IStreamRipper streamRipper)
+        public StreamRipperItemProxy(IStreamRipper streamRipper, Action<StreamRipperItemProxy> onDispose)
         {
             _streamRipper = streamRipper;
+            _onDispose = onDispose;
 
             MetadataChangedHandlers += (sender, arg) => _forks.ForEach(fork =>
             {
@@ -144,7 +147,9 @@ namespace Logic.Services
         public void Dispose()
         {
             _running = false;
-            
+
+            _onDispose(this);
+
             _streamRipper.Dispose();
         }
 
@@ -176,7 +181,15 @@ namespace Logic.Services
         {
             var fork = new StreamRipperItemFork
             {
-                OnDispose = self => _forks.Remove(self),
+                OnDispose = self =>
+                {
+                    _forks.Remove(self);
+
+                    if (_forks.Count == 0)
+                    {
+                        Dispose();
+                    }
+                },
                 OnStart = _ => Start(),
             };
 
