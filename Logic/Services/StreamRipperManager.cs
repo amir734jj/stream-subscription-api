@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using IF.Lastfm.Core.Api;
-using IF.Lastfm.Core.Objects;
 using Logic.Extensions;
 using Logic.Interfaces;
 using Logic.Models;
@@ -14,10 +12,8 @@ using Microsoft.Extensions.Logging;
 using Models.Enums;
 using Models.Models;
 using Models.ViewModels.Config;
-using StreamRipper;
 using StreamRipper.Interfaces;
 using Stream = Models.Models.Stream;
-using StreamRipper.Models;
 
 namespace Logic.Services
 {
@@ -38,6 +34,8 @@ namespace Logic.Services
         private readonly IFilterSongLogic _filterSongLogic;
         
         private readonly ISongMetaDataExtract _songMetaDataExtract;
+        
+        private readonly IStreamRipperProxy _streamRipperProxy;
 
         /// <summary>
         /// Constructor dependency injection
@@ -48,10 +46,12 @@ namespace Logic.Services
         /// <param name="hub"></param>
         /// <param name="configLogic"></param>
         /// <param name="filterSongLogic"></param>
+        /// <param name="streamRipperProxy"></param>
         /// <param name="songMetaDataExtract"></param>
         /// <param name="logger"></param>
         public StreamRipperManager(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService,
             IHubContext<MessageHub> hub, IConfigLogic configLogic, IFilterSongLogic filterSongLogic,
+            IStreamRipperProxy streamRipperProxy,
            ISongMetaDataExtract songMetaDataExtract, ILogger<IStreamRipper> logger)
         {
             _state = state;
@@ -61,13 +61,14 @@ namespace Logic.Services
             _configLogic = configLogic;
             _filterSongLogic = filterSongLogic;
             _songMetaDataExtract = songMetaDataExtract;
+            _streamRipperProxy = streamRipperProxy;
             _logger = logger;
         }
 
         public IStreamRipperManagerImpl For(User user)
         {
             return new StreamRipperManagerImpl(_state, _streamLogic, _sinkService, user, _hub, _configLogic,
-                _filterSongLogic, _songMetaDataExtract, _logger);
+                _filterSongLogic, _songMetaDataExtract, _streamRipperProxy, _logger);
         }
 
         public async Task Refresh()
@@ -125,6 +126,8 @@ namespace Logic.Services
         private readonly IFilterSongLogic _filterSongLogic;
         
         private readonly ISongMetaDataExtract _songMetaDataExtract;
+        
+        private readonly IStreamRipperProxy _streamRipperProxy;
 
         /// <summary>
         /// Constructor dependency injection
@@ -137,10 +140,11 @@ namespace Logic.Services
         /// <param name="configLogic"></param>
         /// <param name="filterSongLogic"></param>
         /// <param name="songMetaDataExtract"></param>
+        /// <param name="streamRipperProxy"></param>
         /// <param name="logger"></param>
         public StreamRipperManagerImpl(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService,
             User user, IHubContext<MessageHub> hub, IConfigLogic configLogic, IFilterSongLogic filterSongLogic,
-            ISongMetaDataExtract songMetaDataExtract,
+            ISongMetaDataExtract songMetaDataExtract, IStreamRipperProxy streamRipperProxy,
             ILogger<IStreamRipper> logger)
         {
             _state = state;
@@ -151,6 +155,7 @@ namespace Logic.Services
             _configLogic = configLogic;
             _filterSongLogic = filterSongLogic;
             _songMetaDataExtract = songMetaDataExtract;
+            _streamRipperProxy = streamRipperProxy;
             _logger = logger;
         }
 
@@ -189,12 +194,7 @@ namespace Logic.Services
                 return false;
             }
 
-            var streamRipperInstance = StreamRipperImpl.New(new StreamRipperOptions
-            {
-                Url = new Uri(stream.Url),
-                Logger = _logger,
-                MaxBufferSize = 15 * 1000000    // stop when buffer size passes 15 megabytes
-            });
+            var streamRipperInstance = _streamRipperProxy.Proxy(new Uri(stream.Url));
 
             streamRipperInstance.SongChangedEventHandlers += async (_, arg) =>
             {

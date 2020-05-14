@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
@@ -289,8 +290,6 @@ namespace Api
 
                     config.For<LastfmClient>().Use("last.FM", () => new LastfmClient(lastFmKey, lastFmSecret, new HttpClient()));
                 }
-
-                config.For<StreamRipperState>().Singleton();
 
                 // Register stuff in container, using the StructureMap APIs...
                 config.Scan(_ =>
