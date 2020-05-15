@@ -1,0 +1,31 @@
+{
+  "streams": [
+    [
+      {
+        "name": "RadioJavan",
+        "url": "http://stream.radiojavan.com/radiojavan",
+        "filter": "advertisement\nsweeper\nradio javan"
+      },
+      {
+        "name": "pophits",
+        "url": "http://listen.radionomy.com:80/-Pophits",
+        "filter": "advertisement\nsweeper\nTargetSpot"
+      },
+      {
+        "name": "Nagham",
+        "url": "http://listen.radionomy.com:80/Nagham",
+        "filter": "advertisement"
+      },
+      {
+        "name": "Asheghaneh",
+        "url": "http://38.99.146.102:8000/asheghaneh.mp3",
+        "filter": "advertisement"
+      },
+      {
+        "name": "1 Radio Dance",
+        "url": "http://listen.radionomy.com/1-Radio-Dance",
+        "filter": "advertisement"
+      }
+    ]
+  ]
+}
