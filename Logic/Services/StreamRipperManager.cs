@@ -189,7 +189,7 @@ namespace Logic.Services
             }
 
             // Stream already started
-            if (_state.StreamItems.ContainsKey(id))
+            if (_state.StreamItems.ContainsKey(id) && _state.StreamItems[id].State == StreamStatusEnum.Started)
             {
                 return false;
             }
