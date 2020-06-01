@@ -240,7 +240,7 @@ namespace Logic.Services
 
             streamRipperInstance.StreamFailedHandlers += async (sender, arg) =>
             {
-                await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} failed");
+                await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} failed", arg.Exception?.Message);
 
                 _state.StreamItems[id].State = StreamStatusEnum.Fail;
 
