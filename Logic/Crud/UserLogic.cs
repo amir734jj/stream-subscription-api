@@ -1,4 +1,5 @@
 ﻿using Dal.Interfaces;
+using EfCoreRepository.Interfaces;
 using Logic.Abstracts;
 using Logic.Interfaces;
 using Models.Models;
@@ -7,22 +8,22 @@ namespace Logic.Crud
 {
     public class UserLogic : BasicLogicAbstract<User>, IUserLogic
     {
-        private readonly IUserDal _userDal;
+        private readonly IBasicCrud<User, int> _userDal;
 
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
-        /// <param name="userDal"></param>
-        public UserLogic(IUserDal userDal)
+        /// <param name="repository"></param>
+        public UserLogic(IEfRepository repository)
         {
-            _userDal = userDal;
+            _userDal = repository.For<User, int>();
         }
 
         /// <summary>
         /// Returns DAL
         /// </summary>
         /// <returns></returns>
-        protected override IBasicDal<User> GetBasicCrudDal()
+        protected override IBasicCrud<User, int> GetBasicCrudDal()
         {
             return _userDal;
         }

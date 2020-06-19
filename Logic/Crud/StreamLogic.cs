@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dal.Interfaces;
+using EfCoreRepository.Interfaces;
 using Logic.Abstracts;
 using Logic.Interfaces;
 using Models.Models;
@@ -11,18 +12,18 @@ namespace Logic.Crud
 {
     public class StreamLogic : BasicLogicAbstract<Stream>, IStreamLogic
     {
-        private readonly IStreamDal _streamDal;
+        private readonly IBasicCrud<Stream, int> _streamDal;
 
         private readonly Lazy<IStreamRipperManager> _streamRipperManager;
 
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
-        /// <param name="streamDal"></param>
+        /// <param name="repository"></param>
         /// <param name="streamRipperManager"></param>
-        public StreamLogic(IStreamDal streamDal, Lazy<IStreamRipperManager> streamRipperManager)
+        public StreamLogic(IEfRepository repository, Lazy<IStreamRipperManager> streamRipperManager)
         {
-            _streamDal = streamDal;
+            _streamDal = repository.For<Stream, int>();
             _streamRipperManager = streamRipperManager;
         }
 
@@ -31,7 +32,7 @@ namespace Logic.Crud
             return new StreamLogicImpl(_streamDal, user, _streamRipperManager);
         }
 
-        protected override IBasicDal<Stream> GetBasicCrudDal()
+        protected override IBasicCrud<Stream, int> GetBasicCrudDal()
         {
             return _streamDal;
         }
@@ -39,20 +40,20 @@ namespace Logic.Crud
 
     public class StreamLogicImpl : BasicLogicAbstract<Stream>
     {
-        private readonly IStreamDal _streamDal;
+        private readonly IBasicCrud<Stream, int> _streamDal;
         
         private readonly User _user;
 
         private readonly Lazy<IStreamRipperManager> _streamManager;
 
-        public StreamLogicImpl(IStreamDal streamDal, User user, Lazy<IStreamRipperManager> streamManager)
+        public StreamLogicImpl(IBasicCrud<Stream, int> streamDal, User user, Lazy<IStreamRipperManager> streamManager)
         {
             _streamDal = streamDal;
             _user = user;
             _streamManager = streamManager;
         }
         
-        protected override IBasicDal<Stream> GetBasicCrudDal()
+        protected override IBasicCrud<Stream, int> GetBasicCrudDal()
         {
             return _streamDal;
         }

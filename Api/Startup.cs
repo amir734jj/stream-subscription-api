@@ -16,6 +16,7 @@ using Dal.ServiceApi;
 using Dal.Utilities;
 using EFCache;
 using EFCache.Redis;
+using EfCoreRepository.Extensions;
 using IF.Lastfm.Core.Api;
 using Logic.Interfaces;
 using Logic.Providers;
@@ -212,6 +213,11 @@ namespace Api
 
                 EntityFrameworkCache.Initialize(new RedisCache(redisConfigurationOptions));
             }
+
+            services.AddEfRepository<EntityDbContext>(x =>
+            {
+                x.Profiles(Assembly.Load("Dal"), Assembly.Load("Models"));
+            });
 
             var jwtSetting = _configuration
                 .GetSection("JwtSettings")

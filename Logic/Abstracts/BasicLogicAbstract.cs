@@ -2,18 +2,19 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dal.Interfaces;
+using EfCoreRepository.Interfaces;
 using Logic.Interfaces;
 using Models.Interfaces;
 
 namespace Logic.Abstracts
 {
-    public abstract class BasicLogicAbstract<T> : IBasicLogic<T> where T: IEntity
+    public abstract class BasicLogicAbstract<T> : IBasicLogic<T> where T: class, IEntity
     {
         /// <summary>
         /// Returns instance of basic DAL
         /// </summary>
         /// <returns></returns>
-        protected abstract IBasicDal<T> GetBasicCrudDal();
+        protected abstract IBasicCrud<T, int> GetBasicCrudDal();
 
         /// <summary>
         /// Call forwarding
@@ -65,9 +66,13 @@ namespace Logic.Abstracts
             return GetBasicCrudDal().Update(id, dto);
         }
 
-        public Task<T> Update(int id, Action<T> updater)
+        public async Task<T> Update(int id, Action<T> updater)
         {
-            return GetBasicCrudDal().Update(id, updater);
+            var entity = await Get(id);
+
+            updater(entity);
+
+            return await Update(id, entity);
         }
     }
 }
