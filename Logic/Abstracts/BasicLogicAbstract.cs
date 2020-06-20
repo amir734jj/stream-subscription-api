@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dal.Interfaces;
 using EfCoreRepository.Interfaces;
 using Logic.Interfaces;
 using Models.Interfaces;
@@ -68,11 +67,13 @@ namespace Logic.Abstracts
 
         public async Task<T> Update(int id, Action<T> updater)
         {
-            var entity = await Get(id);
+            await using var session = GetBasicCrudDal().Session();
+            
+            var entity = await session.Get(id);
 
             updater(entity);
 
-            return await Update(id, entity);
+            return await session.Update(id, entity);
         }
     }
 }
