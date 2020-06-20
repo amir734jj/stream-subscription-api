@@ -12,7 +12,7 @@ namespace Logic.Crud
 {
     public class StreamLogic : BasicLogicAbstract<Stream>, IStreamLogic
     {
-        private readonly IBasicCrud<Stream, int> _streamDal;
+        private readonly IBasicCrudType<Stream, int> _streamDal;
 
         private readonly Lazy<IStreamRipperManager> _streamRipperManager;
 
@@ -32,7 +32,7 @@ namespace Logic.Crud
             return new StreamLogicImpl(_streamDal, user, _streamRipperManager);
         }
 
-        protected override IBasicCrud<Stream, int> GetBasicCrudDal()
+        protected override IBasicCrudType<Stream, int> GetBasicCrudDal()
         {
             return _streamDal;
         }
@@ -40,20 +40,20 @@ namespace Logic.Crud
 
     public class StreamLogicImpl : BasicLogicAbstract<Stream>
     {
-        private readonly IBasicCrud<Stream, int> _streamDal;
+        private readonly IBasicCrudType<Stream, int> _streamDal;
         
         private readonly User _user;
 
         private readonly Lazy<IStreamRipperManager> _streamManager;
 
-        public StreamLogicImpl(IBasicCrud<Stream, int> streamDal, User user, Lazy<IStreamRipperManager> streamManager)
+        public StreamLogicImpl(IBasicCrudType<Stream, int> streamDal, User user, Lazy<IStreamRipperManager> streamManager)
         {
             _streamDal = streamDal;
             _user = user;
             _streamManager = streamManager;
         }
         
-        protected override IBasicCrud<Stream, int> GetBasicCrudDal()
+        protected override IBasicCrudType<Stream, int> GetBasicCrudDal()
         {
             return _streamDal;
         }

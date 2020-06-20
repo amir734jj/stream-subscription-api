@@ -12,7 +12,7 @@ namespace Logic.Crud
 {
     public class FtpSinkLogic : BasicLogicAbstract<FtpSink>, IFtpSinkLogic
     {
-        private readonly IBasicCrud<FtpSink, int> _ftpSinkDal;
+        private readonly IBasicCrudType<FtpSink, int> _ftpSinkDal;
 
         /// <summary>
         /// Constructor dependency injection
@@ -28,7 +28,7 @@ namespace Logic.Crud
             return new FtpSinkLogicImpl(_ftpSinkDal, user);
         }
 
-        protected override IBasicCrud<FtpSink, int> GetBasicCrudDal()
+        protected override IBasicCrudType<FtpSink, int> GetBasicCrudDal()
         {
             return _ftpSinkDal;
         }
@@ -36,17 +36,17 @@ namespace Logic.Crud
 
     public class FtpSinkLogicImpl : BasicLogicAbstract<FtpSink>
     {
-        private readonly IBasicCrud<FtpSink, int> _ftpSinkDal;
+        private readonly IBasicCrudType<FtpSink, int> _ftpSinkDal;
         
         private readonly User _user;
 
-        public FtpSinkLogicImpl(IBasicCrud<FtpSink, int> ftpSinkDal, User user)
+        public FtpSinkLogicImpl(IBasicCrudType<FtpSink, int> ftpSinkDal, User user)
         {
             _ftpSinkDal = ftpSinkDal;
             _user = user;
         }
         
-        protected override IBasicCrud<FtpSink, int> GetBasicCrudDal()
+        protected override IBasicCrudType<FtpSink, int> GetBasicCrudDal()
         {
             return _ftpSinkDal;
         }
