@@ -262,7 +262,7 @@ namespace Api
                 else
                 {
                     config.For<ISimpleConfigServer>().Use(x =>
-                        RestService.For<ISimpleConfigServer>("https://simple-config-server.herokuapp.com/api"));
+                        RestService.For<ISimpleConfigServer>("https://simple-config-server.herokuapp.com/api/v1"));
 
                     config.For<SimpleConfigServerApiKey>().Use(new SimpleConfigServerApiKey
                         {ApiKey = _configuration.GetRequiredValue<string>("CONFIG_KEY")});
