@@ -1,7 +1,6 @@
 using System.IO;
 using System.Threading.Tasks;
 using Logic.Interfaces;
-using Models.Models;
 
 namespace Logic.Logic
 {

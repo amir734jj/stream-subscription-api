@@ -1,18 +1,12 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
-using Amazon;
-using Amazon.Runtime;
-using Amazon.S3;
 using Api.Attributes;
 using Api.Configs;
 using Api.Extensions;
-using Dal.Configs;
 using Dal.Interfaces;
-using Dal.ServiceApi;
 using Dal.Utilities;
 using EFCache;
 using EFCache.Redis;
@@ -21,7 +15,6 @@ using IF.Lastfm.Core.Api;
 using Logic.Interfaces;
 using Logic.Providers;
 using Logic.Services;
-using Logic.State;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -35,14 +28,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MlkPwgen;
 using Models.Constants;
 using Models.Models;
+using Models.ViewModels.Config;
 using Newtonsoft.Json;
+using Refit;
 using StackExchange.Redis;
 using StructureMap;
 using static Dal.Utilities.ConnectionStringUtility;
@@ -263,31 +257,15 @@ namespace Api
                 // If environment is localhost then use mock email service
                 if (_env.IsDevelopment())
                 {
-                    config.For<IS3Service>().Use(new S3Service()).Singleton();
+
                 }
                 else
                 {
-                    var (accessKeyId, secretAccessKey, url) = (
-                        _configuration.GetRequiredValue<string>("CLOUDCUBE_ACCESS_KEY_ID"),
-                        _configuration.GetRequiredValue<string>("CLOUDCUBE_SECRET_ACCESS_KEY"),
-                        _configuration.GetRequiredValue<string>("CLOUDCUBE_URL")
-                    );
+                    config.For<ISimpleConfigServer>().Use(x =>
+                        RestService.For<ISimpleConfigServer>("https://simple-config-server.herokuapp.com/api"));
 
-                    var prefix = new Uri(url).Segments.GetValue(1)?.ToString();
-                    const string bucketName = "cloud-cube";
-
-                    // Generally bad practice
-                    var credentials = new BasicAWSCredentials(accessKeyId, secretAccessKey);
-
-                    // Create S3 client
-                    config.For<IAmazonS3>().Use(() => new AmazonS3Client(credentials, RegionEndpoint.USEast1));
-                    config.For<S3ServiceConfig>().Use(new S3ServiceConfig(bucketName, prefix));
-                    
-                    config.For<IS3Service>().Use(ctx => new S3Service(
-                        ctx.GetInstance<ILogger<S3Service>>(),
-                        ctx.GetInstance<IAmazonS3>(),
-                        ctx.GetInstance<S3ServiceConfig>()
-                    ));
+                    config.For<SimpleConfigServerApiKey>().Use(new SimpleConfigServerApiKey
+                        {ApiKey = _configuration.GetRequiredValue<string>("CONFIG_KEY")});
 
                     var (lastFmKey, lastFmSecret) = (
                         _configuration.GetRequiredValue<string>("last.fm:Key"),

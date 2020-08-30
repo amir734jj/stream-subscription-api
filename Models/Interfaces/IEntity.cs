@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using EfCoreRepository.Interfaces;
+﻿using EfCoreRepository.Interfaces;
 
 namespace Models.Interfaces
 {

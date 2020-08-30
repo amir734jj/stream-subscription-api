@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using Dal.Interfaces;
 using EfCoreRepository.Interfaces;
 using Logic.Abstracts;
 using Logic.Interfaces;
+using Microsoft.Extensions.Hosting;
 using Models.Models;
 
 namespace Logic.Crud
@@ -35,6 +36,14 @@ namespace Logic.Crud
         protected override IBasicCrudType<Stream, int> GetBasicCrudDal()
         {
             return _streamDal;
+        }
+    }
+
+    public class AMir : BackgroundService
+    {
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            throw new NotImplementedException();
         }
     }
 
