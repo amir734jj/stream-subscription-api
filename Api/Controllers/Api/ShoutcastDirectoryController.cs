@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Dal.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -15,7 +16,6 @@ namespace Api.Controllers.Api
         {
             _shoutcastDirectoryApi = shoutcastDirectoryApi;
         }
-
         
         [HttpGet]
         [Route("")]
@@ -25,13 +25,15 @@ namespace Api.Controllers.Api
 
             if (!string.IsNullOrEmpty(name))
             {
-                result = result.Where(x => x.Name.Contains(name)).ToList();
+                result = result.Where(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
             }
             
             if (!string.IsNullOrEmpty(genre))
             {
-                result = result.Where(x => x.Genre.Contains(genre)).ToList();
+                result = result.Where(x => x.Genre.Contains(genre, StringComparison.OrdinalIgnoreCase)).ToList();
             }
+
+            result = result.Take(100).ToList();
 
             return Ok(result);
         }
