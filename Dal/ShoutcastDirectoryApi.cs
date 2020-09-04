@@ -18,8 +18,11 @@ namespace Dal
         public ShoutcastDirectoryApi(IRestClient restClient)
         {
             _restClient = restClient;
-
-            Result = Collect().Result;
+        }
+        
+        public async Task Setup()
+        {
+            Result = await Collect();
         }
 
         private async Task<List<ShoutCastStream>> Collect()

@@ -306,11 +306,14 @@ namespace Api
         /// <param name="app"></param>
         /// <param name="configLogic"></param>
         /// <param name="streamRipperManager"></param>
-        public void Configure(IApplicationBuilder app, IConfigLogic configLogic, IStreamRipperManager streamRipperManager)
+        /// <param name="shoutcastDirectoryApi"></param>
+        public void Configure(IApplicationBuilder app, IConfigLogic configLogic, IStreamRipperManager streamRipperManager, IShoutcastDirectoryApi shoutcastDirectoryApi)
         {
             configLogic.Refresh().Wait();
 
             streamRipperManager.Refresh().Wait();
+
+            shoutcastDirectoryApi.Setup().Wait();
 
             app.UseMiniProfiler();
             
@@ -318,7 +321,7 @@ namespace Api
 
             app.UseResponseCompression();
 
-            if (true || _env.IsDevelopment())
+            if (_env.IsDevelopment())
             {
                 app.UseDatabaseErrorPage();
 

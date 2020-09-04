@@ -6,6 +6,8 @@ namespace Dal.Interfaces
 {
     public interface IShoutcastDirectoryApi
     {
+        Task Setup();
+        
         public List<ShoutCastStream> Result { get; }
     }
 }
