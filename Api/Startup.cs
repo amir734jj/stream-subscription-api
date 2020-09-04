@@ -6,6 +6,7 @@ using System.Text;
 using Api.Attributes;
 using Api.Configs;
 using Api.Extensions;
+using Dal;
 using Dal.Interfaces;
 using Dal.Utilities;
 using EFCache;
@@ -37,6 +38,8 @@ using Models.Models;
 using Models.ViewModels.Config;
 using Newtonsoft.Json;
 using Refit;
+using RestSharp;
+using RestSharp.Serializers.NewtonsoftJson;
 using StackExchange.Redis;
 using StructureMap;
 using static Dal.Utilities.ConnectionStringUtility;
@@ -262,7 +265,7 @@ namespace Api
                 else
                 {
                     config.For<ISimpleConfigServer>().Use(x =>
-                        RestService.For<ISimpleConfigServer>("https://simple-config-server.herokuapp.com/api/v1"));
+                        RestService.For<ISimpleConfigServer>(_configuration.GetValue<string>("ConfigApi")));
 
                     config.For<SimpleConfigServerApiKey>().Use(new SimpleConfigServerApiKey
                         {ApiKey = _configuration.GetRequiredValue<string>("CONFIG_KEY")});
@@ -274,6 +277,9 @@ namespace Api
 
                     config.For<LastfmClient>().Use("last.FM", () => new LastfmClient(lastFmKey, lastFmSecret, new HttpClient()));
                 }
+                
+                config.For<IRestClient>()
+                    .Use(new RestClient(_configuration.GetValue<string>("ShoutcastApi")).UseNewtonsoftJson());
 
                 // Register stuff in container, using the StructureMap APIs...
                 config.Scan(_ =>
@@ -312,7 +318,7 @@ namespace Api
 
             app.UseResponseCompression();
 
-            if (_env.IsDevelopment())
+            if (true || _env.IsDevelopment())
             {
                 app.UseDatabaseErrorPage();
 
