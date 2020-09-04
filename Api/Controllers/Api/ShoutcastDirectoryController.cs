@@ -29,21 +29,9 @@ namespace Api.Controllers.Api
         
         [HttpGet]
         [Route("")]
-        public IActionResult Collect([FromQuery] string name = "", [FromQuery] string genre = "")
+        public IActionResult Collect()
         {
             var result = _shoutcastDirectoryApi.Result;
-
-            if (!string.IsNullOrEmpty(name))
-            {
-                result = result.Where(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
-            }
-            
-            if (!string.IsNullOrEmpty(genre))
-            {
-                result = result.Where(x => x.Genre.Contains(genre, StringComparison.OrdinalIgnoreCase)).ToList();
-            }
-
-            result = result.Take(100).ToList();
 
             return Ok(result);
         }
