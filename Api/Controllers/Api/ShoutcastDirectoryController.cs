@@ -49,7 +49,7 @@ namespace Api.Controllers.Api
             
             if (!string.IsNullOrEmpty(genre))
             {
-                result = result.Where(x => x.Genre.Contains(genre, StringComparison.OrdinalIgnoreCase)).ToList();
+                result = result.Where(x => x.Genre == genre).ToList();
             }
 
             result = result.ToList();
