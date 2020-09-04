@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.Api
 {
-    [Authorize]
+    [AllowAnonymous]
     [Route("api/[controller]")]
     public class ShoutcastDirectoryController : Controller
     {
