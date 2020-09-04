@@ -40,7 +40,7 @@ namespace Dal
                 return url;
             }
 
-            return string.Empty;
+            throw new Exception("Failed to resolve streamURL");
         }
 
         private async Task<List<ShoutCastStream>> Collect()
