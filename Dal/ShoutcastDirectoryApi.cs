@@ -25,10 +25,27 @@ namespace Dal
             Result = await Collect();
         }
 
-        private async Task<List<ShoutCastStream>> Collect()
+        public async Task<string> Url(int id)
         {
             using var client = new HttpClient();
+
+            var stream = Result.Find(x => x.Id == id);
+
+            if (stream != null)
+            {
+                var mp3U = await client.GetStringAsync($"http://yp.shoutcast.com/sbin/tunein-station.m3u?id={stream.Id}");
             
+                var url = mp3U.Split(Environment.NewLine).FirstOrDefault(token => token.StartsWith("http"));
+
+                return url;
+            }
+
+            return string.Empty;
+        }
+
+        private async Task<List<ShoutCastStream>> Collect()
+        {
+
             var request = new RestRequest("shoutcast-directory.json", DataFormat.Json)
             {
                 OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; }
@@ -37,18 +54,9 @@ namespace Dal
             var response = await _restClient.GetAsync<Dictionary<string, List<ShoutCastStream>>>(request);
 
             var tasks = response.Values.SelectMany(x => x)
-                .Select(async x =>
-                {
-                    // var mp3U = await client.GetStringAsync($"http://yp.shoutcast.com/sbin/tunein-station.m3u?id={x.Id}");
-                    // x.Url = mp3U.Split(Environment.NewLine).FirstOrDefault(token => token.StartsWith("http"));
-
-                    return x;
-                })
                 .ToList();
 
-            await Task.WhenAll(tasks);
-
-            return tasks.Select(x => x.Result).Where(x => x.Url != null).ToList();
+            return tasks;
         }
 
         public List<ShoutCastStream> Result { get; private set; }

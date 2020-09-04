@@ -9,5 +9,7 @@ namespace Dal.Interfaces
         Task Setup();
         
         public List<ShoutCastStream> Result { get; }
+
+        Task<string> Url(int id);
     }
 }

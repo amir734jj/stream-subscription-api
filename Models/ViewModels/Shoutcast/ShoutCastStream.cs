@@ -32,7 +32,5 @@ namespace Models.ViewModels.Shoutcast
         
         [JsonProperty("IsAACEnabled")]
         public bool IsAacEnabled { get; set; }
-        
-        public string Url { get; set; }
     }
 }
