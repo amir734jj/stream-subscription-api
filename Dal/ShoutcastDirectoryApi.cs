@@ -37,7 +37,7 @@ namespace Dal
                 .Select(async x =>
                 {
                     var mp3U = await client.GetStringAsync($"http://yp.shoutcast.com/sbin/tunein-station.m3u?id={x.Id}");
-                    x.Url = mp3U.Split(Environment.NewLine).First(token => token.StartsWith("http"));
+                    x.Url = mp3U.Split(Environment.NewLine).FirstOrDefault(token => token.StartsWith("http"));
 
                     return x;
                 })
@@ -45,7 +45,7 @@ namespace Dal
 
             await Task.WhenAll(tasks);
 
-            return tasks.Select(x => x.Result).ToList();
+            return tasks.Select(x => x.Result).Where(x => x.Url != null).ToList();
         }
 
         public List<ShoutCastStream> Result { get; private set; }
