@@ -16,11 +16,6 @@
       "filter": "advertisement"
     },
     {
-      "name": "Asheghaneh",
-      "url": "http://38.99.146.102:8000/asheghaneh.mp3",
-      "filter": "advertisement"
-    },
-    {
       "name": "1 Radio Dance",
       "url": "http://listen.radionomy.com/1-Radio-Dance",
       "filter": "advertisement"
