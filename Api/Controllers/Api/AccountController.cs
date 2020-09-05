@@ -60,6 +60,17 @@ namespace Api.Controllers.Api
         [SwaggerOperation("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel registerViewModel)
         {
+            if (registerViewModel.Password != registerViewModel.PasswordConfirmation)
+            {
+                return BadRequest(new ErrorViewModel("Password and Password Confirmation do not match"));
+            }
+
+            if ((await _userLogic.GetAll()).Any(x =>
+                x.UserName.Equals(registerViewModel.Username, StringComparison.OrdinalIgnoreCase)))
+            {
+                return BadRequest(new ErrorViewModel("Username is already taken. Please try another username"));
+            }
+            
             var user = new User
             {
                 Name = registerViewModel.Name,

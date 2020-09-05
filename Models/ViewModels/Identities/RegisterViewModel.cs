@@ -11,6 +11,8 @@ namespace Models.ViewModels.Identities
         
         public string Password { get; set; }
         
+        public string PasswordConfirmation { get; set; }
+        
         public string Email { get; set; }
     }
 }
