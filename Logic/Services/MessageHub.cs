@@ -26,7 +26,7 @@ namespace Logic.Services
         {
             UserTable[Context.ConnectionId] = await _userManager.FindByNameAsync(Context.User.Identity.Name);
 
-            await Clients.All.SendAsync("log", "joined", Context.ConnectionId);
+            await Clients.All.SendAsync("log", $"joined + ${Context.ConnectionId}");
             await Clients.All.SendAsync("count", UserTable.Count);
         }
 
@@ -34,7 +34,7 @@ namespace Logic.Services
         {
             UserTable.Remove(Context.ConnectionId);
 
-            await Clients.All.SendAsync("log", "left", Context.ConnectionId);
+            await Clients.All.SendAsync("log", $"left + ${Context.ConnectionId}");
             await Clients.All.SendAsync("count", UserTable.Count);
         }
     }
