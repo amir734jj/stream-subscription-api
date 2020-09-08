@@ -45,7 +45,6 @@ namespace Dal
 
         private async Task<List<ShoutCastStream>> Collect()
         {
-
             var request = new RestRequest("shoutcast-directory.json", DataFormat.Json)
             {
                 OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; }
