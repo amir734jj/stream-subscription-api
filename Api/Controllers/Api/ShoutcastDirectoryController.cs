@@ -44,7 +44,9 @@ namespace Api.Controllers.Api
 
             if (!string.IsNullOrEmpty(name))
             {
-                result = result.Where(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
+                result = result.Where(x =>
+                    x.Name.Contains(name, StringComparison.OrdinalIgnoreCase) ||
+                    x.Genre.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
             }
             
             if (!string.IsNullOrEmpty(genre))
