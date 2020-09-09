@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Dal.Extensions;
 using Dal.Interfaces;
 using Models.ViewModels.Shoutcast;
 using RestSharp;
@@ -22,7 +23,7 @@ namespace Dal
         
         public async Task Setup()
         {
-            Result = await Collect();
+            Result = (await Collect()).Shuffle();
         }
 
         public async Task<string> Url(int id)

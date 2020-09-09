@@ -54,7 +54,7 @@ namespace Api.Controllers.Api
                 result = result.Where(x => x.Genre == genre).ToList();
             }
 
-            result = result.Take(50).ToList();
+            result = result.Take(75).ToList();
 
             return Ok(result);
         }
