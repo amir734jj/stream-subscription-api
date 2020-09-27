@@ -6,7 +6,6 @@ using System.Text;
 using Api.Attributes;
 using Api.Configs;
 using Api.Extensions;
-using Dal;
 using Dal.Interfaces;
 using Dal.Utilities;
 using EFCache;
@@ -54,7 +53,7 @@ namespace Api
 
         /// <summary>
         /// Constructor
-        /// </summary>
+        /// </summary>uriString
         /// <param name="env"></param>
         public Startup(IWebHostEnvironment env)
         {

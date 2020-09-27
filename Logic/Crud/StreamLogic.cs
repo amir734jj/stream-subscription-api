@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using EfCoreRepository.Interfaces;
 using Logic.Abstracts;
 using Logic.Interfaces;
-using Microsoft.Extensions.Hosting;
 using Models.Models;
+using Guard = Dawn.Guard;
 
 namespace Logic.Crud
 {
@@ -39,14 +38,6 @@ namespace Logic.Crud
         }
     }
 
-    public class AMir : BackgroundService
-    {
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     public class StreamLogicImpl : BasicLogicAbstract<Stream>
     {
         private readonly IBasicCrudType<Stream, int> _streamDal;
@@ -67,11 +58,13 @@ namespace Logic.Crud
             return _streamDal;
         }
 
-        public override Task<Stream> Save(Stream instance)
+        public override Task<Stream> Save(Stream dto)
         {
-            instance.User = _user;
+            Guard.Argument(dto.Url).HasValue();
+            
+            dto.User = _user;
 
-            return base.Save(instance);
+            return base.Save(dto);
         }
         
         public override async Task<IEnumerable<Stream>> GetAll()
@@ -93,6 +86,8 @@ namespace Logic.Crud
 
         public override async Task<Stream> Update(int id, Stream dto)
         {
+            Guard.Argument(dto.Url).HasValue();
+            
             await _streamManager.Value.For(_user).Stop(id);
 
             return await base.Update(id, dto);
