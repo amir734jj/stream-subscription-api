@@ -1,6 +1,6 @@
 # streaming-subscription-api
 
-By providing an Url and Access Token, this website rips the stream or partitions the stream into .mp3 file and subsequently uploads the song to a service (ftp, dropbox or etc.)
+By providing an Url and Access Token, this website rips the IceCast stream or partitions the stream into .mp3 file and subsequently uploads the song to a service (ftp, dropbox or etc.)
 
 This service is free, we do not own the ripped `.mp3` files and we do not store them, only store them in your file sharing service.
 
@@ -22,5 +22,6 @@ Notes:
 Acknowledgment:
 - Thanks to [@nabster](https://stackoverflow.com/a/61706419/1834787) for help with last.fm integration
 
-Screenshot
+Screenshot:
+
 ![screenshot](stream-ripper-screenshot.png "Screenshot")
