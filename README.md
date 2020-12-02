@@ -21,3 +21,6 @@ Notes:
 
 Acknowledgment:
 - Thanks to [@nabster](https://stackoverflow.com/a/61706419/1834787) for help with last.fm integration
+
+Screenshot
+![screenshot](stream-ripper-screenshot.png "Screenshot")
