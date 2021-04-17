@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Logic.Extensions;
 using Logic.Interfaces;
@@ -11,8 +12,6 @@ using Microsoft.Extensions.Logging;
 using Models.Enums;
 using Models.Models;
 using Models.ViewModels.Config;
-using NAudio.Wave;
-using StreamRipper;
 using StreamRipper.Interfaces;
 using Stream = Models.Models.Stream;
 
@@ -33,6 +32,10 @@ namespace Logic.Services
         private readonly IConfigLogic _configLogic;
 
         private readonly IFilterSongLogic _filterSongLogic;
+        
+        private readonly ISongMetaDataExtract _songMetaDataExtract;
+        
+        private readonly IStreamRipperProxy _streamRipperProxy;
 
         /// <summary>
         /// Constructor dependency injection
@@ -43,10 +46,13 @@ namespace Logic.Services
         /// <param name="hub"></param>
         /// <param name="configLogic"></param>
         /// <param name="filterSongLogic"></param>
+        /// <param name="streamRipperProxy"></param>
+        /// <param name="songMetaDataExtract"></param>
         /// <param name="logger"></param>
         public StreamRipperManager(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService,
             IHubContext<MessageHub> hub, IConfigLogic configLogic, IFilterSongLogic filterSongLogic,
-            ILogger<IStreamRipper> logger)
+            IStreamRipperProxy streamRipperProxy,
+           ISongMetaDataExtract songMetaDataExtract, ILogger<IStreamRipper> logger)
         {
             _state = state;
             _streamLogic = streamLogic;
@@ -54,13 +60,15 @@ namespace Logic.Services
             _hub = hub;
             _configLogic = configLogic;
             _filterSongLogic = filterSongLogic;
+            _songMetaDataExtract = songMetaDataExtract;
+            _streamRipperProxy = streamRipperProxy;
             _logger = logger;
         }
 
         public IStreamRipperManagerImpl For(User user)
         {
             return new StreamRipperManagerImpl(_state, _streamLogic, _sinkService, user, _hub, _configLogic,
-                _filterSongLogic, _logger);
+                _filterSongLogic, _songMetaDataExtract, _streamRipperProxy, _logger);
         }
 
         public async Task Refresh()
@@ -68,16 +76,34 @@ namespace Logic.Services
             var startedStreamIds = _configLogic.ResolveGlobalConfig().StartedStreams;
             var streams = await _streamLogic.GetAll();
 
-            streams.Join(startedStreamIds,
+            await StartMany(streams.Join(startedStreamIds,
                     stream => stream.Id,
                     streamId => streamId,
                     (stream, _) => stream)
-                .AsParallel()
-                .Select(stream => For(stream.User).Start(stream.Id).WrapResultOrException(false, _logger))
-                .ForAll(wrappedResult =>
+                // in the last 3 days user should have logged in for stream to auto start
+                .Where(x => DateTimeOffset.Now - x.User?.LastLoginTime <= TimeSpan.FromDays(3)));
+        }
+
+        public async Task StartMany(IEnumerable<Stream> streams)
+        {
+            var mutex = new SemaphoreSlim(1);
+
+            var tasks = streams.Select(async stream =>
+            {
+                await mutex.WaitAsync();
+                try
                 {
-                    _logger.LogInformation($"Starting stream yielded: {wrappedResult.Result}");
-                });
+                    await For(stream.User).Start(stream.Id);
+
+                    _logger.LogInformation($"Started stream {stream.Id} yielded");
+                }
+                finally
+                {
+                    mutex.Release();
+                }
+            });
+
+            await Task.WhenAll(tasks);
         }
     }
 
@@ -98,6 +124,10 @@ namespace Logic.Services
         private readonly IConfigLogic _configLogic;
 
         private readonly IFilterSongLogic _filterSongLogic;
+        
+        private readonly ISongMetaDataExtract _songMetaDataExtract;
+        
+        private readonly IStreamRipperProxy _streamRipperProxy;
 
         /// <summary>
         /// Constructor dependency injection
@@ -109,9 +139,12 @@ namespace Logic.Services
         /// <param name="hub"></param>
         /// <param name="configLogic"></param>
         /// <param name="filterSongLogic"></param>
+        /// <param name="songMetaDataExtract"></param>
+        /// <param name="streamRipperProxy"></param>
         /// <param name="logger"></param>
         public StreamRipperManagerImpl(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService,
             User user, IHubContext<MessageHub> hub, IConfigLogic configLogic, IFilterSongLogic filterSongLogic,
+            ISongMetaDataExtract songMetaDataExtract, IStreamRipperProxy streamRipperProxy,
             ILogger<IStreamRipper> logger)
         {
             _state = state;
@@ -121,6 +154,8 @@ namespace Logic.Services
             _hub = hub;
             _configLogic = configLogic;
             _filterSongLogic = filterSongLogic;
+            _songMetaDataExtract = songMetaDataExtract;
+            _streamRipperProxy = streamRipperProxy;
             _logger = logger;
         }
 
@@ -147,29 +182,47 @@ namespace Logic.Services
         {
             Stream stream;
 
-            // Already started
-            if (_state.StreamItems.ContainsKey(id) || (stream = await _streamLogic.For(_user).Get(id)) == null)
+            // Stream does not exist
+            if ((stream = await _streamLogic.For(_user).Get(id)) == null)
             {
                 return false;
             }
 
-            var streamRipperInstance = new StreamRipperImpl(new Uri(stream.Url), _logger);
+            // Stream already started
+            if (_state.StreamItems.ContainsKey(id) && _state.StreamItems[id].State == StreamStatusEnum.Started)
+            {
+                return false;
+            }
 
-            var aggregatedSink = await _sinkService.Resolve(stream);
+            var streamRipperInstance = _streamRipperProxy.Proxy(new Uri(stream.Url));
 
             streamRipperInstance.SongChangedEventHandlers += async (_, arg) =>
             {
-                var filename = $"{arg.SongInfo.SongMetadata.Artist}-{arg.SongInfo.SongMetadata.Title}.mp3";
-                var reader = new Mp3FileReader(arg.SongInfo.Stream.Reset());
+                var songMetaData = arg.SongInfo.SongMetadata;
 
-                if (_filterSongLogic.ShouldInclude(filename, stream.Filter) && reader.TotalTime.TotalSeconds >= 30)
+                var track = $"{songMetaData.Artist}-{songMetaData.Title}";
+                var filename = $"{track}.mp3";
+
+                if (_filterSongLogic.ShouldInclude(arg.SongInfo.Stream, track, stream.Filter, out var duration))
                 {
+                    var aggregatedSink = await _sinkService.ResolveStreamSink(stream);
+
                     // Upload the stream
                     await aggregatedSink(arg.SongInfo.Stream.Reset(), filename);
 
+                    var extendedSongMetadata = await _songMetaDataExtract.Populate(ExtendedSongMetadata.Extend(
+                        arg.SongInfo.SongMetadata, x =>
+                        {
+                            x.Duration = duration;
+                        }));
+
                     // Invoke socket
-                    await _hub.Clients.User(_user.Id.ToString()).SendAsync("download", filename,
-                        arg.SongInfo.SongMetadata, arg.SongInfo.Stream.Reset().ConvertToBase64());
+                    await _hub.Clients.User(_user.Id.ToString()).SendAsync("download",
+                        filename,
+                        extendedSongMetadata,
+                        arg.SongInfo.Stream.Reset().ConvertToBase64(),
+                        new { stream.Name, stream.Id }
+                    );
                 }
                 else
                 {
@@ -187,7 +240,7 @@ namespace Logic.Services
 
             streamRipperInstance.StreamFailedHandlers += async (sender, arg) =>
             {
-                await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} failed");
+                await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} failed", arg.Exception?.Message);
 
                 _state.StreamItems[id].State = StreamStatusEnum.Fail;
 

@@ -2,27 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dal.Interfaces;
+using EfCoreRepository.Interfaces;
 using Logic.Abstracts;
 using Logic.Interfaces;
 using Models.Models;
+using Guard = Dawn.Guard;
 
 namespace Logic.Crud
 {
     public class StreamLogic : BasicLogicAbstract<Stream>, IStreamLogic
     {
-        private readonly IStreamDal _streamDal;
+        private readonly IBasicCrud<Stream> _streamDal;
 
         private readonly Lazy<IStreamRipperManager> _streamRipperManager;
 
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
-        /// <param name="streamDal"></param>
+        /// <param name="repository"></param>
         /// <param name="streamRipperManager"></param>
-        public StreamLogic(IStreamDal streamDal, Lazy<IStreamRipperManager> streamRipperManager)
+        public StreamLogic(IEfRepository repository, Lazy<IStreamRipperManager> streamRipperManager)
         {
-            _streamDal = streamDal;
+            _streamDal = repository.For<Stream>();
             _streamRipperManager = streamRipperManager;
         }
 
@@ -31,7 +32,7 @@ namespace Logic.Crud
             return new StreamLogicImpl(_streamDal, user, _streamRipperManager);
         }
 
-        protected override IBasicDal<Stream> GetBasicCrudDal()
+        protected override IBasicCrud<Stream> GetBasicCrudDal()
         {
             return _streamDal;
         }
@@ -39,29 +40,31 @@ namespace Logic.Crud
 
     public class StreamLogicImpl : BasicLogicAbstract<Stream>
     {
-        private readonly IStreamDal _streamDal;
+        private readonly IBasicCrud<Stream> _streamDal;
         
         private readonly User _user;
 
         private readonly Lazy<IStreamRipperManager> _streamManager;
 
-        public StreamLogicImpl(IStreamDal streamDal, User user, Lazy<IStreamRipperManager> streamManager)
+        public StreamLogicImpl(IBasicCrud<Stream> streamDal, User user, Lazy<IStreamRipperManager> streamManager)
         {
             _streamDal = streamDal;
             _user = user;
             _streamManager = streamManager;
         }
         
-        protected override IBasicDal<Stream> GetBasicCrudDal()
+        protected override IBasicCrud<Stream> GetBasicCrudDal()
         {
             return _streamDal;
         }
 
-        public override Task<Stream> Save(Stream instance)
+        public override Task<Stream> Save(Stream dto)
         {
-            instance.User = _user;
+            Guard.Argument(dto.Url).HasValue();
+            
+            dto.User = _user;
 
-            return base.Save(instance);
+            return base.Save(dto);
         }
         
         public override async Task<IEnumerable<Stream>> GetAll()
@@ -83,6 +86,8 @@ namespace Logic.Crud
 
         public override async Task<Stream> Update(int id, Stream dto)
         {
+            Guard.Argument(dto.Url).HasValue();
+            
             await _streamManager.Value.For(_user).Stop(id);
 
             return await base.Update(id, dto);

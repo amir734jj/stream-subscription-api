@@ -1,0 +1,24 @@
+{
+  "streams": [
+    {
+      "name": "RadioJavan",
+      "url": "http://stream.radiojavan.com/radiojavan",
+      "filter": "advertisement\nsweeper\nradio javan"
+    },
+    {
+      "name": "pophits",
+      "url": "http://listen.radionomy.com:80/-Pophits",
+      "filter": "advertisement\nsweeper\nTargetSpot"
+    },
+    {
+      "name": "Nagham",
+      "url": "http://listen.radionomy.com:80/Nagham",
+      "filter": "advertisement"
+    },
+    {
+      "name": "1 Radio Dance",
+      "url": "http://listen.radionomy.com/1-Radio-Dance",
+      "filter": "advertisement"
+    }
+  ]
+}

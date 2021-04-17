@@ -6,11 +6,14 @@
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "DATABASE_URL": "",
-        "REDISTOGO_URL": "",
         "CLOUDCUBE_ACCESS_KEY_ID": "",
         "CLOUDCUBE_SECRET_ACCESS_KEY": "",
-        "CLOUDCUBE_URL": ""
+        "CLOUDCUBE_URL": "",
+        "DATABASE_URL": "",
+        "JwtSettings:Key": "",
+        "REDISTOGO_URL": "",
+        "last.fm:Key": "",
+        "last.fm:Secret": ""
       }
     }
   }

@@ -1,0 +1,17 @@
+I wrote this website in my free time to "rip" online radios. It basically listens to online radios (user provides the URL), if the metadata has changed, it knows song has changed and it yields the mp3 audio file right to 1) the user browser or 2) FTPs to their FTP server. It can also remove advertisements using a simple regex against metadata.
+
+** It does not store the audio internally and it's all open source **
+
+I wrote this website to be able to listen to my few of my favorite online radio simultaneously without an advertisement.
+
+I was wondering if I can some feedback. This is my weekend project.
+
+Thank you.
+
+UI: https://stream-subscription-ui.herokuapp.com/
+API: https://stream-subscription-api.herokuapp.com/
+
+GitHub:
+https://github.com/amir734jj/stream-subscription-api
+https://github.com/amir734jj/stream-subscription-ui
+https://github.com/amir734jj/Stream-ripper

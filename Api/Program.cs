@@ -13,7 +13,7 @@ namespace Api
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
-                .ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Warning))
+                .ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Error))
                 .UseStartup<Startup>()
                 .ConfigureLogging((hostingContext, logging) =>
                 {

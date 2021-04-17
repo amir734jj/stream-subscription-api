@@ -1,7 +1,7 @@
 using Models.Interfaces;
 using Models.Models.Sinks;
 
-namespace Models.Models
+namespace Models.Models.Relationships
 {
     public class StreamFtpSinkRelationship : IEntity
     {

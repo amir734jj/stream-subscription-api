@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dal.Interfaces;
+using EfCoreRepository.Interfaces;
 using Logic.Abstracts;
 using Logic.Interfaces;
 using Models.Models;
@@ -11,15 +11,15 @@ namespace Logic.Crud
 {
     public class FtpSinkLogic : BasicLogicAbstract<FtpSink>, IFtpSinkLogic
     {
-        private readonly IFtpSinkDal _ftpSinkDal;
+        private readonly IBasicCrud<FtpSink> _ftpSinkDal;
 
         /// <summary>
         /// Constructor dependency injection
         /// </summary>
-        /// <param name="ftpSinkDal"></param>
-        public FtpSinkLogic(IFtpSinkDal ftpSinkDal)
+        /// <param name="repository"></param>
+        public FtpSinkLogic(IEfRepository repository)
         {
-            _ftpSinkDal = ftpSinkDal;
+            _ftpSinkDal = repository.For<FtpSink>();
         }
 
         public IBasicLogic<FtpSink> For(User user)
@@ -27,7 +27,7 @@ namespace Logic.Crud
             return new FtpSinkLogicImpl(_ftpSinkDal, user);
         }
 
-        protected override IBasicDal<FtpSink> GetBasicCrudDal()
+        protected override IBasicCrud<FtpSink> GetBasicCrudDal()
         {
             return _ftpSinkDal;
         }
@@ -35,17 +35,17 @@ namespace Logic.Crud
 
     public class FtpSinkLogicImpl : BasicLogicAbstract<FtpSink>
     {
-        private readonly IFtpSinkDal _ftpSinkDal;
+        private readonly IBasicCrud<FtpSink> _ftpSinkDal;
         
         private readonly User _user;
 
-        public FtpSinkLogicImpl(IFtpSinkDal ftpSinkDal, User user)
+        public FtpSinkLogicImpl(IBasicCrud<FtpSink> ftpSinkDal, User user)
         {
             _ftpSinkDal = ftpSinkDal;
             _user = user;
         }
         
-        protected override IBasicDal<FtpSink> GetBasicCrudDal()
+        protected override IBasicCrud<FtpSink> GetBasicCrudDal()
         {
             return _ftpSinkDal;
         }

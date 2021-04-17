@@ -6,14 +6,15 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Api.Configs;
+using Logic.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Models.Models;
 using Models.ViewModels.Identities;
 using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.AspNetCore.Authorization;
+using Models.ViewModels.Api;
 
 namespace Api.Controllers.Api
 {
@@ -21,16 +22,22 @@ namespace Api.Controllers.Api
     [Route("api/[controller]")]
     public class AccountController : Controller
     {
+        private const string SetupUserTempDataKey = nameof(SetupUserTempDataKey);
+
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signManager;
-        private readonly IOptions<JwtSettings> _jwtSettings;
+        private readonly JwtSettings _jwtSettings;
+        private readonly IUserSetup _userSetup;
+        private readonly IUserLogic _userLogic;
 
-        public AccountController(IOptions<JwtSettings> jwtSettings, UserManager<User> userManager,
-            SignInManager<User> signManager)
+        public AccountController(JwtSettings jwtSettings, UserManager<User> userManager,
+            SignInManager<User> signManager, IUserSetup userSetup, IUserLogic userLogic)
         {
             _jwtSettings = jwtSettings;
             _userManager = userManager;
             _signManager = signManager;
+            _userSetup = userSetup;
+            _userLogic = userLogic;
         }
 
         [HttpGet]
@@ -53,6 +60,23 @@ namespace Api.Controllers.Api
         [SwaggerOperation("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel registerViewModel)
         {
+            var users = (await _userLogic.GetAll()).ToList();
+            
+            if (registerViewModel.Password != registerViewModel.PasswordConfirmation)
+            {
+                return BadRequest(new ErrorViewModel("Password and Password Confirmation do not match"));
+            }
+
+            if (users.Any(x => x.UserName.Equals(registerViewModel.Username, StringComparison.OrdinalIgnoreCase)))
+            {
+                return BadRequest(new ErrorViewModel("Username is already taken. Please try another username"));
+            }
+            
+            if (users.Any(x => x.Email.Equals(registerViewModel.Email, StringComparison.OrdinalIgnoreCase)))
+            {
+                return BadRequest(new ErrorViewModel("There is an existing user with this email. Please try another email"));
+            }
+            
             var user = new User
             {
                 Name = registerViewModel.Name,
@@ -66,12 +90,24 @@ namespace Api.Controllers.Api
                 await _userManager.CreateAsync(user, registerViewModel.Password)
             };
 
-            if (identityResults.Aggregate(true, (b, result) => b && result.Succeeded))
+            if (identityResults.All(x => x.Succeeded))
             {
-                return Ok("Successfully registered!");
+                return RedirectToAction("Setup", new {userId = user.Id});
             }
 
-            return BadRequest("Failed to register!");
+            return BadRequest(new ErrorViewModel(new[] {"Failed to register!"}
+                .Concat(identityResults.SelectMany(x => x.Errors.Select(y => y.Description))).ToArray()));
+        }
+
+        [HttpGet]
+        [Route("Setup/{userId}")]
+        [SwaggerOperation("Setup")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Setup([FromRoute] int userId)
+        {
+            await _userSetup.Setup(userId);
+
+            return Ok("Successfully registered and setup user");
         }
 
         [HttpPost]
@@ -84,14 +120,13 @@ namespace Api.Controllers.Api
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, loginViewModel.Password))
             {
-                return BadRequest(new
-                {
-                    error = "", // OpenIdConnectConstants.Errors.InvalidGrant,
-                    error_description = "The username or password is invalid."
-                });
+                return BadRequest(new ErrorViewModel("The username or password is invalid."));
             }
 
             await _signManager.SignInAsync(user, true);
+
+            // Set LastLoginTime
+            await _userLogic.Update(user.Id, x => x.LastLoginTime = DateTimeOffset.Now);
 
             var (token, expires) = ResolveToken(user);
 
@@ -151,14 +186,14 @@ namespace Api.Controllers.Api
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Value.Key));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             
-            var expires = DateTime.Now.AddMinutes(_jwtSettings.Value.AccessTokenDurationInMinutes);
+            var expires = DateTime.Now.AddMinutes(_jwtSettings.AccessTokenDurationInMinutes);
 
             var token = new JwtSecurityToken(
-                _jwtSettings.Value.Issuer,
-                _jwtSettings.Value.Issuer,
+                _jwtSettings.Issuer,
+                _jwtSettings.Issuer,
                 claims,
                 expires: expires,
                 signingCredentials: credentials);

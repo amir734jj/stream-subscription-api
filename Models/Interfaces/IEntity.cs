@@ -1,10 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using EfCoreRepository.Interfaces;
 
 namespace Models.Interfaces
 {
     public interface IEntity
     {
-        [Key]
-        int Id { get; set; }
     }
 }

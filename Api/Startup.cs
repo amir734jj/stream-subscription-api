@@ -1,22 +1,20 @@
-﻿using System;
+using System;
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
-using Amazon;
-using Amazon.Runtime;
-using Amazon.S3;
+using Api.Attributes;
 using Api.Configs;
 using Api.Extensions;
-using Dal.Configs;
 using Dal.Interfaces;
-using Dal.ServiceApi;
 using Dal.Utilities;
 using EFCache;
 using EFCache.Redis;
+using EfCoreRepository.Extensions;
+using IF.Lastfm.Core.Api;
 using Logic.Interfaces;
 using Logic.Providers;
 using Logic.Services;
-using Logic.State;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,12 +28,17 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MlkPwgen;
 using Models.Constants;
 using Models.Models;
+using Models.ViewModels.Config;
 using Newtonsoft.Json;
+using Refit;
+using RestSharp;
+using RestSharp.Serializers.NewtonsoftJson;
 using StackExchange.Redis;
 using StructureMap;
 using static Dal.Utilities.ConnectionStringUtility;
@@ -50,7 +53,7 @@ namespace Api
 
         /// <summary>
         /// Constructor
-        /// </summary>
+        /// </summary>uriString
         /// <param name="env"></param>
         public Startup(IWebHostEnvironment env)
         {
@@ -123,7 +126,7 @@ namespace Api
                 options.IdleTimeout = TimeSpan.FromMinutes(60);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.Name = ApiConstants.AuthenticationSessionCookieName;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.None;
             });
 
             services.AddSwaggerGen(c =>
@@ -160,6 +163,10 @@ namespace Api
                 {
                     x.Filters.Add<AllowAnonymousFilter>();
                 }
+
+                // Exception filter attribute
+                x.Filters.Add<ExceptionFilterAttribute>();
+                
             }).AddNewtonsoftJson(x =>
             {
                 x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -180,7 +187,7 @@ namespace Api
                 }
             });
 
-            services.AddIdentity<User, IdentityRole<int>>(x => { x.User.RequireUniqueEmail = true; })
+            services.AddIdentity<User, IdentityRole<int>>(x => x.User.RequireUniqueEmail = true)
                 .AddEntityFrameworkStores<EntityDbContext>()
                 .AddRoles<IdentityRole<int>>()
                 .AddDefaultTokenProviders();
@@ -203,9 +210,18 @@ namespace Api
                 EntityFrameworkCache.Initialize(new RedisCache(redisConfigurationOptions));
             }
 
+            services.AddEfRepository<EntityDbContext>(x => x.Profile(Assembly.Load("Dal"), Assembly.Load("Models")));
+
             var jwtSetting = _configuration
                 .GetSection("JwtSettings")
                 .Get<JwtSettings>();
+
+            if (_env.IsDevelopment() && string.IsNullOrEmpty(jwtSetting.Key))
+            {
+                jwtSetting.Key = PasswordGenerator.Generate(length: 100, allowed: Sets.Alphanumerics);
+                
+                IdentityModelEventSource.ShowPII = true;
+            }
             
             services.AddAuthentication(options => {
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -235,37 +251,31 @@ namespace Api
 
             var container = new Container(config =>
             {
+                config.For<JwtSettings>().Use(jwtSetting).Singleton();
+                
                 // If environment is localhost then use mock email service
                 if (_env.IsDevelopment())
                 {
-                    config.For<IS3Service>().Use(new S3Service()).Singleton();
+
                 }
                 else
                 {
-                    var (accessKeyId, secretAccessKey, url) = (
-                        _configuration.GetRequiredValue<string>("CLOUDCUBE_ACCESS_KEY_ID"),
-                        _configuration.GetRequiredValue<string>("CLOUDCUBE_SECRET_ACCESS_KEY"),
-                        _configuration.GetRequiredValue<string>("CLOUDCUBE_URL")
+                    config.For<ISimpleConfigServer>().Use(x =>
+                        RestService.For<ISimpleConfigServer>(_configuration.GetValue<string>("ConfigApi")));
+
+                    config.For<SimpleConfigServerApiKey>().Use(new SimpleConfigServerApiKey
+                        {ApiKey = _configuration.GetRequiredValue<string>("CONFIG_KEY")});
+
+                    var (lastFmKey, lastFmSecret) = (
+                        _configuration.GetRequiredValue<string>("last.fm:Key"),
+                        _configuration.GetRequiredValue<string>("last.fm:Secret")
                     );
 
-                    var prefix = new Uri(url).Segments.GetValue(1)?.ToString();
-                    const string bucketName = "cloud-cube";
-
-                    // Generally bad practice
-                    var credentials = new BasicAWSCredentials(accessKeyId, secretAccessKey);
-
-                    // Create S3 client
-                    config.For<IAmazonS3>().Use(() => new AmazonS3Client(credentials, RegionEndpoint.USEast1));
-                    config.For<S3ServiceConfig>().Use(new S3ServiceConfig(bucketName, prefix));
-                    
-                    config.For<IS3Service>().Use(ctx => new S3Service(
-                        ctx.GetInstance<ILogger<S3Service>>(),
-                        ctx.GetInstance<IAmazonS3>(),
-                        ctx.GetInstance<S3ServiceConfig>()
-                    ));
+                    config.For<LastfmClient>().Use("last.FM", () => new LastfmClient(lastFmKey, lastFmSecret, new HttpClient()));
                 }
-
-                config.For<StreamRipperState>().Singleton();
+                
+                config.For<IRestClient>()
+                    .Use(new RestClient(_configuration.GetValue<string>("ShoutcastApi")).UseNewtonsoftJson());
 
                 // Register stuff in container, using the StructureMap APIs...
                 config.Scan(_ =>
@@ -292,11 +302,14 @@ namespace Api
         /// <param name="app"></param>
         /// <param name="configLogic"></param>
         /// <param name="streamRipperManager"></param>
-        public void Configure(IApplicationBuilder app, IConfigLogic configLogic, IStreamRipperManager streamRipperManager)
+        /// <param name="shoutcastDirectoryApi"></param>
+        public void Configure(IApplicationBuilder app, IConfigLogic configLogic, IStreamRipperManager streamRipperManager, IShoutcastDirectoryApi shoutcastDirectoryApi)
         {
             configLogic.Refresh().Wait();
 
             streamRipperManager.Refresh().Wait();
+
+            shoutcastDirectoryApi.Setup().Wait();
 
             app.UseMiniProfiler();
             
