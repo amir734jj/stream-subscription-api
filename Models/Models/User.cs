@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using Models.Interfaces;
@@ -12,6 +13,10 @@ namespace Models.Models
     /// </summary>
     public class User : IdentityUser<int>, IEntity
     {
+        [Key]
+        [PersonalData]
+        public override int Id { get; set; }
+
         public string Name { get; set; }
         
         public virtual DateTimeOffset LastLoginTime { get; set; }  = DateTimeOffset.MinValue;
