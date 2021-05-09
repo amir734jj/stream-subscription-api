@@ -1,20 +1,14 @@
 using System.Linq;
+using EfCoreRepository;
 using EfCoreRepository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Models.Models.Sinks;
 
 namespace Dal.Profiles
 {
-    public class FtpSinkProfile : IEntityProfile<FtpSink>
+    public class FtpSinkProfile : EntityProfile<FtpSink>
     {
-        private readonly IEntityProfileAuxiliary _entityProfileAuxiliary;
-
-        public FtpSinkProfile(IEntityProfileAuxiliary entityProfileAuxiliary)
-        {
-            _entityProfileAuxiliary = entityProfileAuxiliary;
-        }
-        
-        public void Update(FtpSink entity, FtpSink dto)
+        public override void Update(FtpSink entity, FtpSink dto)
         {
             entity.Name = dto.Name;
             entity.Host = dto.Host;
@@ -23,12 +17,13 @@ namespace Dal.Profiles
             entity.Path = dto.Path;
             entity.Port = dto.Port;
             entity.Favorite = dto.Favorite;
-            entity.StreamFtpSinkRelationships =
-                _entityProfileAuxiliary.ModifyList(entity.StreamFtpSinkRelationships, dto.StreamFtpSinkRelationships,
-                    x => new {x.StreamId, x.FtpSinkId}).ToList();
+            ModifyList(
+                entity.StreamFtpSinkRelationships,
+                dto.StreamFtpSinkRelationships,
+                x => (x.StreamId, x.FtpSinkId));
         }
 
-        public IQueryable<FtpSink> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<FtpSink>
+        public override IQueryable<FtpSink> Include<TQueryable>(TQueryable queryable)
         {
             return queryable
                 .Include(x => x.StreamFtpSinkRelationships)

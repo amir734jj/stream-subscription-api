@@ -1,30 +1,25 @@
 using System.Linq;
+using EfCoreRepository;
 using EfCoreRepository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Models.Models;
 
 namespace Dal.Profiles
 {
-    public class StreamProfile : IEntityProfile<Stream>
+    public class StreamProfile : EntityProfile<Stream>
     {
-        private readonly IEntityProfileAuxiliary _entityProfileAuxiliary;
-
-        public StreamProfile(IEntityProfileAuxiliary entityProfileAuxiliary)
-        {
-            _entityProfileAuxiliary = entityProfileAuxiliary;
-        }
-        
-        public void Update(Stream entity, Stream dto)
+        public override void Update(Stream entity, Stream dto)
         {
             entity.Filter = dto.Filter;
             entity.Name = dto.Name;
             entity.Url = dto.Url;
-            entity.StreamFtpSinkRelationships = _entityProfileAuxiliary.ModifyList(
-                entity.StreamFtpSinkRelationships, dto.StreamFtpSinkRelationships,
-                x => new {x.StreamId, x.FtpSinkId}).ToList();
+            ModifyList(
+                entity.StreamFtpSinkRelationships,
+                dto.StreamFtpSinkRelationships,
+                x => (x.StreamId, x.FtpSinkId));
         }
 
-        public IQueryable<Stream> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<Stream>
+        public override IQueryable<Stream> Include<TQueryable>(TQueryable queryable)
         {
             return queryable
                 .Include(x => x.User)

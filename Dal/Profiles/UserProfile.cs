@@ -1,18 +1,19 @@
 using System.Linq;
+using EfCoreRepository;
 using EfCoreRepository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Models.Models;
 
 namespace Dal.Profiles
 {
-    public class UserProfile : IEntityProfile<User>
+    public class UserProfile : EntityProfile<User>
     {
-        public void Update(User entity, User dto)
+        public override void Update(User entity, User dto)
         {
             entity.LastLoginTime = dto.LastLoginTime;
         }
 
-        public IQueryable<User> Include<TQueryable>(TQueryable queryable) where TQueryable : IQueryable<User>
+        public override IQueryable<User> Include<TQueryable>(TQueryable queryable)
         {
             return queryable
                 .Include(x => x.FtpSinks)
