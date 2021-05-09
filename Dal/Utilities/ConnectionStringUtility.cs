@@ -22,8 +22,7 @@ namespace Dal.Utilities
 
             return configurationOptions.ToString();
         }
-        
-        
+
         /// <summary>
         /// Converts connection string url to resource
         /// </summary>
