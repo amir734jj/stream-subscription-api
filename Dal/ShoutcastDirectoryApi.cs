@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Dal.Extensions;
@@ -30,11 +31,9 @@ namespace Dal
         {
             using var client = new HttpClient();
 
-            var stream = Result.Find(x => x.Id == id);
-
-            if (stream != null)
+            if (Result == null || Result?.Find(x => x.Id == id) != null)
             {
-                var mp3U = await client.GetStringAsync($"http://yp.shoutcast.com/sbin/tunein-station.m3u?id={stream.Id}");
+                var mp3U = await client.GetStringAsync($"http://yp.shoutcast.com/sbin/tunein-station.m3u?id={id}");
             
                 var url = mp3U.Split(Environment.NewLine).FirstOrDefault(token => token.StartsWith("http"));
 
@@ -54,9 +53,32 @@ namespace Dal
             var response = await _restClient.GetAsync<Dictionary<string, List<ShoutCastStream>>>(request);
 
             var tasks = response.Values.SelectMany(x => x)
-                .ToList();
+                .AsParallel()
+                .Where(async x =>
+                {
+                    try
+                    {
+                        var url =  await Url(x.Id);
 
-            return tasks;
+                        if (string.IsNullOrWhiteSpace(url))
+                        {
+                            throw new Exception("Loading URL failed");
+                        }
+
+                        var req = WebRequest.Create(url);
+                        req.Method = "HEAD";
+
+                        var res = await req.GetResponseAsync();
+
+                        return res != null;
+                    }
+                    catch (Exception)
+                    {
+                        return false;
+                    }
+                }).ToListAsync();
+
+            return tasks.Result.ToList();
         }
 
         public List<ShoutCastStream> Result { get; private set; }
