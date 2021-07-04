@@ -309,7 +309,7 @@ namespace Api
 
             streamRipperManager.Refresh().Wait();
 
-            shoutcastDirectoryApi.Setup().Wait();
+            shoutcastDirectoryApi.Setup();
 
             app.UseMiniProfiler();
             
