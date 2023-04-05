@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Dal.Utilities;
 using Logic.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Stream = Models.Models.Stream;

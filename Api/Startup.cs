@@ -8,8 +8,6 @@ using Api.Configs;
 using Api.Extensions;
 using Dal.Interfaces;
 using Dal.Utilities;
-using EFCache;
-using EFCache.Redis;
 using EfCoreRepository.Extensions;
 using IF.Lastfm.Core.Api;
 using Logic.Interfaces;
@@ -39,7 +37,6 @@ using Newtonsoft.Json;
 using Refit;
 using RestSharp;
 using RestSharp.Serializers.NewtonsoftJson;
-using StackExchange.Redis;
 using StructureMap;
 using static Dal.Utilities.ConnectionStringUtility;
 
@@ -107,18 +104,6 @@ namespace Api
             services.AddLogging();
             
             services.AddRouting(options => options.LowercaseUrls = true);
-
-            if (_env.IsDevelopment())
-            {
-                services.AddDistributedMemoryCache();
-            }
-            else
-            {
-                var redisConnectionString =
-                    ConnectionStringUrlToRedisResource(_configuration.GetValue<string>("REDISTOGO_URL"));
-
-                services.AddStackExchangeRedisCache(c => c.Configuration = redisConnectionString);
-            }
 
             services.AddSession(options =>
             {
@@ -191,24 +176,6 @@ namespace Api
                 .AddEntityFrameworkStores<EntityDbContext>()
                 .AddRoles<IdentityRole<int>>()
                 .AddDefaultTokenProviders();
-
-            // L2 EF cache
-            if (_env.IsDevelopment())
-            {
-                EntityFrameworkCache.Initialize(new InMemoryCache());
-            }
-            else
-            {
-                var redisConnectionString =
-                    ConnectionStringUrlToRedisResource(_configuration.GetValue<string>("REDISTOGO_URL"));
-
-                var redisConfigurationOptions = ConfigurationOptions.Parse(redisConnectionString);
-
-                // Important
-                redisConfigurationOptions.AbortOnConnectFail = false;
-
-                EntityFrameworkCache.Initialize(new RedisCache(redisConfigurationOptions));
-            }
 
             services.AddEfRepository<EntityDbContext>(x => x.Profile(Assembly.Load("Dal"), Assembly.Load("Models")));
 
