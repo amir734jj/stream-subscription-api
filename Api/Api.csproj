@@ -6,6 +6,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Flurl" Version="3.0.7" />
+    <PackageReference Include="Lamar" Version="11.1.2" />
+    <PackageReference Include="Lamar.Microsoft.DependencyInjection" Version="11.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.16" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="6.0.16" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.16" />
@@ -16,8 +18,6 @@
     <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.2.22" />
     <PackageReference Include="MlkPwgen" Version="0.3.0" />
     <PackageReference Include="OwaspHeaders.Core" Version="4.5.1" />
-    <PackageReference Include="StructureMap" Version="4.7.1" />
-    <PackageReference Include="StructureMap.Microsoft.DependencyInjection" Version="2.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
     <PackageReference Include="System.Net.Sockets" Version="4.3.0" />

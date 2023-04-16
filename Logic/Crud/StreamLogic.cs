@@ -19,11 +19,11 @@ public class StreamLogic : BasicLogicAbstract<Stream>, IStreamLogic
     /// <summary>
     /// Constructor dependency injection
     /// </summary>
-    /// <param name="repository"></param>
+    /// <param name="streamDal"></param>
     /// <param name="streamRipperManager"></param>
-    public StreamLogic(IEfRepository repository, Lazy<IStreamRipperManager> streamRipperManager)
+    public StreamLogic(IBasicCrud<Stream> streamDal, Lazy<IStreamRipperManager> streamRipperManager)
     {
-        _streamDal = repository.For<Stream>();
+        _streamDal = streamDal;
         _streamRipperManager = streamRipperManager;
     }
 
@@ -38,7 +38,7 @@ public class StreamLogic : BasicLogicAbstract<Stream>, IStreamLogic
     }
 }
 
-public class StreamLogicImpl : BasicLogicAbstract<Stream>
+internal class StreamLogicImpl : BasicLogicAbstract<Stream>
 {
     private readonly IBasicCrud<Stream> _streamDal;
         

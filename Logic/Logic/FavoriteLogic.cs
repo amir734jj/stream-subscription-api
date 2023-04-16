@@ -27,7 +27,7 @@ public class FavoriteLogic : IFavoriteLogic
     }
 }
 
-public class FavoriteLogicUserBound : IFavoriteLogicUserBound
+internal class FavoriteLogicUserBound : IFavoriteLogicUserBound
 {
     private readonly ISinkService _sinkService;
 

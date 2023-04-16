@@ -36,8 +36,7 @@ public class UserSetup : IUserSetup
             
         var fileString = await File.ReadAllTextAsync(SetupUserRecipe);
 
-        user.Streams.AddRange(JsonConvert.DeserializeAnonymousType(fileString, new {Streams = new List<Stream>()})
-            .Streams);
+        user.Streams.AddRange(JsonConvert.DeserializeAnonymousType(fileString, new {Streams = new List<Stream>()}).Streams);
 
         await _dbContext.SaveChangesAsync();
 

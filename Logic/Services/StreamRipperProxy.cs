@@ -8,11 +8,9 @@ using StreamRipper;
 using StreamRipper.Interfaces;
 using StreamRipper.Models;
 using StreamRipper.Models.Events;
-using StructureMap;
 
 namespace Logic.Services;
 
-[Singleton]
 public class StreamRipperProxy : IStreamRipperProxy
 {
     private readonly IDictionary<Uri, StreamRipperItemProxy> _streamRippers =

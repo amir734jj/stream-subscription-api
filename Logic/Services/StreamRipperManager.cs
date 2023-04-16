@@ -51,8 +51,7 @@ public class StreamRipperManager : IStreamRipperManager
     /// <param name="logger"></param>
     public StreamRipperManager(StreamRipperState state, IStreamLogic streamLogic, ISinkService sinkService,
         IHubContext<MessageHub> hub, IConfigLogic configLogic, IFilterSongLogic filterSongLogic,
-        IStreamRipperProxy streamRipperProxy,
-        ISongMetaDataExtract songMetaDataExtract, ILogger<IStreamRipper> logger)
+        IStreamRipperProxy streamRipperProxy, ISongMetaDataExtract songMetaDataExtract, ILogger<IStreamRipper> logger)
     {
         _state = state;
         _streamLogic = streamLogic;
@@ -107,7 +106,7 @@ public class StreamRipperManager : IStreamRipperManager
     }
 }
 
-public class StreamRipperManagerImpl : IStreamRipperManagerImpl
+internal class StreamRipperManagerImpl : IStreamRipperManagerImpl
 {
     private readonly IStreamLogic _streamLogic;
 

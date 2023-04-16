@@ -16,10 +16,10 @@ public class FtpSinkLogic : BasicLogicAbstract<FtpSink>, IFtpSinkLogic
     /// <summary>
     /// Constructor dependency injection
     /// </summary>
-    /// <param name="repository"></param>
-    public FtpSinkLogic(IEfRepository repository)
+    /// <param name="ftpSinkDal"></param>
+    public FtpSinkLogic(IBasicCrud<FtpSink> ftpSinkDal)
     {
-        _ftpSinkDal = repository.For<FtpSink>();
+        _ftpSinkDal = ftpSinkDal;
     }
 
     public IBasicLogic<FtpSink> For(User user)
@@ -33,7 +33,7 @@ public class FtpSinkLogic : BasicLogicAbstract<FtpSink>, IFtpSinkLogic
     }
 }
 
-public class FtpSinkLogicImpl : BasicLogicAbstract<FtpSink>
+internal class FtpSinkLogicImpl : BasicLogicAbstract<FtpSink>
 {
     private readonly IBasicCrud<FtpSink> _ftpSinkDal;
         

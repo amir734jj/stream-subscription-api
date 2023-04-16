@@ -6,13 +6,16 @@ using System.Text;
 using Api.Attributes;
 using Api.Configs;
 using Api.Extensions;
+using Dal;
 using Dal.Interfaces;
 using Dal.Utilities;
 using EfCoreRepository.Extensions;
 using IF.Lastfm.Core.Api;
+using Lamar;
 using Logic.Interfaces;
 using Logic.Providers;
 using Logic.Services;
+using Logic.State;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -35,7 +38,6 @@ using Models.Models;
 using Models.ViewModels.Config;
 using Newtonsoft.Json;
 using Refit;
-using StructureMap;
 using static Dal.Utilities.ConnectionStringUtility;
 
 namespace Api;
@@ -69,7 +71,7 @@ public class Startup
     /// </summary>
     /// <param name="services"></param>
     /// <returns></returns>
-    public IServiceProvider ConfigureServices(IServiceCollection services)
+    public void ConfigureContainer(ServiceRegistry services)
     {
         services.AddMiniProfiler(opt =>
         {
@@ -175,7 +177,7 @@ public class Startup
             .AddRoles<IdentityRole<int>>()
             .AddDefaultTokenProviders();
 
-        services.AddEfRepository<EntityDbContext>(x => x.Profile(Assembly.Load("Dal"), Assembly.Load("Models")));
+        services.AddEfRepository<EntityDbContext>(x => x.Profile(Assembly.Load("Dal")));
 
         var jwtSetting = _configuration
             .GetSection("JwtSettings")
@@ -205,7 +207,7 @@ public class Startup
                 };
             });
 
-        services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+        services.AddScoped<IUserIdProvider, CustomUserIdProvider>();
 
         services.AddSignalR(config =>
         {
@@ -214,48 +216,41 @@ public class Startup
             config.EnableDetailedErrors = true;
         });
 
-        var container = new Container(config =>
+        services.AddSingleton(jwtSetting);
+
+        services.AddSingleton<StreamRipperState>();
+
+        services.AddSingleton<IShoutcastDirectoryApi, ShoutcastDirectoryApi>();
+
+        services.AddSingleton<IStreamRipperProxy, StreamRipperProxy>();
+
+        // If environment is localhost then use mock email service
+        if (_env.IsDevelopment())
         {
-            config.For<JwtSettings>().Use(jwtSetting).Singleton();
-                
-            // If environment is localhost then use mock email service
-            if (_env.IsDevelopment())
-            {
 
-            }
-            else
-            {
-                config.For<ISimpleConfigServer>().Use(x =>
-                    RestService.For<ISimpleConfigServer>(_configuration.GetValue<string>("ConfigApi")));
+        }
+        else
+        {
+            services.AddSingleton(RestService.For<ISimpleConfigServer>(_configuration.GetValue<string>("ConfigApi")));
 
-                config.For<SimpleConfigServerApiKey>().Use(new SimpleConfigServerApiKey
-                    {ApiKey = _configuration.GetRequiredValue<string>("CONFIG_KEY")});
+            services.AddSingleton(new SimpleConfigServerApiKey
+                {ApiKey = _configuration.GetRequiredValue<string>("CONFIG_KEY")});
 
-                var (lastFmKey, lastFmSecret) = (
-                    _configuration.GetRequiredValue<string>("last.fm:Key"),
-                    _configuration.GetRequiredValue<string>("last.fm:Secret")
-                );
+            var (lastFmKey, lastFmSecret) = (
+                _configuration.GetRequiredValue<string>("last.fm:Key"),
+                _configuration.GetRequiredValue<string>("last.fm:Secret")
+            );
 
-                config.For<LastfmClient>().Use("last.FM", () => new LastfmClient(lastFmKey, lastFmSecret, new HttpClient()));
-            }
+            services.AddSingleton(new LastfmClient(lastFmKey, lastFmSecret, new HttpClient()));
+        }
 
-            // Register stuff in container, using the StructureMap APIs...
-            config.Scan(_ =>
-            {
-                _.AssemblyContainingType(typeof(Startup));
-                _.Assembly("Api");
-                _.Assembly("Logic");
-                _.Assembly("Dal");
-                _.WithDefaultConventions();
-            });
-
-            // Populate the container using the service collection
-            config.Populate(services);
+        services.Scan(s =>
+        {
+            s.TheCallingAssembly();
+            s.Assembly("Logic");
+            s.Assembly("Dal");
+            s.WithDefaultConventions();
         });
-
-        container.AssertConfigurationIsValid();
-
-        return container.GetInstance<IServiceProvider>();
     }
 
     /// <summary>

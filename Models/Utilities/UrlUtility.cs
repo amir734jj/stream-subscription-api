@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Web;
 
 namespace Models.Utilities;
 
@@ -23,10 +24,10 @@ public static class UrlUtility
         var connectionStringBuilder = new Dictionary<string, string>
         {
             ["Host"] = url.Host,
-            ["Username"] = url.UserInfo.Split(':').GetValue(0)?.ToString(),
-            ["Password"] = url.UserInfo.Split(':').GetValue(1)?.ToString(),
+            ["Username"] = HttpUtility.UrlDecode(url.UserInfo.Split(':').GetValue(0)?.ToString()),
+            ["Password"] = HttpUtility.UrlDecode(url.UserInfo.Split(':').GetValue(1)?.ToString()),
             ["Database"] = url.LocalPath.Substring(1),
-            ["ApplicationName"] = "stream-subscription-api"
+            ["ApplicationName"] = "config-api"
         };
 
         return (url, connectionStringBuilder);

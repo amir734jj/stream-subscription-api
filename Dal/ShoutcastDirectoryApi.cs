@@ -7,11 +7,9 @@ using System.Threading.Tasks;
 using Dal.Interfaces;
 using Models.ViewModels.Shoutcast;
 using Newtonsoft.Json;
-using StructureMap;
 
 namespace Dal;
 
-[Singleton]
 public class ShoutcastDirectoryApi : IShoutcastDirectoryApi
 {
     public ShoutcastDirectoryApi()

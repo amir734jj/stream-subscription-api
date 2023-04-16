@@ -12,10 +12,10 @@ public class UserLogic : BasicLogicAbstract<User>, IUserLogic
     /// <summary>
     /// Constructor dependency injection
     /// </summary>
-    /// <param name="repository"></param>
-    public UserLogic(IEfRepository repository)
+    /// <param name="userDal"></param>
+    public UserLogic(IBasicCrud<User> userDal)
     {
-        _userDal = repository.For<User>();
+        _userDal = userDal;
     }
 
     /// <summary>
