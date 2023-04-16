@@ -1,15 +1,14 @@
 using Newtonsoft.Json;
 using static Models.Constants.ApplicationConstants;
 
-namespace Dal.Extensions
+namespace Dal.Extensions;
+
+public static class ObjectExtension
 {
-    public static class ObjectExtension
+    public static byte[] ObjectToByteArray<T>(this T data)
     {
-        public static byte[] ObjectToByteArray<T>(this T data)
-        {
-            var json = JsonConvert.SerializeObject(data);
+        var json = JsonConvert.SerializeObject(data);
             
-            return DefaultEncoding.GetBytes(json);
-        }
+        return DefaultEncoding.GetBytes(json);
     }
 }

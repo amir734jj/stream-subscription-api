@@ -4,42 +4,41 @@ using FluentFTP;
 using Logic.Interfaces;
 using Models.Models.Sinks;
 using Stream = Models.Models.Stream;
-namespace Logic.Sinks
+namespace Logic.Sinks;
+
+public class FtpUploadService : IUploadService
 {
-    public class FtpUploadService : IUploadService
+    private readonly FtpSink _ftpSink;
+
+    private readonly AsyncFtpClient _client;
+
+    public FtpUploadService(FtpSink ftpSink)
     {
-        private readonly FtpSink _ftpSink;
-
-        private readonly FtpClient _client;
-
-        public FtpUploadService(FtpSink ftpSink)
-        {
-            _ftpSink = ftpSink;
+        _ftpSink = ftpSink;
             
-            _client = new FtpClient(ftpSink.Host, ftpSink.Port, ftpSink.Username, ftpSink.Password);
-        }
+        _client = new AsyncFtpClient(ftpSink.Host, ftpSink.Username, ftpSink.Password, ftpSink.Port);
+    }
 
-        public async Task UploadStream(Stream stream, string filename, MemoryStream data)
-        {
-            await Upload(stream.Name, filename, data);
-        }
+    public async Task UploadStream(Stream stream, string filename, MemoryStream data)
+    {
+        await Upload(stream.Name, filename, data);
+    }
 
-        public async Task UploadToFavorite(string filename, MemoryStream data)
-        {
-            await Upload("favorite", filename, data);
-        }
+    public async Task UploadToFavorite(string filename, MemoryStream data)
+    {
+        await Upload("favorite", filename, data);
+    }
 
-        private async Task Upload(string folder, string filename, System.IO.Stream data)
-        {
-            var directory = Path.Join(_ftpSink.Path, folder);
+    private async Task Upload(string folder, string filename, System.IO.Stream data)
+    {
+        var directory = Path.Join(_ftpSink.Path, folder);
             
-            await _client.ConnectAsync();
+        await _client.Connect();
 
-            await _client.CreateDirectoryAsync(directory);
+        await _client.CreateDirectory(directory);
             
-            await _client.UploadAsync(data, Path.Join(directory, filename));
+        await _client.UploadStream(data, Path.Join(directory, filename));
 
-            await _client.DisconnectAsync();
-        }
+        await _client.Disconnect();
     }
 }

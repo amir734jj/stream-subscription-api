@@ -1,8 +1,5 @@
-﻿using EfCoreRepository.Interfaces;
+﻿namespace Models.Interfaces;
 
-namespace Models.Interfaces
+public interface IEntity
 {
-    public interface IEntity
-    {
-    }
 }

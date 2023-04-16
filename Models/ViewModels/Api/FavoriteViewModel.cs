@@ -1,9 +1,8 @@
-namespace Models.ViewModels.Api
+namespace Models.ViewModels.Api;
+
+public class FavoriteViewModel
 {
-    public class FavoriteViewModel
-    {
-        public string Filename { get; set; }
+    public string Filename { get; set; }
         
-        public string Stream { get; set; }
-    }
+    public string Stream { get; set; }
 }

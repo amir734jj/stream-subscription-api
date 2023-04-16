@@ -8,41 +8,40 @@ using Box.V2.Models;
 using Logic.Interfaces;
 using Stream = Models.Models.Stream;
 
-namespace Logic.Sinks
+namespace Logic.Sinks;
+
+/// <summary>
+/// TODO: NotImplemented
+/// </summary>
+public class BoxDotComUploadService : IUploadService
 {
+    private readonly BoxClient _boxClient;
+
     /// <summary>
-    /// TODO: NotImplemented
+    /// Pass teh token
     /// </summary>
-    public class BoxDotComUploadService : IUploadService
+    /// <param name="token"></param>
+    public BoxDotComUploadService(string token)
     {
-        private readonly BoxClient _boxClient;
+        var config = new BoxConfig("", "", new Uri("http://localhost"));
+        var session = new OAuthSession(token, "NOT_NEEDED", 3600, "bearer");
+        _boxClient = new BoxClient(config, session);
+    }
 
-        /// <summary>
-        /// Pass teh token
-        /// </summary>
-        /// <param name="token"></param>
-        public BoxDotComUploadService(string token)
+    public Task UploadStream(Stream stream, string filename, MemoryStream data)
+    {
+        var req = new BoxFileRequest
         {
-            var config = new BoxConfig("", "", new Uri("http://localhost"));
-            var session = new OAuthSession(token, "NOT_NEEDED", 3600, "bearer");
-            _boxClient = new BoxClient(config, session);
-        }
+            Name = filename,
+            Parent = new BoxRequestEntity { Id = "0" },
+            Description = "ripped_music"
+        };
 
-        public Task UploadStream(Stream stream, string filename, MemoryStream data)
-        {
-            var req = new BoxFileRequest
-            {
-                Name = filename,
-                Parent = new BoxRequestEntity { Id = "0" },
-                Description = "ripped_music"
-            };
+        return _boxClient.FilesManager.UploadAsync(req, data);
+    }
 
-            return _boxClient.FilesManager.UploadAsync(req, data);
-        }
-
-        public Task UploadToFavorite(string filename, MemoryStream data)
-        {
-            throw new NotImplementedException();
-        }
+    public Task UploadToFavorite(string filename, MemoryStream data)
+    {
+        throw new NotImplementedException();
     }
 }

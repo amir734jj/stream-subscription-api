@@ -6,28 +6,27 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Models.Models;
 
-namespace Api.Controllers.Api
+namespace Api.Controllers.Api;
+
+[Authorize]
+[Route("api/[controller]")]
+public class StreamController : BasicCrudController<Stream>
 {
-    [Authorize]
-    [Route("api/[controller]")]
-    public class StreamController : BasicCrudController<Stream>
+    private readonly UserManager<User> _userManager;
+
+    private readonly IStreamLogic _streamLogic;
+
+    public StreamController(UserManager<User> userManager,
+        IStreamLogic streamLogic)
     {
-        private readonly UserManager<User> _userManager;
+        _userManager = userManager;
+        _streamLogic = streamLogic;
+    }
 
-        private readonly IStreamLogic _streamLogic;
+    protected override async Task<IBasicLogic<Stream>> BasicLogic()
+    {
+        var user = await _userManager.FindByEmailAsync(User.Identity.Name);
 
-        public StreamController(UserManager<User> userManager,
-            IStreamLogic streamLogic)
-        {
-            _userManager = userManager;
-            _streamLogic = streamLogic;
-        }
-
-        protected override async Task<IBasicLogic<Stream>> BasicLogic()
-        {
-            var user = await _userManager.FindByEmailAsync(User.Identity.Name);
-
-            return _streamLogic.For(user);
-        }
+        return _streamLogic.For(user);
     }
 }

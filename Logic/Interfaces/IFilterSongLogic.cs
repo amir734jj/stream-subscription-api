@@ -1,9 +1,8 @@
 using System.IO;
 
-namespace Logic.Interfaces
+namespace Logic.Interfaces;
+
+public interface IFilterSongLogic
 {
-    public interface IFilterSongLogic
-    {
-        bool ShouldInclude(MemoryStream stream, string track, string pattern, out double duration);
-    }
+    bool ShouldInclude(MemoryStream stream, string track, string pattern, out double duration);
 }

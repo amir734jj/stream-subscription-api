@@ -2,10 +2,9 @@ using System.Collections.Generic;
 using Models.Enums;
 using Models.Models;
 
-namespace Models.ViewModels.Streams
+namespace Models.ViewModels.Streams;
+
+public class StreamsStatusViewModel
 {
-    public class StreamsStatusViewModel
-    {
-        public Dictionary<Stream, StreamStatusEnum> Status { get; set; }
-    }
+    public Dictionary<Stream, StreamStatusEnum> Status { get; set; }
 }

@@ -1,9 +1,8 @@
 ﻿using Models.Models;
 
-namespace Logic.Interfaces
+namespace Logic.Interfaces;
+
+public interface IUserLogic : IBasicLogic<User>
 {
-    public interface IUserLogic : IBasicLogic<User>
-    {
         
-    }
 }

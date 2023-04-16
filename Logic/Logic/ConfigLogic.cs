@@ -6,56 +6,55 @@ using Microsoft.Extensions.Logging;
 using Models.ViewModels.Config;
 using static Models.Constants.GlobalConfigs;
 
-namespace Logic.Logic
+namespace Logic.Logic;
+
+public class ConfigLogic : IConfigLogic
 {
-    public class ConfigLogic : IConfigLogic
-    {
-        private readonly ISimpleConfigServer _configServer;
+    private readonly ISimpleConfigServer _configServer;
 
-        private readonly SimpleConfigServerApiKey _configServerApiKey;
+    private readonly SimpleConfigServerApiKey _configServerApiKey;
         
-        private readonly ILogger<ConfigLogic> _logger;
+    private readonly ILogger<ConfigLogic> _logger;
 
-        public ConfigLogic(ISimpleConfigServer configServer, SimpleConfigServerApiKey configServerApiKey, ILogger<ConfigLogic> logger)
-        {
-            _configServer = configServer;
-            _configServerApiKey = configServerApiKey;
-            _logger = logger;
-        }
+    public ConfigLogic(ISimpleConfigServer configServer, SimpleConfigServerApiKey configServerApiKey, ILogger<ConfigLogic> logger)
+    {
+        _configServer = configServer;
+        _configServerApiKey = configServerApiKey;
+        _logger = logger;
+    }
 
-        private async Task SetGlobalConfig(GlobalConfigViewModel globalConfigViewModel)
-        {
-            UpdateGlobalConfigs(globalConfigViewModel);
+    private async Task SetGlobalConfig(GlobalConfigViewModel globalConfigViewModel)
+    {
+        UpdateGlobalConfigs(globalConfigViewModel);
 
-            await _configServer.Update(_configServerApiKey.ApiKey, globalConfigViewModel);
-        }
+        await _configServer.Update(_configServerApiKey.ApiKey, globalConfigViewModel);
+    }
 
-        public GlobalConfigViewModel ResolveGlobalConfig()
-        {
-            return ToViewModel();
-        }
+    public GlobalConfigViewModel ResolveGlobalConfig()
+    {
+        return ToViewModel();
+    }
 
-        public async Task UpdateGlobalConfig(Func<GlobalConfigViewModel, GlobalConfigViewModel> update)
-        {
-            var re = update(ResolveGlobalConfig());
+    public async Task UpdateGlobalConfig(Func<GlobalConfigViewModel, GlobalConfigViewModel> update)
+    {
+        var re = update(ResolveGlobalConfig());
             
-            await SetGlobalConfig(re);
-        }
+        await SetGlobalConfig(re);
+    }
 
-        public async Task Refresh()
+    public async Task Refresh()
+    {
+        try
         {
-            try
-            {
-                var response = await _configServer.Load(_configServerApiKey.ApiKey);
+            var response = await _configServer.Load(_configServerApiKey.ApiKey);
 
-                _logger.LogInformation("Successfully fetched the config from config server");
+            _logger.LogInformation("Successfully fetched the config from config server");
 
-                UpdateGlobalConfigs(response);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Failed to fetch the config from config server");
-            }
+            UpdateGlobalConfigs(response);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to fetch the config from config server");
         }
     }
 }

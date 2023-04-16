@@ -1,7 +1,6 @@
-namespace Models.ViewModels.Config
+namespace Models.ViewModels.Config;
+
+public class SimpleConfigServerApiKey
 {
-    public class SimpleConfigServerApiKey
-    {
-        public string ApiKey { get; set; }
-    }
+    public string ApiKey { get; set; }
 }

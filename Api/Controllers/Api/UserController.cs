@@ -8,38 +8,37 @@ using Microsoft.AspNetCore.Mvc;
 using Models.Models;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace Api.Controllers.Api
+namespace Api.Controllers.Api;
+
+[Authorize]
+[Route("api/[controller]")]
+public class UserController : Controller
 {
-    [Authorize]
-    [Route("api/[controller]")]
-    public class UserController : Controller
+    private readonly IUserLogic _userLogic;
+
+    private readonly UserManager<User> _userManager;
+
+    /// <summary>
+    /// Constructor dependency injection
+    /// </summary>
+    /// <param name="userLogic"></param>
+    /// <param name="userManager"></param>
+    public UserController(IUserLogic userLogic, UserManager<User> userManager)
     {
-        private readonly IUserLogic _userLogic;
+        _userLogic = userLogic;
+        _userManager = userManager;
+    }
 
-        private readonly UserManager<User> _userManager;
+    [HttpGet]
+    [Route("")]
+    [SwaggerOperation("GetAll")]
+    [ProducesResponseType(typeof(IEnumerable<>), 200)]
+    public async Task<IActionResult> GetAll()
+    {
+        var user = await _userManager.FindByEmailAsync(User.Identity.Name);
 
-        /// <summary>
-        /// Constructor dependency injection
-        /// </summary>
-        /// <param name="userLogic"></param>
-        /// <param name="userManager"></param>
-        public UserController(IUserLogic userLogic, UserManager<User> userManager)
-        {
-            _userLogic = userLogic;
-            _userManager = userManager;
-        }
+        var users = (await _userLogic.GetAll()).Select(x => x.Id == user.Id ? x.ToAnonymousObject() : x.Obfuscate());
 
-        [HttpGet]
-        [Route("")]
-        [SwaggerOperation("GetAll")]
-        [ProducesResponseType(typeof(IEnumerable<>), 200)]
-        public async Task<IActionResult> GetAll()
-        {
-            var user = await _userManager.FindByEmailAsync(User.Identity.Name);
-
-            var users = (await _userLogic.GetAll()).Select(x => x.Id == user.Id ? x.ToAnonymousObject() : x.Obfuscate());
-
-            return Ok(users);
-        }
+        return Ok(users);
     }
 }

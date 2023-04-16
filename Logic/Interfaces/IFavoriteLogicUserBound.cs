@@ -1,10 +1,9 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Logic.Interfaces
+namespace Logic.Interfaces;
+
+public interface IFavoriteLogicUserBound
 {
-    public interface IFavoriteLogicUserBound
-    {
-        Task UploadFavorite(string filename, MemoryStream stream);
-    }
+    Task UploadFavorite(string filename, MemoryStream stream);
 }

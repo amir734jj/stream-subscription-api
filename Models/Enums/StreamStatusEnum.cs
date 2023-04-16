@@ -1,9 +1,8 @@
-﻿namespace Models.Enums
+﻿namespace Models.Enums;
+
+public enum StreamStatusEnum
 {
-    public enum StreamStatusEnum
-    {
-        Started,
-        Stopped,
-        Fail
-    }
+    Started,
+    Stopped,
+    Fail
 }

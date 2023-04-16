@@ -1,31 +1,30 @@
 using Models.Models;
 
-namespace Models.ViewModels.Api
+namespace Models.ViewModels.Api;
+
+public class ProfileViewModel
 {
-    public class ProfileViewModel
+    public string Name { get; set; }
+
+    public string Email { get; set; }
+
+    public string PhoneNumber { get; set; }
+
+    public string Description { get; set; }
+
+    public User User { get; set; }
+
+    public ProfileViewModel()
     {
-        public string Name { get; set; }
+    }
 
-        public string Email { get; set; }
+    public ProfileViewModel(User user) : this()
+    {
+        if (user == null) return;
 
-        public string PhoneNumber { get; set; }
-
-        public string Description { get; set; }
-
-        public User User { get; set; }
-
-        public ProfileViewModel()
-        {
-        }
-
-        public ProfileViewModel(User user) : this()
-        {
-            if (user == null) return;
-
-            Name = user.Name;
-            Email = user.Email;
-            PhoneNumber = user.PhoneNumber;
-            User = user;
-        }
+        Name = user.Name;
+        Email = user.Email;
+        PhoneNumber = user.PhoneNumber;
+        User = user;
     }
 }

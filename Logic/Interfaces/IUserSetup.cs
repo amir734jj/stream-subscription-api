@@ -1,9 +1,8 @@
 using System.Threading.Tasks;
 
-namespace Logic.Interfaces
+namespace Logic.Interfaces;
+
+public interface IUserSetup
 {
-    public interface IUserSetup
-    {
-        Task Setup(int user);
-    }
+    Task Setup(int user);
 }

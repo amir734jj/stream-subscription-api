@@ -3,23 +3,22 @@ using Logic.Interfaces;
 using Models.Models;
 using Models.ViewModels.Api;
 
-namespace Logic.Logic
+namespace Logic.Logic;
+
+public class ProfileLogic : IProfileLogic
 {
-    public class ProfileLogic : IProfileLogic
+    private readonly IUserLogic _userLogic;
+
+    public ProfileLogic(IUserLogic userLogic)
     {
-        private readonly IUserLogic _userLogic;
+        _userLogic = userLogic;
+    }
 
-        public ProfileLogic(IUserLogic userLogic)
+    public async Task Update(User user, ProfileViewModel profileViewModel)
+    {
+        await _userLogic.Update(user.Id, entity =>
         {
-            _userLogic = userLogic;
-        }
-
-        public async Task Update(User user, ProfileViewModel profileViewModel)
-        {
-            await _userLogic.Update(user.Id, entity =>
-            {
-                entity.Name = profileViewModel.Name;
-            });
-        }
+            entity.Name = profileViewModel.Name;
+        });
     }
 }

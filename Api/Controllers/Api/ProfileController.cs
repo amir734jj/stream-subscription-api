@@ -6,46 +6,45 @@ using Microsoft.AspNetCore.Mvc;
 using Models.Models;
 using Models.ViewModels.Api;
 
-namespace Api.Controllers.Api
+namespace Api.Controllers.Api;
+
+[Authorize]
+[ApiController]
+[Route("Api/[controller]")]
+public class ProfileController : Controller
 {
-    [Authorize]
-    [ApiController]
-    [Route("Api/[controller]")]
-    public class ProfileController : Controller
+    private readonly UserManager<User> _userManager;
+        
+    private readonly IProfileLogic _profileLogic;
+        
+    private readonly IUserLogic _userLogic;
+
+    public ProfileController(UserManager<User> userManager, IProfileLogic profileLogic, IUserLogic userLogic)
     {
-        private readonly UserManager<User> _userManager;
-        
-        private readonly IProfileLogic _profileLogic;
-        
-        private readonly IUserLogic _userLogic;
+        _userManager = userManager;
+        _profileLogic = profileLogic;
+        _userLogic = userLogic;
+    }
 
-        public ProfileController(UserManager<User> userManager, IProfileLogic profileLogic, IUserLogic userLogic)
-        {
-            _userManager = userManager;
-            _profileLogic = profileLogic;
-            _userLogic = userLogic;
-        }
+    [HttpGet]
+    [Route("")]
+    public async Task<IActionResult> Index()
+    {
+        var user = await _userManager.FindByEmailAsync(User.Identity.Name);
 
-        [HttpGet]
-        [Route("")]
-        public async Task<IActionResult> Index()
-        {
-            var user = await _userManager.FindByEmailAsync(User.Identity.Name);
-
-            var userWithNonNullReferenceProperties = await _userLogic.Get(user.Id);
+        var userWithNonNullReferenceProperties = await _userLogic.Get(user.Id);
             
-            return Ok(new ProfileViewModel(userWithNonNullReferenceProperties));
-        }
+        return Ok(new ProfileViewModel(userWithNonNullReferenceProperties));
+    }
         
-        [HttpPost]
-        [Route("")]
-        public async Task<IActionResult> Update([FromBody] ProfileViewModel profileViewModel)
-        {
-            var user = await _userManager.FindByEmailAsync(User.Identity.Name);
+    [HttpPost]
+    [Route("")]
+    public async Task<IActionResult> Update([FromBody] ProfileViewModel profileViewModel)
+    {
+        var user = await _userManager.FindByEmailAsync(User.Identity.Name);
 
-            await _profileLogic.Update(user, profileViewModel);
+        await _profileLogic.Update(user, profileViewModel);
 
-            return Ok(profileViewModel);
-        }
+        return Ok(profileViewModel);
     }
 }

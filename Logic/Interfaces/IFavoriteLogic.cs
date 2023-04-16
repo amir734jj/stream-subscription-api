@@ -1,7 +1,6 @@
-namespace Logic.Interfaces
+namespace Logic.Interfaces;
+
+public interface IFavoriteLogic
 {
-    public interface IFavoriteLogic
-    {
-        IFavoriteLogicUserBound For(int userId);
-    }
+    IFavoriteLogicUserBound For(int userId);
 }

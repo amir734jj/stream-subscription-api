@@ -2,10 +2,9 @@ using System.Threading.Tasks;
 using Models.Models;
 using Models.ViewModels.Api;
 
-namespace Logic.Interfaces
+namespace Logic.Interfaces;
+
+public interface IProfileLogic
 {
-    public interface IProfileLogic
-    {
-        Task Update(User user, ProfileViewModel profileViewModel);
-    }
+    Task Update(User user, ProfileViewModel profileViewModel);
 }

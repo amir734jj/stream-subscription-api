@@ -4,33 +4,32 @@ using Models.Interfaces;
 using Models.Models.Relationships;
 using Newtonsoft.Json;
 
-namespace Models.Models.Sinks
+namespace Models.Models.Sinks;
+
+public class FtpSink : IEntity
 {
-    public class FtpSink : IEntity
-    {
-        [Key]
-        public int Id { get; set; }
+    [Key]
+    public int Id { get; set; }
         
-        public string Name { get; set; }
+    public string Name { get; set; }
         
-        public string Username { get; set; }
+    public string Username { get; set; }
         
-        public string Password { get; set; }
+    public string Password { get; set; }
         
-        public string Host { get; set; }
+    public string Host { get; set; }
 
-        public int Port { get; set; } = 21;
+    public int Port { get; set; } = 21;
 
-        public string Path { get; set; } = string.Empty;
+    public string Path { get; set; } = string.Empty;
 
-        public bool Favorite { get; set; }
+    public bool Favorite { get; set; }
         
-        /// <summary>
-        /// User reference
-        /// </summary>
-        [JsonIgnore]
-        public User User { get; set; }
+    /// <summary>
+    /// User reference
+    /// </summary>
+    [JsonIgnore]
+    public User User { get; set; }
         
-        public List<StreamFtpSinkRelationship> StreamFtpSinkRelationships  { get; set; } = new List<StreamFtpSinkRelationship>();
-    }
+    public List<StreamFtpSinkRelationship> StreamFtpSinkRelationships  { get; set; } = new List<StreamFtpSinkRelationship>();
 }

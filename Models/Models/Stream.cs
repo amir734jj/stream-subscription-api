@@ -4,28 +4,27 @@ using Models.Interfaces;
 using Models.Models.Relationships;
 using Newtonsoft.Json;
 
-namespace Models.Models
+namespace Models.Models;
+
+/// <summary>
+/// Streaming Subscription
+/// </summary>
+public class Stream : IEntity
 {
+    [Key]
+    public int Id { get; set; }
+
+    public string Name { get; set; }
+        
+    public string Url { get; set; }
+
+    public string Filter { get; set; } = "advertisement";
+
     /// <summary>
-    /// Streaming Subscription
+    /// User reference
     /// </summary>
-    public class Stream : IEntity
-    {
-        [Key]
-        public int Id { get; set; }
-
-        public string Name { get; set; }
+    [JsonIgnore]
+    public User User { get; set; }
         
-        public string Url { get; set; }
-
-        public string Filter { get; set; } = "advertisement";
-
-        /// <summary>
-        /// User reference
-        /// </summary>
-        [JsonIgnore]
-        public User User { get; set; }
-        
-        public List<StreamFtpSinkRelationship> StreamFtpSinkRelationships  { get; set; } = new List<StreamFtpSinkRelationship>();
-    }
+    public List<StreamFtpSinkRelationship> StreamFtpSinkRelationships  { get; set; } = new List<StreamFtpSinkRelationship>();
 }

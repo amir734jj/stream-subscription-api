@@ -1,10 +1,9 @@
-﻿namespace Models.Enums
+﻿namespace Models.Enums;
+
+/// <summary>
+/// Service type
+/// </summary>
+public enum SinkTypeEnum
 {
-    /// <summary>
-    /// Service type
-    /// </summary>
-    public enum SinkTypeEnum
-    {
-        Ftp = 0
-    }
+    Ftp = 0
 }
