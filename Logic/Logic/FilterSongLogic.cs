@@ -6,6 +6,7 @@ using Logic.Extensions;
 using Logic.Interfaces;
 using Microsoft.Extensions.Logging;
 using NAudio.Wave;
+using NLayer.NAudioSupport;
 
 namespace Logic.Logic;
 
@@ -31,12 +32,14 @@ public class FilterSongLogic : IFilterSongLogic
             .Where(pattern => !string.IsNullOrWhiteSpace(pattern))
             .Select(x => x.Trim())
             .All(pattern => !Regex.Matches(track, pattern, RegexOptions.IgnoreCase).Any());
-
+        
         try
         {
-            var reader = new Mp3FileReader(stream.Reset());
-
-            duration = reader.TotalTime.TotalSeconds;
+            var builder = new Mp3FileReaderBase.FrameDecompressorBuilder(wf => new Mp3FrameDecompressor(wf));
+            using (var reader = new Mp3FileReaderBase(stream.Reset(), builder))
+            {
+                duration = reader.TotalTime.TotalSeconds;
+            }
 
             flag &= duration >= 30;
         }

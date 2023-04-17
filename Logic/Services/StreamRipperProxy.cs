@@ -31,6 +31,7 @@ public class StreamRipperProxy : IStreamRipperProxy
 
         var instance = existingPair.Value;
 
+        // Stream does not exist
         if (default(KeyValuePair<Uri, StreamRipperItemProxy>).Equals(existingPair))
         {
             instance = new StreamRipperItemProxy(StreamRipperFactory.New(new StreamRipperOptions
@@ -38,7 +39,10 @@ public class StreamRipperProxy : IStreamRipperProxy
                 Url = uri,
                 Logger = _logger,
                 MaxBufferSize = 15 * 1000000 // stop when buffer size passes 15 megabytes
-            }), proxy => _streamRippers.Remove(uri));
+            }), _ =>
+            {
+                _streamRippers.Remove(uri);
+            });
 
             _streamRippers.Add(uri, instance);
         }
@@ -85,7 +89,7 @@ public class StreamRipperItemFork : IStreamRipper
     public EventHandler<StreamFailedEventArg> StreamFailedHandlers { get; set; } = (sender, arg) => { };
 }
     
-public class StreamRipperItemProxy : IStreamRipper
+public sealed class StreamRipperItemProxy : IStreamRipper
 {
     private readonly List<StreamRipperItemFork> _forks = new List<StreamRipperItemFork>();
 
@@ -145,6 +149,13 @@ public class StreamRipperItemProxy : IStreamRipper
     public void Dispose()
     {
         _running = false;
+        
+        _streamRipper.MetadataChangedHandlers -= MetadataChangedHandlers;
+        _streamRipper.StreamUpdateEventHandlers -= StreamUpdateEventHandlers;
+        _streamRipper.StreamStartedEventHandlers -= StreamStartedEventHandlers;
+        _streamRipper.StreamEndedEventHandlers -= StreamEndedEventHandlers;
+        _streamRipper.SongChangedEventHandlers -= SongChangedEventHandlers;
+        _streamRipper.StreamFailedHandlers -= StreamFailedHandlers;
 
         _onDispose(this);
 

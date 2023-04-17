@@ -9,16 +9,6 @@
       "name": "pophits",
       "url": "http://listen.radionomy.com:80/-Pophits",
       "filter": "advertisement\nsweeper\nTargetSpot"
-    },
-    {
-      "name": "Nagham",
-      "url": "http://listen.radionomy.com:80/Nagham",
-      "filter": "advertisement"
-    },
-    {
-      "name": "1 Radio Dance",
-      "url": "http://listen.radionomy.com/1-Radio-Dance",
-      "filter": "advertisement"
     }
   ]
 }
