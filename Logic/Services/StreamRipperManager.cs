@@ -204,10 +204,8 @@ internal class StreamRipperManagerImpl : IStreamRipperManagerImpl
 
             if (_filterSongLogic.ShouldInclude(arg.SongInfo.Stream, track, stream.Filter, out var duration))
             {
-                var aggregatedSink = await _sinkService.ResolveStreamSink(stream.Id);
-
                 // Upload the stream
-                await aggregatedSink(arg.SongInfo.Stream.Reset(), filename);
+                await _sinkService.ResolveStreamSink(stream.Id, arg.SongInfo.Stream.Reset(), filename);
 
                 var extendedSongMetadata = await _songMetaDataExtract.Populate(ExtendedSongMetadata.Extend(
                     arg.SongInfo.SongMetadata, x =>

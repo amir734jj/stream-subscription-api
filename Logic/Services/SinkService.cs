@@ -20,9 +20,8 @@ public class SinkService : ISinkService
         _streamLogic = streamLogic;
         _userLogic = userLogic;
     }
-        
-    // TODO: use pure functions
-    public async Task<Func<MemoryStream, string, Task>> ResolveStreamSink(int streamId)
+    
+    public async Task ResolveStreamSink(int streamId, MemoryStream data, string filename)
     {
         var stream = await _streamLogic.Get(streamId);
         
@@ -31,15 +30,12 @@ public class SinkService : ISinkService
             .Cast<IUploadService>()
             .ToList();
             
-        return async (data, filename) =>
-        {
-            var uploadTasks = sinks.Select(x => x.UploadStream(stream, filename, data));
+        var uploadTasks = sinks.Select(x => x.UploadStream(stream, filename, data));
                 
-            await Task.WhenAll(uploadTasks);
-        };
+        await Task.WhenAll(uploadTasks);
     }
 
-    public async Task<Func<string, MemoryStream, Task>> ResolveFavoriteStream(int userId)
+    public async Task ResolveFavoriteStream(int userId, MemoryStream data, string filename)
     {
         var user = await _userLogic.Get(userId);
         
@@ -49,11 +45,8 @@ public class SinkService : ISinkService
             .Cast<IUploadService>()
             .ToList();
 
-        return async (filename, stream) =>
-        {
-            var uploadTasks = sinks.Select(x => x.UploadToFavorite(filename, stream));
+        var uploadTasks = sinks.Select(x => x.UploadToFavorite(filename, data));
                 
-            await Task.WhenAll(uploadTasks);
-        };
+        await Task.WhenAll(uploadTasks);
     }
 }
