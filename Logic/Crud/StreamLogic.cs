@@ -69,12 +69,12 @@ internal class StreamLogicImpl : BasicLogicAbstract<Stream>
         
     public override async Task<IEnumerable<Stream>> GetAll()
     {
-        return (await _streamDal.GetAll()).Where(x => x.User.Id == _user.Id).ToList();
+        return (await _streamDal.GetAll(filterExpr: x => x.User.Id == _user.Id)).ToList();
     }
 
     public override async Task<Stream> Get(int id)
     {
-        return (await _streamDal.GetAll()).Where(x => x.User.Id == _user.Id).FirstOrDefault(x => x.Id == id);
+        return (await _streamDal.GetAll(filterExpr: x => x.User.Id == _user.Id, additionalFilterExprs: x => x.Id == id)).FirstOrDefault();
     }
 
     public override async Task<Stream> Delete(int id)

@@ -59,11 +59,11 @@ internal class FtpSinkLogicImpl : BasicLogicAbstract<FtpSink>
         
     public override async Task<IEnumerable<FtpSink>> GetAll()
     {
-        return (await _ftpSinkDal.GetAll()).Where(x => x.User.Id == _user.Id).ToList();
+        return (await _ftpSinkDal.GetAll(filterExpr: x => x.User.Id == _user.Id)).ToList();
     }
 
     public override async Task<FtpSink> Get(int id)
     {
-        return (await _ftpSinkDal.GetAll()).Where(x => x.User.Id == _user.Id).FirstOrDefault(x => x.Id == id);
+        return (await _ftpSinkDal.GetAll(filterExpr:x => x.User.Id == _user.Id, additionalFilterExprs:x => x.Id == id)).FirstOrDefault();
     }
 }

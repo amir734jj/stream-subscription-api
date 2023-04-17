@@ -23,7 +23,7 @@ public class FavoriteLogic : IFavoriteLogic
 
     public IFavoriteLogicUserBound For(int userId)
     {
-        return new FavoriteLogicUserBound(userId, _userLogic, _sinkService);
+        return new FavoriteLogicUserBound(userId, _sinkService);
     }
 }
 
@@ -33,25 +33,19 @@ internal class FavoriteLogicUserBound : IFavoriteLogicUserBound
 
     private readonly int _userId;
 
-    private readonly IUserLogic _userLogic;
-
     /// <summary>
     /// Constructor dependency injection
     /// </summary>
     /// <param name="userId"></param>
-    /// <param name="userLogic"></param>
     /// <param name="sinkService"></param>
-    public FavoriteLogicUserBound(int userId, IUserLogic userLogic, ISinkService sinkService)
+    public FavoriteLogicUserBound(int userId, ISinkService sinkService)
     {
         _userId = userId;
-        _userLogic = userLogic;
         _sinkService = sinkService;
     }
 
     public async Task UploadFavorite(string filename, MemoryStream stream)
     {
-        var user = await _userLogic.Get(_userId);
-
-        await _sinkService.ResolveFavoriteStream(user)(filename, stream);
+        await (await _sinkService.ResolveFavoriteStream(_userId))(filename, stream);
     }
 }

@@ -1,14 +1,12 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Models.Models;
-using Stream = Models.Models.Stream;
 
 namespace Logic.Interfaces;
 
 public interface ISinkService
 {
-    Func<MemoryStream, string, Task> ResolveStreamSink(Stream stream);
+    Task<Func<MemoryStream, string, Task>> ResolveStreamSink(int streamId);
 
-    Func<string, MemoryStream, Task> ResolveFavoriteStream(User user);
+    Task<Func<string, MemoryStream, Task>> ResolveFavoriteStream(int userId);
 }
