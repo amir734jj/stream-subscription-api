@@ -26,8 +26,6 @@ public class FtpSinkProfile : EntityProfile<FtpSink>
     {
         return queryable
             .Include(x => x.StreamFtpSinkRelationships)
-            .ThenInclude(x => x.FtpSink)
-            .ThenInclude(x => x.User)
             .Include(x => x.User)
             .ThenInclude(x => x.Streams)
             .ThenInclude(x => x.StreamFtpSinkRelationships)
