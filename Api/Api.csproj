@@ -15,7 +15,6 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.16" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.16" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.16" />
-    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.2.22" />
     <PackageReference Include="MlkPwgen" Version="0.3.0" />
     <PackageReference Include="OwaspHeaders.Core" Version="4.5.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />

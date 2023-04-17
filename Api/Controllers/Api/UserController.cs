@@ -32,7 +32,7 @@ public class UserController : Controller
     [HttpGet]
     [Route("")]
     [SwaggerOperation("GetAll")]
-    [ProducesResponseType(typeof(IEnumerable<>), 200)]
+    [ProducesResponseType(typeof(IEnumerable<object>), 200)]
     public async Task<IActionResult> GetAll()
     {
         var user = await _userManager.FindByEmailAsync(User.Identity.Name);

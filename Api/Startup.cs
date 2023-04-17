@@ -73,17 +73,6 @@ public class Startup
     /// <returns></returns>
     public void ConfigureContainer(ServiceRegistry services)
     {
-        services.AddMiniProfiler(opt =>
-        {
-            // opt.RouteBasePath = "/profiler";
-            opt.ShouldProfile = _ => true;
-            opt.ShowControls = true;
-            opt.StackMaxLength = short.MaxValue;
-            opt.PopupStartHidden = false;
-            opt.PopupShowTrivial = true;
-            opt.PopupShowTimeWithChildren = true;
-        });
-            
         services.AddHttpsRedirection(options => options.HttpsPort = 443);
 
         // If environment is localhost, then enable CORS policy, otherwise no cross-origin access
@@ -267,22 +256,17 @@ public class Startup
         streamRipperManager.Refresh().Wait();
 
         shoutcastDirectoryApi.Setup();
-
-        app.UseMiniProfiler();
-            
+        
         app.UseCors("CorsPolicy");
 
         app.UseResponseCompression();
 
-        if (_env.IsDevelopment())
-        {
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
+        // Enable middleware to serve generated Swagger as a JSON endpoint.
+        app.UseSwagger();
 
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
-            // specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"));
-        }
+        // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
+        // specifying the Swagger JSON endpoint.
+        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"));
 
         // Not necessary for this workshop but useful when running behind kubernetes
         app.UseForwardedHeaders(new ForwardedHeadersOptions
