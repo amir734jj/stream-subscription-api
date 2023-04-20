@@ -15,6 +15,6 @@ public class CustomUserIdProvider : IUserIdProvider
         
     public string GetUserId(HubConnectionContext connection)
     {
-        return _userManager.FindByEmailAsync(connection.User.Identity.Name).Result.Id.ToString();
+        return _userManager.FindByNameAsync(connection.User.Identity!.Name).Result.Id.ToString();
     }
 }

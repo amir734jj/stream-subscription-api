@@ -26,7 +26,7 @@ public class FtpSinkController : BasicCrudController<FtpSink>
 
     protected override async Task<IBasicLogic<FtpSink>> BasicLogic()
     {
-        var user = await _userManager.FindByEmailAsync(User.Identity.Name);
+        var user = await _userManager.FindByNameAsync(User.Identity.Name);
 
         return _ftpSinkLogic.For(user);
     }

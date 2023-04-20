@@ -34,7 +34,7 @@ public class FavoriteController : Controller
             return BadRequest("Failed to upload file");
         }
             
-        var user = await _userManager.FindByEmailAsync(User.Identity.Name);
+        var user = await _userManager.FindByNameAsync(User.Identity.Name);
 
         await _favoriteLogic.For(user.Id).UploadFavorite(favorite.Filename, new MemoryStream(
             Convert.FromBase64String(favorite.Stream)

@@ -166,7 +166,7 @@ public class Startup
             .AddRoles<IdentityRole<int>>()
             .AddDefaultTokenProviders();
 
-        services.AddEfRepository<EntityDbContext>(x => x.Profile(Assembly.Load("Dal")));
+        services.AddEfRepository<EntityDbContext>(x => x.Profile(Assembly.Load("Dal")), ServiceLifetime.Singleton);
 
         var jwtSetting = _configuration
             .GetSection("JwtSettings")

@@ -22,8 +22,6 @@ namespace Api.Controllers.Api;
 [Route("api/[controller]")]
 public class AccountController : Controller
 {
-    private const string SetupUserTempDataKey = nameof(SetupUserTempDataKey);
-
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signManager;
     private readonly JwtSettings _jwtSettings;
@@ -45,9 +43,9 @@ public class AccountController : Controller
     [SwaggerOperation("AccountInfo")]
     public async Task<IActionResult> Index()
     {
-        if (User.Identity.IsAuthenticated)
+        if (User.Identity is { IsAuthenticated: true })
         {
-            var user = await _userManager.FindByEmailAsync(User.Identity.Name);
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
                 
             return Ok(user);
         }
@@ -156,7 +154,7 @@ public class AccountController : Controller
     [SwaggerOperation("Refresh")]
     public async Task<IActionResult> Refresh()
     {
-        var user = await _userManager.FindByEmailAsync(User.Identity.Name);
+        var user = await _userManager.FindByNameAsync(User.Identity!.Name);
                 
         var (token, expires) = ResolveToken(user);
 
@@ -180,7 +178,7 @@ public class AccountController : Controller
         var claims = new[]
         {
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Name, user.Email),    // use email as name
+            new Claim(ClaimTypes.Name, user.UserName),    // use username as name
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Sub, user.Email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),

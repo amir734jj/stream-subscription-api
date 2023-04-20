@@ -30,7 +30,7 @@ public class ProfileController : Controller
     [Route("")]
     public async Task<IActionResult> Index()
     {
-        var user = await _userManager.FindByEmailAsync(User.Identity.Name);
+        var user = await _userManager.FindByNameAsync(User.Identity.Name);
 
         var userWithNonNullReferenceProperties = await _userLogic.Get(user.Id);
             
@@ -41,7 +41,7 @@ public class ProfileController : Controller
     [Route("")]
     public async Task<IActionResult> Update([FromBody] ProfileViewModel profileViewModel)
     {
-        var user = await _userManager.FindByEmailAsync(User.Identity.Name);
+        var user = await _userManager.FindByNameAsync(User.Identity.Name);
 
         await _profileLogic.Update(user, profileViewModel);
 

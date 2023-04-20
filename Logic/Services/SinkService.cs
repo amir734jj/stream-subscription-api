@@ -1,8 +1,6 @@
-using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Logic.Crud;
 using Logic.Interfaces;
 using Logic.Sinks;
 
@@ -10,13 +8,11 @@ namespace Logic.Services;
 
 public class SinkService : ISinkService
 {
-    private readonly FtpSinkLogic _ftpSinkLogic;
     private readonly IStreamLogic _streamLogic;
     private readonly IUserLogic _userLogic;
 
-    public SinkService(FtpSinkLogic ftpSinkLogic, IStreamLogic streamLogic, IUserLogic userLogic)
+    public SinkService(IStreamLogic streamLogic, IUserLogic userLogic)
     {
-        _ftpSinkLogic = ftpSinkLogic;
         _streamLogic = streamLogic;
         _userLogic = userLogic;
     }

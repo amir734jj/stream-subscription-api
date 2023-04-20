@@ -35,7 +35,7 @@ public class UserController : Controller
     [ProducesResponseType(typeof(IEnumerable<object>), 200)]
     public async Task<IActionResult> GetAll()
     {
-        var user = await _userManager.FindByEmailAsync(User.Identity.Name);
+        var user = await _userManager.FindByNameAsync(User.Identity.Name);
 
         var users = (await _userLogic.GetAll()).Select(x => x.Id == user.Id ? x.ToAnonymousObject() : x.Obfuscate());
 
