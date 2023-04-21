@@ -205,6 +205,9 @@ internal class StreamRipperManagerImpl : IStreamRipperManagerImpl
             if (_filterSongLogic.ShouldInclude(arg.SongInfo.Stream, songMetaData, stream.Filter, out var duration))
             {
                 // Upload the stream
+                // Because SinkService may be used when StreamRipperManager is disposed, and consequently SinkService
+                // may be destroyed too ... to prevent this we need to mark SinkService as singleton so it doesn't get
+                // disposed ever.
                 await _sinkService.UploadToSinks(_user.Id, stream.Id, arg.SongInfo.Stream.Reset(), filename);
 
                 var extendedSongMetadata = await _songMetaDataExtract.Populate(ExtendedSongMetadata.Extend(
