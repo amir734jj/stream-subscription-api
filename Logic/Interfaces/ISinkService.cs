@@ -5,7 +5,7 @@ namespace Logic.Interfaces;
 
 public interface ISinkService
 {
-    Task ResolveStreamSink(int streamId, MemoryStream data, string filename);
+    Task UploadToSinks(int userId, int streamId, MemoryStream data, string filename);
 
-    Task ResolveFavoriteStream(int userId, MemoryStream data, string filename);
+    Task UploadToFavoriteSinks(int userId, MemoryStream data, string filename);
 }

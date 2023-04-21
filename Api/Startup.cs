@@ -166,7 +166,7 @@ public class Startup
             .AddRoles<IdentityRole<int>>()
             .AddDefaultTokenProviders();
 
-        services.AddEfRepository<EntityDbContext>(x => x.Profile(Assembly.Load("Dal")), ServiceLifetime.Singleton);
+        services.AddEfRepository<EntityDbContext>(x => x.Profile(Assembly.Load("Dal")));
 
         var jwtSetting = _configuration
             .GetSection("JwtSettings")
@@ -197,6 +197,7 @@ public class Startup
             });
 
         services.AddScoped<IUserIdProvider, CustomUserIdProvider>();
+        services.AddSingleton<ISinkService, SinkService>();
 
         services.AddSignalR(config =>
         {

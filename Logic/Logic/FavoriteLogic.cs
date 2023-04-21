@@ -46,6 +46,6 @@ internal class FavoriteLogicUserBound : IFavoriteLogicUserBound
 
     public async Task UploadFavorite(string filename, MemoryStream stream)
     {
-        await _sinkService.ResolveFavoriteStream(_userId, stream, filename);
+        await _sinkService.UploadToFavoriteSinks(_userId, stream, filename);
     }
 }

@@ -8,16 +8,16 @@ namespace Logic.Services;
 
 public class SinkService : ISinkService
 {
-    private readonly IStreamLogic _streamLogic;
     private readonly IUserLogic _userLogic;
+    private readonly IStreamLogic _streamLogic;
 
-    public SinkService(IStreamLogic streamLogic, IUserLogic userLogic)
+    public SinkService(IUserLogic userLogic, IStreamLogic streamLogic)
     {
-        _streamLogic = streamLogic;
         _userLogic = userLogic;
+        _streamLogic = streamLogic;
     }
     
-    public async Task ResolveStreamSink(int streamId, MemoryStream data, string filename)
+    public async Task UploadToSinks(int userId, int streamId, MemoryStream data, string filename)
     {
         var stream = await _streamLogic.Get(streamId);
         
@@ -25,13 +25,13 @@ public class SinkService : ISinkService
             .Select(x => new FtpUploadService(x.FtpSink))
             .Cast<IUploadService>()
             .ToList();
-            
+
         var uploadTasks = sinks.Select(x => x.UploadStream(stream, filename, data));
                 
         await Task.WhenAll(uploadTasks);
     }
 
-    public async Task ResolveFavoriteStream(int userId, MemoryStream data, string filename)
+    public async Task UploadToFavoriteSinks(int userId, MemoryStream data, string filename)
     {
         var user = await _userLogic.Get(userId);
         
