@@ -31,7 +31,7 @@ public class ShoutcastDirectoryController : Controller
     [Route("genres")]
     public IActionResult Genres()
     {
-        var genres = _shoutcastDirectoryApi.Result.Select(x => x.Genre).Distinct().ToList();
+        var genres = _shoutcastDirectoryApi.Result.Keys.ToList();
 
         return Ok(genres);
     }
@@ -40,7 +40,7 @@ public class ShoutcastDirectoryController : Controller
     [Route("")]
     public IActionResult Collect([FromQuery] string name = "", [FromQuery] string genre = "")
     {
-        var result = _shoutcastDirectoryApi.Result;
+        var result = _shoutcastDirectoryApi.Result.Values.SelectMany(x => x);
 
         if (!string.IsNullOrEmpty(name))
         {

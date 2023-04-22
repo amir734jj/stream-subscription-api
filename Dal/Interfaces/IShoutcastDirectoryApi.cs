@@ -8,7 +8,7 @@ public interface IShoutcastDirectoryApi
 {
     Task Setup();
         
-    public List<ShoutCastStream> Result { get; }
+    public Dictionary<string, List<ShoutCastStream>> Result { get; }
 
     Task<string> Url(int id);
 }

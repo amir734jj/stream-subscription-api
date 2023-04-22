@@ -18,13 +18,13 @@ public class ShoutcastDirectoryApi : IShoutcastDirectoryApi
         
     public async Task Setup()
     {
-        Result = JsonConvert.DeserializeObject<List<ShoutCastStream>>(await File.ReadAllTextAsync("shoutcast-directory.json"));
+        Result = JsonConvert.DeserializeObject<Dictionary<string, List<ShoutCastStream>>>(await File.ReadAllTextAsync("shoutcast-directory.json"));
     }
 
     public Task<string> Url(int id)
     {
-        return Task.FromResult(Result.FirstOrDefault(x => x.Id == id)?.Url ?? throw new Exception("Failed to resolve streamURL"));
+        return Task.FromResult(Result.Values.SelectMany(x => x).FirstOrDefault(x => x.Id == id)?.Url ?? throw new Exception("Failed to resolve streamURL"));
     }
 
-    public List<ShoutCastStream> Result { get; private set; }
+    public Dictionary<string, List<ShoutCastStream>> Result { get; private set; }
 }
