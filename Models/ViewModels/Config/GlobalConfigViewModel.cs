@@ -8,7 +8,7 @@ public class GlobalConfigViewModel
 
     public GlobalConfigViewModel()
     {
-        StartedStreams = ImmutableHashSet<int>.Empty;;
+        StartedStreams = ImmutableHashSet<int>.Empty;
     }
 
     public GlobalConfigViewModel(GlobalConfigViewModel globalConfigViewModel) : this()
