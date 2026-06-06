@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Dal.Interfaces;
+using Microsoft.Extensions.Logging;
 using Models.ViewModels.Shoutcast;
 using Newtonsoft.Json;
 
@@ -16,9 +18,33 @@ public class ShoutcastDirectoryApi : IShoutcastDirectoryApi
     private const string LatestReleaseUrl =
         "https://api.github.com/repos/amir734jj/shoutcast-directory-crawler/releases/latest";
 
-    public ShoutcastDirectoryApi()
+    private const string LocalFilePath = "shoutcast-directory.json";
+
+    private readonly ILogger<ShoutcastDirectoryApi> _logger;
+
+    public ShoutcastDirectoryApi(ILogger<ShoutcastDirectoryApi> logger)
     {
-        Setup().Wait();
+        _logger = logger;
+
+        if (File.Exists(LocalFilePath))
+        {
+            var json = File.ReadAllText(LocalFilePath);
+            Result = JsonConvert.DeserializeObject<Dictionary<string, List<ShoutCastStream>>>(json);
+            _logger.LogInformation("Loaded shoutcast directory from local file: {FilePath}", LocalFilePath);
+        }
+        else
+        {
+            try
+            {
+                Setup().Wait();
+                _logger.LogInformation("Loaded shoutcast directory from GitHub release");
+            }
+            catch (Exception)
+            {
+                Result = new Dictionary<string, List<ShoutCastStream>>();
+                _logger.LogWarning("Failed to load shoutcast directory from GitHub release, using empty directory");
+            }
+        }
     }
         
     public async Task Setup()
