@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Dal.Interfaces;
 using Models.ViewModels.Shoutcast;
@@ -11,6 +12,11 @@ namespace Dal;
 
 public class ShoutcastDirectoryApi : IShoutcastDirectoryApi
 {
+    private static readonly HttpClient HttpClient = new();
+
+    private const string LatestReleaseUrl =
+        "https://api.github.com/repos/amir734jj/shoutcast-directory-crawler/releases/latest";
+
     public ShoutcastDirectoryApi()
     {
         Setup().Wait();
@@ -18,7 +24,18 @@ public class ShoutcastDirectoryApi : IShoutcastDirectoryApi
         
     public async Task Setup()
     {
-        Result = JsonConvert.DeserializeObject<Dictionary<string, List<ShoutCastStream>>>(await File.ReadAllTextAsync("shoutcast-directory.json"));
+        HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("stream-subscription-api");
+
+        var release = await HttpClient.GetFromJsonAsync<GitHubRelease>(LatestReleaseUrl);
+        var asset = release?.Assets?.FirstOrDefault(a => a.Name == "shoutcast-directory.json");
+
+        if (asset == null)
+        {
+            throw new Exception("Could not find shoutcast-directory.json in latest release");
+        }
+
+        var json = await HttpClient.GetStringAsync(asset.BrowserDownloadUrl);
+        Result = JsonConvert.DeserializeObject<Dictionary<string, List<ShoutCastStream>>>(json);
     }
 
     public Task<string> Url(int id)
@@ -27,4 +44,19 @@ public class ShoutcastDirectoryApi : IShoutcastDirectoryApi
     }
 
     public Dictionary<string, List<ShoutCastStream>> Result { get; private set; }
+
+    private class GitHubRelease
+    {
+        [JsonProperty("assets")]
+        public List<GitHubAsset> Assets { get; set; }
+    }
+
+    private class GitHubAsset
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("browser_download_url")]
+        public string BrowserDownloadUrl { get; set; }
+    }
 }
