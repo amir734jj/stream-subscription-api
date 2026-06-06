@@ -1,14 +1,14 @@
 {
   "streams": [
     {
-      "name": "RadioJavan",
-      "url": "http://stream.radiojavan.com/radiojavan",
-      "filter": "advertisement\nsweeper\nradio javan"
+      "name": "ANTENNE BAYERN",
+      "url": "http://stream.antenne.de:80/antenne",
+      "filter": "advertisement\nsweeper"
     },
     {
-      "name": "pophits",
-      "url": "http://listen.radionomy.com:80/-Pophits",
-      "filter": "advertisement\nsweeper\nTargetSpot"
+      "name": "ROCK ANTENNE",
+      "url": "http://stream.antenne.de:80/rockantenne",
+      "filter": "advertisement\nsweeper"
     }
   ]
 }
