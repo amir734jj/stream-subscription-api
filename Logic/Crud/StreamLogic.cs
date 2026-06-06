@@ -45,7 +45,7 @@ public class StreamLogic : BasicLogicAbstract<Stream>, IStreamLogic
 internal class StreamLogicImpl : BasicLogicAbstract<Stream>
 {
     private readonly IBasicCrud<Stream> _streamDal;
-        
+
     private readonly User _user;
 
     private readonly Lazy<IStreamRipperManager> _streamManager;
@@ -59,7 +59,7 @@ internal class StreamLogicImpl : BasicLogicAbstract<Stream>
         _streamManager = streamManager;
         _streamRipperProxy = streamRipperProxy;
     }
-        
+
     protected override IBasicCrud<Stream> GetBasicCrudDal()
     {
         return _streamDal;
@@ -68,12 +68,12 @@ internal class StreamLogicImpl : BasicLogicAbstract<Stream>
     public override async Task<Stream> Save(Stream dto)
     {
         await ValidateStreamUrlOrThrow(dto);
-            
+
         dto.User = _user;
 
         return await base.Save(dto);
     }
-        
+
     public override async Task<IEnumerable<Stream>> GetAll()
     {
         return (await _streamDal.GetAll(filterExpr: x => x.User.Id == _user.Id)).ToList();
@@ -93,14 +93,14 @@ internal class StreamLogicImpl : BasicLogicAbstract<Stream>
         }
 
         await _streamManager.Value.For(_user).Stop(id);
-            
+
         return await base.Delete(id);
     }
 
     public override async Task<Stream> Update(int id, Stream dto)
     {
         await ValidateStreamUrlOrThrow(dto);
-            
+
         await _streamManager.Value.For(_user).Stop(id);
 
         return await base.Update(id, dto);
