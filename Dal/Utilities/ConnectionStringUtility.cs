@@ -28,7 +28,6 @@ public static class ConnectionStringUtility
             Database = table["Database"],
             ApplicationName = table["ApplicationName"],
             SslMode = SslMode.Prefer,
-            TrustServerCertificate = true,
             Pooling = true,
             // Hard limit
             MaxPoolSize = 5
