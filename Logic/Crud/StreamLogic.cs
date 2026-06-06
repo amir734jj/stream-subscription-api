@@ -67,12 +67,7 @@ internal class StreamLogicImpl : BasicLogicAbstract<Stream>
 
     public override async Task<Stream> Save(Stream dto)
     {
-        Guard.Argument(dto.Url).HasValue();
-
-        if (!await _streamRipperProxy.CheckUrlValidAsync(new Uri(dto.Url)))
-        {
-            throw new Exception($"The stream URL '{dto.Url}' is not a valid streaming source");
-        }
+        await ValidateStreamUrlOrThrow(dto);
             
         dto.User = _user;
 
@@ -98,15 +93,43 @@ internal class StreamLogicImpl : BasicLogicAbstract<Stream>
 
     public override async Task<Stream> Update(int id, Stream dto)
     {
-        Guard.Argument(dto.Url).HasValue();
-
-        if (!await _streamRipperProxy.CheckUrlValidAsync(new Uri(dto.Url)))
-        {
-            throw new Exception($"The stream URL '{dto.Url}' is not a valid streaming source");
-        }
+        await ValidateStreamUrlOrThrow(dto);
             
         await _streamManager.Value.For(_user).Stop(id);
 
         return await base.Update(id, dto);
+    }
+
+    private async Task ValidateStreamUrlOrThrow(Stream dto)
+    {
+        Guard.Argument(dto.Url).HasValue();
+
+        dto.Url = dto.Url.Trim();
+
+        if (!Uri.TryCreate(dto.Url, UriKind.Absolute, out var parsedUri))
+        {
+            throw new Exception("Please enter a valid absolute stream URL.");
+        }
+
+        if (parsedUri.Scheme != Uri.UriSchemeHttp && parsedUri.Scheme != Uri.UriSchemeHttps)
+        {
+            throw new Exception("Only HTTP/HTTPS stream URLs are supported.");
+        }
+
+        bool reachable;
+
+        try
+        {
+            reachable = await _streamRipperProxy.CheckUrlValidAsync(parsedUri);
+        }
+        catch
+        {
+            throw new Exception("Could not verify the stream URL. Please use a working direct stream URL.");
+        }
+
+        if (!reachable)
+        {
+            throw new Exception("The stream URL is unreachable or not a valid audio stream.");
+        }
     }
 }
