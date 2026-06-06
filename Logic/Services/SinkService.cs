@@ -3,24 +3,26 @@ using System.Linq;
 using System.Threading.Tasks;
 using Logic.Interfaces;
 using Logic.Sinks;
+using Microsoft.Extensions.DependencyInjection;
 using Models.Models.Sinks;
 
 namespace Logic.Services;
 
 public class SinkService : ISinkService
 {
-    private readonly IUserLogic _userLogic;
-    private readonly IStreamLogic _streamLogic;
+    private readonly IServiceScopeFactory _scopeFactory;
 
-    public SinkService(IUserLogic userLogic, IStreamLogic streamLogic)
+    public SinkService(IServiceScopeFactory scopeFactory)
     {
-        _userLogic = userLogic;
-        _streamLogic = streamLogic;
+        _scopeFactory = scopeFactory;
     }
     
     public async Task UploadToSinks(int userId, int streamId, MemoryStream data, string filename)
     {
-        var stream = await _streamLogic.Get(streamId);
+        using var scope = _scopeFactory.CreateScope();
+        var streamLogic = scope.ServiceProvider.GetRequiredService<IStreamLogic>();
+        
+        var stream = await streamLogic.Get(streamId);
         
         var sinks = stream.StreamFtpSinkRelationships
             .Select(x => ResolveUploadService(x.FtpSink))
@@ -34,7 +36,10 @@ public class SinkService : ISinkService
 
     public async Task UploadToFavoriteSinks(int userId, MemoryStream data, string filename)
     {
-        var user = await _userLogic.Get(userId);
+        using var scope = _scopeFactory.CreateScope();
+        var userLogic = scope.ServiceProvider.GetRequiredService<IUserLogic>();
+        
+        var user = await userLogic.Get(userId);
         
         var sinks = user.FtpSinks
             .Where(x => x.Favorite)
