@@ -16,7 +16,10 @@ public class FtpUploadService : IUploadService
     {
         _ftpSink = ftpSink;
             
-        _client = new AsyncFtpClient(ftpSink.Host, ftpSink.Username, ftpSink.Password, ftpSink.Port);
+        _client = new AsyncFtpClient(ftpSink.Host, ftpSink.Username, ftpSink.Password, ftpSink.Port)
+        {
+            Config = { DataConnectionType = FtpDataConnectionType.AutoPassive }
+        };
     }
 
     public async Task UploadStream(Stream stream, string filename, MemoryStream data)
