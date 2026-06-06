@@ -16,20 +16,24 @@ public class StreamLogic : BasicLogicAbstract<Stream>, IStreamLogic
 
     private readonly Lazy<IStreamRipperManager> _streamRipperManager;
 
+    private readonly IStreamRipperProxy _streamRipperProxy;
+
     /// <summary>
     /// Constructor dependency injection
     /// </summary>
     /// <param name="streamDal"></param>
     /// <param name="streamRipperManager"></param>
-    public StreamLogic(IBasicCrud<Stream> streamDal, Lazy<IStreamRipperManager> streamRipperManager)
+    /// <param name="streamRipperProxy"></param>
+    public StreamLogic(IBasicCrud<Stream> streamDal, Lazy<IStreamRipperManager> streamRipperManager, IStreamRipperProxy streamRipperProxy)
     {
         _streamDal = streamDal;
         _streamRipperManager = streamRipperManager;
+        _streamRipperProxy = streamRipperProxy;
     }
 
     public IBasicLogic<Stream> For(User user)
     {
-        return new StreamLogicImpl(_streamDal, user, _streamRipperManager);
+        return new StreamLogicImpl(_streamDal, user, _streamRipperManager, _streamRipperProxy);
     }
 
     protected override IBasicCrud<Stream> GetBasicCrudDal()
@@ -46,11 +50,14 @@ internal class StreamLogicImpl : BasicLogicAbstract<Stream>
 
     private readonly Lazy<IStreamRipperManager> _streamManager;
 
-    public StreamLogicImpl(IBasicCrud<Stream> streamDal, User user, Lazy<IStreamRipperManager> streamManager)
+    private readonly IStreamRipperProxy _streamRipperProxy;
+
+    public StreamLogicImpl(IBasicCrud<Stream> streamDal, User user, Lazy<IStreamRipperManager> streamManager, IStreamRipperProxy streamRipperProxy)
     {
         _streamDal = streamDal;
         _user = user;
         _streamManager = streamManager;
+        _streamRipperProxy = streamRipperProxy;
     }
         
     protected override IBasicCrud<Stream> GetBasicCrudDal()
@@ -58,13 +65,18 @@ internal class StreamLogicImpl : BasicLogicAbstract<Stream>
         return _streamDal;
     }
 
-    public override Task<Stream> Save(Stream dto)
+    public override async Task<Stream> Save(Stream dto)
     {
         Guard.Argument(dto.Url).HasValue();
+
+        if (!await _streamRipperProxy.CheckUrlValidAsync(new Uri(dto.Url)))
+        {
+            throw new Exception($"The stream URL '{dto.Url}' is not a valid streaming source");
+        }
             
         dto.User = _user;
 
-        return base.Save(dto);
+        return await base.Save(dto);
     }
         
     public override async Task<IEnumerable<Stream>> GetAll()
@@ -87,6 +99,11 @@ internal class StreamLogicImpl : BasicLogicAbstract<Stream>
     public override async Task<Stream> Update(int id, Stream dto)
     {
         Guard.Argument(dto.Url).HasValue();
+
+        if (!await _streamRipperProxy.CheckUrlValidAsync(new Uri(dto.Url)))
+        {
+            throw new Exception($"The stream URL '{dto.Url}' is not a valid streaming source");
+        }
             
         await _streamManager.Value.For(_user).Stop(id);
 

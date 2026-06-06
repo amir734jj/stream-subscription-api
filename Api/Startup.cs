@@ -18,6 +18,8 @@ using Logic.Services;
 using Logic.State;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using StreamRipper.Interfaces;
+using StreamRipper.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -213,6 +215,8 @@ public class Startup
         services.AddSingleton<IShoutcastDirectoryApi, ShoutcastDirectoryApi>();
 
         services.AddSingleton<IStreamRipperProxy, StreamRipperProxy>();
+
+        services.AddStreamRipper();
 
         // If environment is localhost then use mock email service
         if (_env.IsDevelopment())

@@ -2,9 +2,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Logic.Interfaces;
-using Microsoft.Extensions.Logging;
-using StreamRipper;
+using Microsoft.Extensions.DependencyInjection;
 using StreamRipper.Interfaces;
 using StreamRipper.Models;
 using StreamRipper.Models.Events;
@@ -16,13 +16,29 @@ public class StreamRipperProxy : IStreamRipperProxy
     private readonly IDictionary<Uri, StreamRipperItemProxy> _streamRippers =
         new ConcurrentDictionary<Uri, StreamRipperItemProxy>();
         
-    private readonly ILogger<StreamRipperProxy> _logger;
+    private readonly IServiceProvider _serviceProvider;
 
-    public StreamRipperProxy(ILogger<StreamRipperProxy> logger)
+    public StreamRipperProxy(IServiceProvider serviceProvider)
     {
-        _logger = logger;
+        _serviceProvider = serviceProvider;
+    }
+
+    private IStreamRipperFactory GetFactory()
+    {
+        using var scope = _serviceProvider.CreateScope();
+        return scope.ServiceProvider.GetRequiredService<IStreamRipperFactory>();
     }
         
+    public async Task<bool> CheckUrlValidAsync(Uri uri)
+    {
+        using var instance = GetFactory().New(new StreamRipperOptions
+        {
+            Url = uri
+        });
+
+        return await instance.CheckUrlValidAsync();
+    }
+
     public IStreamRipper Proxy(Uri uri)
     {
         var existingPair = _streamRippers.FirstOrDefault(x =>
@@ -34,10 +50,9 @@ public class StreamRipperProxy : IStreamRipperProxy
         // Stream does not exist
         if (default(KeyValuePair<Uri, StreamRipperItemProxy>).Equals(existingPair))
         {
-            instance = new StreamRipperItemProxy(StreamRipperFactory.New(new StreamRipperOptions
+            instance = new StreamRipperItemProxy(GetFactory().New(new StreamRipperOptions
             {
                 Url = uri,
-                Logger = _logger,
                 MaxBufferSize = 15 * 1000000 // stop when buffer size passes 15 megabytes
             }), _ =>
             {
@@ -87,6 +102,8 @@ public class StreamRipperItemFork : IStreamRipper
     public EventHandler<SongChangedEventArg> SongChangedEventHandlers { get; set; } = (sender, arg) => { };
         
     public EventHandler<StreamFailedEventArg> StreamFailedHandlers { get; set; } = (sender, arg) => { };
+
+    public Task<bool> CheckUrlValidAsync() => Task.FromResult(false);
 }
     
 public sealed class StreamRipperItemProxy : IStreamRipper
@@ -185,6 +202,8 @@ public sealed class StreamRipperItemProxy : IStreamRipper
     public EventHandler<SongChangedEventArg> SongChangedEventHandlers { get; set; }
         
     public EventHandler<StreamFailedEventArg> StreamFailedHandlers { get; set; }
+
+    public Task<bool> CheckUrlValidAsync() => _streamRipper.CheckUrlValidAsync();
 
     public IStreamRipper Fork()
     {
