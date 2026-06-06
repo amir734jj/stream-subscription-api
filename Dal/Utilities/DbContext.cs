@@ -14,6 +14,8 @@ public sealed class EntityDbContext: IdentityDbContext<User, IdentityRole<int>, 
 
     public DbSet<FtpSink> FtpSinks { get; set; }
 
+    public DbSet<GlobalConfig> GlobalConfigs { get; set; }
+
     public EntityDbContext() { }
 
     /// <inheritdoc />
@@ -58,6 +60,10 @@ public sealed class EntityDbContext: IdentityDbContext<User, IdentityRole<int>, 
             .HasOne(x => x.FtpSink)
             .WithMany(x => x.StreamFtpSinkRelationships)
             .HasForeignKey(x => x.FtpSinkId);
+
+        modelBuilder.Entity<GlobalConfig>()
+            .HasIndex(x => x.Key)
+            .IsUnique();
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

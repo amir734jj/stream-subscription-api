@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Threading.Tasks;
-using Dal.Interfaces;
+using EfCoreRepository.Interfaces;
 using Logic.Interfaces;
 using Microsoft.Extensions.Logging;
+using Models.Models;
 using Models.ViewModels.Config;
 using static Models.Constants.GlobalConfigs;
 
@@ -10,24 +13,40 @@ namespace Logic.Logic;
 
 public class ConfigLogic : IConfigLogic
 {
-    private readonly ISimpleConfigServer _configServer;
+    private readonly IEfRepository _repository;
 
-    private readonly SimpleConfigServerApiKey _configServerApiKey;
-        
     private readonly ILogger<ConfigLogic> _logger;
 
-    public ConfigLogic(ISimpleConfigServer configServer, SimpleConfigServerApiKey configServerApiKey, ILogger<ConfigLogic> logger)
+    public ConfigLogic(IEfRepository repository, ILogger<ConfigLogic> logger)
     {
-        _configServer = configServer;
-        _configServerApiKey = configServerApiKey;
+        _repository = repository;
         _logger = logger;
     }
+
+    private IBasicCrud<GlobalConfig> Dal => _repository.For<GlobalConfig>();
 
     private async Task SetGlobalConfig(GlobalConfigViewModel globalConfigViewModel)
     {
         UpdateGlobalConfigs(globalConfigViewModel);
 
-        await _configServer.Update(_configServerApiKey.ApiKey, globalConfigViewModel);
+        var rows = (await Dal.GetAll()).ToList();
+
+        // Serialize StartedStreams as comma-separated string
+        var startedStreamsValue = string.Join(",", globalConfigViewModel.StartedStreams);
+
+        var existing = rows.FirstOrDefault(r => r.Key == "StartedStreams");
+        if (existing != null)
+        {
+            await Dal.Update(existing.Id, e => e.Value = startedStreamsValue);
+        }
+        else
+        {
+            await Dal.Save(new GlobalConfig
+            {
+                Key = "StartedStreams",
+                Value = startedStreamsValue
+            });
+        }
     }
 
     public GlobalConfigViewModel ResolveGlobalConfig()
@@ -38,7 +57,7 @@ public class ConfigLogic : IConfigLogic
     public async Task UpdateGlobalConfig(Func<GlobalConfigViewModel, GlobalConfigViewModel> update)
     {
         var re = update(ResolveGlobalConfig());
-            
+
         await SetGlobalConfig(re);
     }
 
@@ -46,15 +65,28 @@ public class ConfigLogic : IConfigLogic
     {
         try
         {
-            var response = await _configServer.Load(_configServerApiKey.ApiKey);
+            var rows = (await Dal.GetAll()).ToList();
 
-            _logger.LogInformation("Successfully fetched the config from config server");
+            var startedStreamsRow = rows.FirstOrDefault(r => r.Key == "StartedStreams");
+            var startedStreams = ImmutableHashSet<int>.Empty;
 
-            UpdateGlobalConfigs(response);
+            if (startedStreamsRow != null && !string.IsNullOrWhiteSpace(startedStreamsRow.Value))
+            {
+                startedStreams = startedStreamsRow.Value
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(int.Parse)
+                    .ToImmutableHashSet();
+            }
+
+            var config = new GlobalConfigViewModel { StartedStreams = startedStreams };
+
+            _logger.LogInformation("Successfully loaded config from database");
+
+            UpdateGlobalConfigs(config);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to fetch the config from config server");
+            _logger.LogError(e, "Failed to load config from database");
         }
     }
 }

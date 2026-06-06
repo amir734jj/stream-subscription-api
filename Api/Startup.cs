@@ -37,9 +37,7 @@ using Microsoft.OpenApi.Models;
 using MlkPwgen;
 using Models.Constants;
 using Models.Models;
-using Models.ViewModels.Config;
 using Newtonsoft.Json;
-using Refit;
 using static Dal.Utilities.ConnectionStringUtility;
 
 namespace Api;
@@ -225,11 +223,6 @@ public class Startup
         }
         else
         {
-            services.AddSingleton(RestService.For<ISimpleConfigServer>(_configuration.GetValue<string>("ConfigApi")));
-
-            services.AddSingleton(new SimpleConfigServerApiKey
-                {ApiKey = _configuration.GetRequiredValue<string>("CONFIG_KEY")});
-
             var (lastFmKey, lastFmSecret) = (
                 _configuration.GetRequiredValue<string>("last.fm:Key"),
                 _configuration.GetRequiredValue<string>("last.fm:Secret")
