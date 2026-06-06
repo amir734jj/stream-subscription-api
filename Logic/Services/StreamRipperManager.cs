@@ -227,20 +227,20 @@ internal class StreamRipperManagerImpl : IStreamRipperManagerImpl
             else
             {
                 await _hub.Clients.User(_user.Id.ToString())
-                    .SendAsync("log", $"Stream {id} with name {filename} skipped");
+                    .SendAsync("log", $"Stream {id} ({stream.Name}) skipped file {filename}");
             }
         };
 
         streamRipperInstance.StreamEndedEventHandlers += async (sender, arg) =>
         {
-            await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} ended");
+            await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} ({stream.Name}) ended");
 
             _state.StreamItems[id].State = StreamStatusEnum.Stopped;
         };
 
         streamRipperInstance.StreamFailedHandlers += async (sender, arg) =>
         {
-            await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} failed", arg.Exception?.Message);
+            await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} ({stream.Name}) failed", arg.Exception?.Message);
 
             _state.StreamItems[id].State = StreamStatusEnum.Fail;
 
@@ -249,13 +249,13 @@ internal class StreamRipperManagerImpl : IStreamRipperManagerImpl
 
         streamRipperInstance.StreamStartedEventHandlers += async (sender, arg) =>
         {
-            await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} started");
+            await _hub.Clients.User(_user.Id.ToString()).SendAsync("log", $"Stream {id} ({stream.Name}) started");
         };
 
         streamRipperInstance.StreamUpdateEventHandlers += async (sender, arg) =>
         {
             await _hub.Clients.User(_user.Id.ToString()).SendAsync("log",
-                $"Stream {id} updated with {arg.SongRawPartial.Length} bytes");
+                $"Stream {id} ({stream.Name}) updated with {arg.SongRawPartial.Length} bytes");
         };
 
         // Start the ripper
