@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Dal.Interfaces;
 using Models.ViewModels.Shoutcast;
@@ -26,7 +25,8 @@ public class ShoutcastDirectoryApi : IShoutcastDirectoryApi
     {
         HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("stream-subscription-api");
 
-        var release = await HttpClient.GetFromJsonAsync<GitHubRelease>(LatestReleaseUrl);
+        var releaseJson = await HttpClient.GetStringAsync(LatestReleaseUrl);
+        var release = JsonConvert.DeserializeObject<GitHubRelease>(releaseJson);
         var asset = release?.Assets?.FirstOrDefault(a => a.Name == "shoutcast-directory.json");
 
         if (asset == null)
