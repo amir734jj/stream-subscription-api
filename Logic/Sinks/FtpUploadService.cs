@@ -4,6 +4,7 @@ using FluentFTP;
 using Logic.Interfaces;
 using Models.Models.Sinks;
 using Stream = Models.Models.Stream;
+
 namespace Logic.Sinks;
 
 public class FtpUploadService : IUploadService
@@ -15,8 +16,11 @@ public class FtpUploadService : IUploadService
     public FtpUploadService(FtpSink ftpSink)
     {
         _ftpSink = ftpSink;
+
+        var endpoint = SinkEndpointUtility.ResolveEndpoint(ftpSink);
+        var port = SinkEndpointUtility.ResolvePort(ftpSink);
             
-        _client = new AsyncFtpClient(ftpSink.Host, ftpSink.Username, ftpSink.Password, ftpSink.Port)
+        _client = new AsyncFtpClient(endpoint.Host, ftpSink.Username, ftpSink.Password, port)
         {
             Config = { DataConnectionType = FtpDataConnectionType.AutoPassive }
         };

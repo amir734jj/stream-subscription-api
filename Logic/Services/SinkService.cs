@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Logic.Interfaces;
 using Logic.Sinks;
+using Models.Models.Sinks;
 
 namespace Logic.Services;
 
@@ -22,7 +23,7 @@ public class SinkService : ISinkService
         var stream = await _streamLogic.Get(streamId);
         
         var sinks = stream.StreamFtpSinkRelationships
-            .Select(x => new FtpUploadService(x.FtpSink))
+            .Select(x => ResolveUploadService(x.FtpSink))
             .Cast<IUploadService>()
             .ToList();
 
@@ -37,12 +38,19 @@ public class SinkService : ISinkService
         
         var sinks = user.FtpSinks
             .Where(x => x.Favorite)
-            .Select(x => new FtpUploadService(x))
+            .Select(ResolveUploadService)
             .Cast<IUploadService>()
             .ToList();
 
         var uploadTasks = sinks.Select(x => x.UploadToFavorite(filename, data));
                 
         await Task.WhenAll(uploadTasks);
+    }
+
+    private static IUploadService ResolveUploadService(FtpSink sink)
+    {
+        return SinkEndpointUtility.ResolveProtocol(sink) == "sftp"
+            ? new SftpUploadService(sink)
+            : new FtpUploadService(sink);
     }
 }

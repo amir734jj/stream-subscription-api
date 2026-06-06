@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using EfCoreRepository.Interfaces;
 using Logic.Abstracts;
 using Logic.Interfaces;
+using Logic.Sinks;
 using Models.Models;
 using Models.Models.Sinks;
 
@@ -52,9 +53,16 @@ internal class FtpSinkLogicImpl : BasicLogicAbstract<FtpSink>
 
     public override Task<FtpSink> Save(FtpSink instance)
     {
+        ValidateAndNormalize(instance);
         instance.User = _user;
             
         return base.Save(instance);
+    }
+
+    public override Task<FtpSink> Update(int id, FtpSink dto)
+    {
+        ValidateAndNormalize(dto);
+        return base.Update(id, dto);
     }
         
     public override async Task<IEnumerable<FtpSink>> GetAll()
@@ -65,5 +73,24 @@ internal class FtpSinkLogicImpl : BasicLogicAbstract<FtpSink>
     public override async Task<FtpSink> Get(int id)
     {
         return (await _ftpSinkDal.GetAll(filterExpr:x => x.User.Id == _user.Id, additionalFilterExprs:x => x.Id == id)).FirstOrDefault();
+    }
+
+    private static void ValidateAndNormalize(FtpSink sink)
+    {
+        if (string.IsNullOrWhiteSpace(sink.Name))
+        {
+            throw new System.Exception("Sink name is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(sink.Username))
+        {
+            throw new System.Exception("Sink username is required.");
+        }
+
+        SinkEndpointUtility.ResolveEndpoint(sink);
+
+        sink.Host = SinkEndpointUtility.NormalizeHost(sink);
+        sink.Path = sink.Path?.Trim() ?? string.Empty;
+        sink.Port = SinkEndpointUtility.ResolvePort(sink);
     }
 }

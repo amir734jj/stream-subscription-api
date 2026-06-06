@@ -86,6 +86,12 @@ internal class StreamLogicImpl : BasicLogicAbstract<Stream>
 
     public override async Task<Stream> Delete(int id)
     {
+        var stream = await Get(id);
+        if (stream == null)
+        {
+            return null;
+        }
+
         await _streamManager.Value.For(_user).Stop(id);
             
         return await base.Delete(id);
