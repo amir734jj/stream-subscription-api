@@ -30,22 +30,29 @@ public class SftpUploadService : IUploadService
 
     private Task Upload(string folder, string filename, MemoryStream data)
     {
-        var endpoint = SinkEndpointUtility.ResolveEndpoint(_sink);
-        var port = SinkEndpointUtility.ResolvePort(_sink);
+        try
+        {
+            var endpoint = SinkEndpointUtility.ResolveEndpoint(_sink);
+            var port = SinkEndpointUtility.ResolvePort(_sink);
 
-        using var client = new SftpClient(endpoint.Host, port, _sink.Username, _sink.Password);
+            using var client = new SftpClient(endpoint.Host, port, _sink.Username, _sink.Password);
 
-        client.Connect();
+            client.Connect();
 
-        var directory = CombineRemotePath(_sink.Path, folder);
-        EnsureDirectory(client, directory);
+            var directory = CombineRemotePath(_sink.Path, folder);
+            EnsureDirectory(client, directory);
 
-        var remoteFilePath = CombineRemotePath(directory, filename);
+            var remoteFilePath = CombineRemotePath(directory, filename);
 
-        data.Position = 0;
-        client.UploadFile(data, remoteFilePath, true);
+            data.Position = 0;
+            client.UploadFile(data, remoteFilePath, true);
 
-        client.Disconnect();
+            client.Disconnect();
+        }
+        catch (Exception)
+        {
+            // Swallow SFTP errors to prevent crashing the app
+        }
 
         return Task.CompletedTask;
     }

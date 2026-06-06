@@ -58,4 +58,15 @@ public class StreamRipperManagerController : Controller
 
         return Ok(await _streamRipper.For(user).Status());
     }
+
+    [HttpPost]
+    [Route("stop-all")]
+    public async Task<IActionResult> StopAll()
+    {
+        var user = await _userManager.FindByNameAsync(User.Identity!.Name);
+
+        await _streamRipper.For(user).StopAll();
+
+        return Ok(await _streamRipper.For(user).Status());
+    }
 }

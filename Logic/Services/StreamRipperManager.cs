@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -299,5 +300,27 @@ internal class StreamRipperManagerImpl : IStreamRipperManagerImpl
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Stop all streams for the current user at once
+    /// </summary>
+    public async Task StopAll()
+    {
+        var userStreamIds = _state.StreamItems
+            .Where(x => x.Value.User.Id == _user.Id)
+            .Select(x => x.Key)
+            .ToList();
+
+        foreach (var id in userStreamIds)
+        {
+            _state.StreamItems[id].StreamRipper.Dispose();
+            _state.StreamItems.Remove(id);
+        }
+
+        await _configLogic.UpdateGlobalConfig(c => new GlobalConfigViewModel(c)
+        {
+            StartedStreams = c.StartedStreams.Except(userStreamIds).ToImmutableHashSet()
+        });
     }
 }

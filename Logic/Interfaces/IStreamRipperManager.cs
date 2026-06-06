@@ -20,5 +20,7 @@ public interface IStreamRipperManagerImpl
 
     Task<bool> Stop(int id);
 
+    Task StopAll();
+
     Task<Dictionary<int, StreamStatusEnum>> Status();
 }
