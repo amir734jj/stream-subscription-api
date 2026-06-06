@@ -6,7 +6,7 @@ WORKDIR /app/stage
 COPY . .
 
 RUN dotnet restore
-RUN dotnet publish -c Release -o out
+RUN dotnet publish Api/Api.csproj -c Release -o out
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
